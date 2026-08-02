@@ -66,7 +66,8 @@ import javax.sql.DataSource;
  @Override
  public Optional<User> findByEmail(String email) throws DataAccessException 
   {
-   String sql = "SELECT id, name, email, password_hash, role, created_at FROM users WHERE email = ?";    try (Connection conn = dataSource.getConnection();
+   String sql = "SELECT id, name, email, password_hash, role, created_at FROM users WHERE email = ?"; 
+    try (Connection conn = dataSource.getConnection();
     PreparedStatement ps = conn.prepareStatement(sql))
      {
       ps.setString(1, email);
