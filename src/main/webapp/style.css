@@ -1,0 +1,233 @@
+:root {
+    --primary: #1a5d3a;
+    --primary-dark: #0f3d26;
+    --accent: #e8a33d;
+    --bg: #f7f7f5;
+    --card-bg: #ffffff;
+    --text: #222222;
+    --muted: #666666;
+    --error: #b3261e;
+    --border: #dddddd;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--primary-dark);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.site-header .brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: white;
+    text-decoration: none;
+}
+
+.site-header nav a {
+    color: white;
+    text-decoration: none;
+    margin-right: 1rem;
+}
+
+.site-header nav a:hover { text-decoration: underline; }
+
+.session-box { font-size: 0.9rem; }
+.session-box a, .session-box button {
+    color: white;
+    background: var(--primary);
+    border: none;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.site-main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    min-height: 60vh;
+}
+
+.site-footer {
+    text-align: center;
+    color: var(--muted);
+    padding: 1.5rem;
+    font-size: 0.85rem;
+}
+
+.search-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.search-bar input, .search-bar select {
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+.search-bar button, button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover { background: var(--primary-dark); }
+button.secondary { background: var(--muted); }
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.product-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.product-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 4px;
+    background: #eee;
+}
+
+.product-card .price { font-weight: 700; color: var(--primary-dark); }
+.product-card .category { color: var(--muted); font-size: 0.85rem; }
+
+.auth-form, .product-form, .cart-page, .orders-page, .seller-dashboard,
+.admin-page, .product-detail, .review-section, .error-page {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    max-width: 560px;
+}
+
+.orders-page, .admin-page, .seller-dashboard, .product-detail, .review-section {
+    max-width: 100%;
+}
+
+.auth-form label, .product-form label {
+    display: block;
+    margin-top: 0.75rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.auth-form input, .auth-form select,
+.product-form input, .product-form select, .product-form textarea,
+#reviewForm input, #reviewForm select, #reviewForm textarea {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+.auth-form button, .product-form button { margin-top: 1rem; }
+
+.form-error { color: var(--error); font-size: 0.9rem; }
+
+.order-card, .cart-item, .user-row, .listing-row {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    background: var(--card-bg);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--accent);
+    color: #3a2a00;
+}
+
+.hidden { display: none !important; }
+
+.cart-total { font-weight: 700; margin: 1rem 0; font-size: 1.1rem; }
+
+/* Chat widget */
+.chat-widget { position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 1000; }
+.chat-toggle {
+    width: 52px; height: 52px; border-radius: 50%;
+    font-size: 1.4rem; box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.chat-panel {
+    position: absolute;
+    bottom: 64px;
+    right: 0;
+    width: 300px;
+    max-height: 420px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+}
+.chat-panel-header {
+    background: var(--primary-dark);
+    color: white;
+    padding: 0.6rem 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px 8px 0 0;
+}
+.chat-panel-header button {
+    background: transparent;
+    color: white;
+    font-size: 1.1rem;
+    padding: 0 0.25rem;
+}
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.6rem;
+    font-size: 0.85rem;
+    max-height: 280px;
+}
+.chat-msg { margin-bottom: 0.5rem; }
+.chat-msg.user { text-align: right; color: var(--primary-dark); }
+.chat-msg.bot { text-align: left; color: var(--text); }
+.chat-form { display: flex; border-top: 1px solid var(--border); }
+.chat-form input {
+    flex: 1;
+    border: none;
+    padding: 0.6rem;
+}
+.chat-form button { border-radius: 0 0 8px 0; }

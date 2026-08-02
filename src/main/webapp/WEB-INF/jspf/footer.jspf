@@ -1,0 +1,25 @@
+</main>
+<footer class="site-footer">
+    <p>KrishvaMart &mdash; Anna University R2025 Semester 3 Capstone Project.</p>
+</footer>
+
+<div id="chatWidget" class="chat-widget">
+    <button id="chatToggle" class="chat-toggle" aria-label="Open support chat">&#128172;</button>
+    <div id="chatPanel" class="chat-panel hidden">
+        <div class="chat-panel-header">
+            <span>KrishvaMart Assistant</span>
+            <button id="chatClose" aria-label="Close chat">&times;</button>
+        </div>
+        <div id="chatMessages" class="chat-messages"></div>
+        <form id="chatForm" class="chat-form">
+            <input id="chatInput" type="text" maxlength="500" placeholder="Ask about orders, shipping, returns..." autocomplete="off" />
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</div>
+
+<script src="${pageContext.request.contextPath}/js/api.js"></script>
+<script src="${pageContext.request.contextPath}/js/auth.js"></script>
+<script src="${pageContext.request.contextPath}/js/chat-widget.js"></script>
+</body>
+</html>
