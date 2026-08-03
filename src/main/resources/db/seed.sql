@@ -1,14 +1,4 @@
--- KrishvaMart seed data
--- NOTE: Seed users (admin/seller/buyer) are inserted by
--- com.krishva.krishvamart.util.DbSeeder (run once after schema.sql) because
--- their passwords must go through jBCrypt at insert time -- a raw INSERT
--- here would either store a plaintext password or an unverifiable hash,
--- which section 2 (engineering rules) forbids. Run:
---   mvn compile exec:java -Dexec.mainClass="com.krishva.krishvamart.util.DbSeeder"
--- before applying this file. This file only seeds data with no password
--- material, and assumes the seller ids created by DbSeeder are 2 and 3.
-
-INSERT INTO products (seller_id, name, description, price, stock_qty, category, image_url) VALUES
+INSERT INTO products (seller_id, name, description, price, stock_qty, category, image_url) VALUES 
   (2, 'Wireless Mouse',        'Ergonomic 2.4GHz wireless mouse with USB receiver.',        699.00,  50, 'Electronics', 'https://picsum.photos/seed/mouse/400'),
   (2, 'Mechanical Keyboard',   '87-key hot-swappable mechanical keyboard, blue switches.',  2499.00, 30, 'Electronics', 'https://picsum.photos/seed/keyboard/400'),
   (2, 'USB-C Hub',             '7-in-1 USB-C hub with HDMI, SD card and PD passthrough.',    1299.00, 40, 'Electronics', 'https://picsum.photos/seed/hub/400'),
