@@ -1,6 +1,6 @@
-package com.krishvamart.controller;
+package com.krishva.krishvamart.controller;
 
-import com.krishvamart.dto.ProductRequestDTO;
+import com.krishva.krishvamart.dto.ProductRequestDTO;
 import com.krishvamart.exception.AppException;
 import com.krishvamart.exception.ForbiddenException;
 import com.krishvamart.exception.NotFoundException;
