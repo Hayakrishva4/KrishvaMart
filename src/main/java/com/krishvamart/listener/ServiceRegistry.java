@@ -9,10 +9,10 @@ import com.krishva.krishvamart.dao.impl.JdbcOrderDAO;
 import com.krishva.krishvamart.dao.impl.JdbcProductDAO;
 import com.krishva.krishvamart.dao.impl.JdbcReviewDAO;
 import com.krishva.krishvamart.dao.impl.JdbcUserDAO;
-import com.krishva.krishvamart.chat.ChatProvider;
-import com.krishva.krishvamart.chat.ChatService;
-import com.krishva.krishvamart.chat.GeminiChatProvider;
-import com.krishva.krishvamart.chat.MockChatProvider;
+//import com.krishva.krishvamart.chat.ChatProvider;
+//import com.krishva.krishvamart.chat.ChatService;
+//import com.krishva.krishvamart.chat.GeminiChatProvider;
+//import com.krishva.krishvamart.chat.MockChatProvider;
 import com.krishva.krishvamart.service.CartService;
 import com.krishva.krishvamart.service.OrderService;
 import com.krishva.krishvamart.service.ProductService;
@@ -26,7 +26,7 @@ public final class ServiceRegistry {
     private final CartService cartService;
     private final OrderService orderService;
     private final ReviewService reviewService;
-    private final ChatService chatService;
+  //  private final ChatService chatService;
     public ServiceRegistry(DataSource dataSource) {
         this(dataSource, loadChatConfig());
     }
@@ -41,11 +41,11 @@ public final class ServiceRegistry {
         this.cartService = new CartService(cartDAO, productDAO);
         this.orderService = new OrderService(dataSource, orderDAO, productDAO, cartDAO);
         this.reviewService = new ReviewService(reviewDAO, orderDAO);
-        String providerFlag = chatConfig.getProperty("ai.chatbot.provider", "mock");
-        ChatProvider provider = "gemini".equalsIgnoreCase(providerFlag)
-                ? new GeminiChatProvider(chatConfig.getProperty("ai.chatbot.apiKey", ""))
-                : new MockChatProvider();
-        this.chatService = new ChatService(provider);
+//        String providerFlag = chatConfig.getProperty("ai.chatbot.provider", "mock");
+ //       ChatProvider provider = "gemini".equalsIgnoreCase(providerFlag)
+   //             ? new GeminiChatProvider(chatConfig.getProperty("ai.chatbot.apiKey", ""))
+     //           : new MockChatProvider();
+     //   this.chatService = new ChatService(provider);
     }
     private static java.util.Properties loadChatConfig() {
         java.util.Properties props = new java.util.Properties();
@@ -72,7 +72,7 @@ public final class ServiceRegistry {
     public ReviewService reviewService() {
         return reviewService;
     }
-    public ChatService chatService() {
-        return chatService;
-    }
+    //public ChatService chatService() {
+      //  return chatService;
+    //}
 }
