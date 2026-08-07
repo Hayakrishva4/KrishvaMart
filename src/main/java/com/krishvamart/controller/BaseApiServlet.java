@@ -1,5 +1,4 @@
 package com.krishva.krishvamart.controller;
-
 import com.krishva.krishvamart.exception.AppException;
 import com.krishva.krishvamart.exception.ConflictException;
 import com.krishva.krishvamart.exception.DataAccessException;
@@ -11,34 +10,19 @@ import com.krishva.krishvamart.filter.AuthFilter;
 import com.krishva.krishvamart.listener.ServiceRegistry;
 import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.util.JsonUtil;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringWriter;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-/**
- * Thin base for all JSON API servlets (Section 12 SOLID rule: "Servlets
- * restricted to HTTP orchestration"). Handles request body parsing, the
- * current session user, and translating AppException subtypes to the fixed
- * response envelope (Section 13) with the right HTTP status code.
- */
 public abstract class BaseApiServlet extends HttpServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(BaseApiServlet.class);
     private static final String METHOD_PATCH = "PATCH";
-
-    /**
-     * javax.servlet.http.HttpServlet has no doPatch hook, so PATCH requests
-     * are routed here explicitly before falling back to the standard verbs.
-     */
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp)
             throws javax.servlet.ServletException, IOException {
@@ -53,16 +37,12 @@ public abstract class BaseApiServlet extends HttpServlet {
         }
         super.service(req, resp);
     }
-
-    /** Override in subclasses that support PATCH; default is 405. */
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
-
     protected ServiceRegistry services() {
         return (ServiceRegistry) getServletContext().getAttribute(ServiceRegistry.ATTR);
     }
-
     protected <T> T readBody(HttpServletRequest req, Class<T> type) throws IOException {
         StringWriter sw = new StringWriter();
         try (BufferedReader reader = req.getReader()) {

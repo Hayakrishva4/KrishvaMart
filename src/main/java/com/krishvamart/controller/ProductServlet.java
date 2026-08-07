@@ -1,12 +1,12 @@
 package com.krishva.krishvamart.controller;
 
 import com.krishva.krishvamart.dto.ProductRequestDTO;
-import com.krishvamart.exception.AppException;
-import com.krishvamart.exception.ForbiddenException;
-import com.krishvamart.exception.NotFoundException;
-import com.krishvamart.model.Product;
-import com.krishvamart.model.User;
-import com.krishvamart.util.JsonUtil;
+import com.krishva.krishvamart.exception.AppException;
+import com.krishva.krishvamart.exception.ForbiddenException;
+import com.krishva.krishvamart.exception.NotFoundException;
+import com.krishva.krishvamart.model.Product;
+import com.krishva.krishvamart.model.User;
+import com.krishva.krishvamart.util.JsonUtil;
 
 import java.io.IOException;
 import java.util.List;
