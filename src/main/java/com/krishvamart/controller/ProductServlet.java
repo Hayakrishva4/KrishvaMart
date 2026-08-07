@@ -1,12 +1,12 @@
-package com.krishva.krishvamart.controller;
+package com.krishvamart.controller;
 
-import com.krishva.krishvamart.dto.ProductRequestDTO;
-import com.krishva.krishvamart.exception.AppException;
-import com.krishva.krishvamart.exception.ForbiddenException;
-import com.krishva.krishvamart.exception.NotFoundException;
-import com.krishva.krishvamart.model.Product;
-import com.krishva.krishvamart.model.User;
-import com.krishva.krishvamart.util.JsonUtil;
+import com.krishvamart.dto.ProductRequestDTO;
+import com.krishvamart.exception.AppException;
+import com.krishvamart.exception.ForbiddenException;
+import com.krishvamart.exception.NotFoundException;
+import com.krishvamart.model.Product;
+import com.krishvamart.model.User;
+import com.krishvamart.util.JsonUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,12 +14,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * F2: seller create/edit/delete listings. F3: buyer browse/search by
- * category and keyword (public, no login required - see AuthFilter).
- * Mapped at /api/v1/products and /api/v1/products/{id}.
- */
-@WebServlet(urlPatterns = {"/api/v1/products", "/api/v1/products/*"})
+@WebServlet(urlPatterns = { "/api/v1/products", "/api/v1/products/*" })
 public class ProductServlet extends BaseApiServlet {
 
     @Override
@@ -68,7 +63,8 @@ public class ProductServlet extends BaseApiServlet {
             User seller = requireSeller(req);
             long id = parseId(req.getPathInfo());
             ProductRequestDTO body = readBody(req, ProductRequestDTO.class);
-            Product updated = services().productService().update(id, seller.getId(), body.getName(), body.getDescription(),
+            Product updated = services().productService().update(id, seller.getId(), body.getName(),
+                    body.getDescription(),
                     body.getPrice(), body.getStockQty(), body.getCategory(), body.getImageUrl());
             JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK, updated);
         } catch (AppException e) {
