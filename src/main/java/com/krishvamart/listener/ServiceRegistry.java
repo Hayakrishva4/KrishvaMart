@@ -1,6 +1,6 @@
 package com.krishvamart.listener;
-import com.krishvamart.dao.CartDAO;
-import com.krishvamart.dao.OrderDAO;
+//import com.krishvamart.dao.CartDAO;
+//import com.krishvamart.dao.OrderDAO;
 import com.krishvamart.dao.ProductDAO;
 import com.krishvamart.dao.ReviewDAO;
 import com.krishvamart.dao.UserDAO;
@@ -13,7 +13,7 @@ import com.krishvamart.dao.impl.JdbcUserDAO;
 //import com.krishvamart.chat.ChatService;
 //import com.krishvamart.chat.GeminiChatProvider;
 //import com.krishvamart.chat.MockChatProvider;
-import com.krishvamart.service.CartService;
+//import com.krishvamart.service.CartService;
 import com.krishvamart.service.OrderService;
 import com.krishvamart.exeception.ForbiddenException;
 import com.krishvamart.exeception.NotFoundException;
@@ -38,7 +38,7 @@ public final class ServiceRegistry {
         CartDAO cartDAO = new JdbcCartDAO(dataSource);
         OrderDAO orderDAO = new JdbcOrderDAO(dataSource);
         ReviewDAO reviewDAO = new JdbcReviewDAO(dataSource);
-        this.userService = new UserService(userDAO);
+       this.userService = new UserService(userDAO);
         this.productService = new ProductService(productDAO);
         this.cartService = new CartService(cartDAO, productDAO);
         this.orderService = new OrderService(dataSource, orderDAO, productDAO, cartDAO);
@@ -65,7 +65,7 @@ public final class ServiceRegistry {
    public ProductService productService() {
         return productService;
     }
-    public CartService cartService() {
+  /*   public CartService cartService() {
         return cartService;
     }
     public OrderService orderService() {
@@ -76,5 +76,5 @@ public final class ServiceRegistry {
     }
     //public ChatService chatService() {
       //  return chatService;
-    //}
+    //}*/
 }
