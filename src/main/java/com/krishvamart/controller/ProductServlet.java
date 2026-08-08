@@ -1,28 +1,32 @@
-package com.krishvamart.controller;
-import com.krishvamart.dto.ProductRequestDTO;
-import com.krishvamart.exception.AppException;
-import com.krishvamart.exception.ForbiddenException;
-import com.krishvamart.exception.NotFoundException;
-import com.krishvamart.model.Product;
-import com.krishvamart.model.User;
-import com.krishvamart.util.JsonUtil;
+
+package com.krishva.krishvamart.controller;
+
+import com.krishva.krishvamart.dto.ProductRequestDTO;
+import com.krishva.krishvamart.exception.AppException;
+import com.krishva.krishvamart.exception.ForbiddenException;
+import com.krishva.krishvamart.exception.NotFoundException;
+import com.krishva.krishvamart.model.Product;
+import com.krishva.krishvamart.model.User;
+import com.krishva.krishvamart.util.JsonUtil;
+
 import java.io.IOException;
 import java.util.List;
+
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 @WebServlet(urlPatterns = { "/api/v1/products", "/api/v1/products/*" })
 public class ProductServlet extends BaseApiServlet {
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             String idPart = req.getPathInfo();
 
             if (idPart == null || idPart.equals("/")) {
-
                 if ("true".equalsIgnoreCase(req.getParameter("sellerOnly"))) {
                     User seller = requireSeller(req);
-
                     JsonUtil.writeSuccess(
                             resp,
                             HttpServletResponse.SC_OK,
@@ -42,9 +46,7 @@ public class ProductServlet extends BaseApiServlet {
                         HttpServletResponse.SC_OK,
                         results
                 );
-
             } else {
-
                 long id = parseId(idPart);
 
                 Product product =
@@ -99,14 +101,17 @@ public class ProductServlet extends BaseApiServlet {
             handleError(resp, e);
         }
     }
+
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             User seller = requireSeller(req);
 
             long id = parseId(req.getPathInfo());
+
             ProductRequestDTO body =
                     readBody(req, ProductRequestDTO.class);
+
             Product updated =
                     services().productService().update(
                             id,
@@ -124,6 +129,7 @@ public class ProductServlet extends BaseApiServlet {
                     HttpServletResponse.SC_OK,
                     updated
             );
+
         } catch (AppException e) {
             handleError(resp, e);
 
@@ -136,22 +142,28 @@ public class ProductServlet extends BaseApiServlet {
             );
         }
     }
+
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             User seller = requireSeller(req);
+
             long id = parseId(req.getPathInfo());
+
             services().productService().delete(
                     id,
                     seller.getId()
             );
+
             JsonUtil.writeSuccess(
                     resp,
                     HttpServletResponse.SC_OK,
                     null
             );
+
         } catch (AppException e) {
             handleError(resp, e);
+
         } catch (NumberFormatException | NullPointerException e) {
             JsonUtil.writeError(
                     resp,
@@ -161,6 +173,7 @@ public class ProductServlet extends BaseApiServlet {
             );
         }
     }
+
     private User requireSeller(HttpServletRequest req) throws AppException {
         User user = requireUser(req);
 
@@ -172,10 +185,12 @@ public class ProductServlet extends BaseApiServlet {
 
         return user;
     }
+
     private long parseId(String pathInfo) throws NotFoundException {
         if (pathInfo == null || pathInfo.equals("/")) {
             throw new NotFoundException("Product id required");
         }
+
         return Long.parseLong(pathInfo.substring(1));
     }
 }
