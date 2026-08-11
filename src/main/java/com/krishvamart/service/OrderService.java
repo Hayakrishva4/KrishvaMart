@@ -1,0 +1,156 @@
+package com.krishva.krishvamart.service;
+
+import com.krishva.krishvamart.dao.CartDAO;
+import com.krishva.krishvamart.dao.OrderDAO;
+import com.krishva.krishvamart.dao.ProductDAO;
+import com.krishva.krishvamart.exception.AppException;
+import com.krishva.krishvamart.exception.ConflictException;
+import com.krishva.krishvamart.exception.DataAccessException;
+import com.krishva.krishvamart.exception.ForbiddenException;
+import com.krishva.krishvamart.exception.NotFoundException;
+import com.krishva.krishvamart.exception.ValidationException;
+import com.krishva.krishvamart.model.CartItem;
+import com.krishva.krishvamart.model.Order;
+import com.krishva.krishvamart.model.User;
+
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import javax.sql.DataSource;
+
+/**
+ * Business rules for checkout (F5) and order history (F6), plus the optional
+ * status workflow (O2). No SQL statements are written here (Section 2, Rule 1
+ * confines those to the DAO layer) - this class only demarcates the checkout
+ * transaction boundary (getConnection / commit / rollback) around calls into
+ * OrderDAO, ProductDAO and CartDAO, all of which execute PreparedStatements
+ * against the Connection this class hands them.
+ */
+public class OrderService {
+
+    private final DataSource dataSource;
+    private final OrderDAO orderDAO;
+    private final ProductDAO productDAO;
+    private final CartDAO cartDAO;
+
+    public OrderService(DataSource dataSource, OrderDAO orderDAO, ProductDAO productDAO, CartDAO cartDAO) {
+        this.dataSource = dataSource;
+        this.orderDAO = orderDAO;
+        this.productDAO = productDAO;
+        this.cartDAO = cartDAO;
+    }
+
+    /** F5: place an order from the current cart contents via mock payment confirmation. */
+    public Order checkout(long buyerId, boolean mockPaymentConfirmed) throws AppException {
+        if (!mockPaymentConfirmed) {
+            throw new ValidationException("payment", "Mock payment confirmation is required to place an order");
+        }
+        List<CartItem> cartItems = cartDAO.findByUser(buyerId);
+        if (cartItems.isEmpty()) {
+            throw new ValidationException("cart", "Your cart is empty");
+        }
+
+        BigDecimal total = cartItems.stream()
+                .map(CartItem::getLineTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Order order = new Order();
+        order.setBuyerId(buyerId);
+        order.setStatus(Order.Status.CONFIRMED);
+        order.setTotalAmount(total);
+
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                Order saved = orderDAO.insert(conn, order);
+                for (CartItem item : cartItems) {
+                    boolean stockOk = productDAO.adjustStock(conn, item.getProductId(), -item.getQuantity());
+                    if (!stockOk) {
+                        throw new ConflictException(
+                                "\"" + item.getProductName() + "\" no longer has enough stock");
+                    }
+                    orderDAO.insertItem(conn, saved.getId(), item.getProductId(), item.getQuantity(), item.getUnitPrice());
+                }
+                cartDAO.clear(conn, buyerId);
+                conn.commit();
+                return orderDAO.findById(saved.getId()).orElse(saved);
+            } catch (AppException e) {
+                conn.rollback();
+                throw e;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw new DataAccessException("Checkout transaction failed", e);
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Failed to open checkout transaction", e);
+        }
+    }
+
+    /** F6: buyer view of past orders. */
+    public List<Order> historyForBuyer(long buyerId) throws AppException {
+        return orderDAO.findByBuyer(buyerId);
+    }
+
+    /** F6: seller view of incoming orders for their products. */
+    public List<Order> incomingForSeller(long sellerId) throws AppException {
+        return orderDAO.findBySeller(sellerId);
+    }
+
+    /** F7: admin view of all orders. */
+    public List<Order> listAllForAdmin(User admin) throws AppException {
+        requireAdmin(admin);
+        return orderDAO.findAll();
+    }
+
+    public Order get(long orderId, User requester) throws AppException {
+        Order order = orderDAO.findById(orderId).orElseThrow(() -> new NotFoundException("Order not found"));
+        boolean isOwner = order.getBuyerId().equals(requester.getId());
+        boolean isAdmin = requester.getRole() == User.Role.ADMIN;
+        boolean isSellerOnOrder = false;
+        if (requester.getRole() == User.Role.SELLER) {
+            for (var item : order.getItems()) {
+                var product = productDAO.findById(item.getProductId());
+                if (product.isPresent() && product.get().getSellerId().equals(requester.getId())) {
+                    isSellerOnOrder = true;
+                    break;
+                }
+            }
+        }
+        if (!isOwner && !isAdmin && !isSellerOnOrder) {
+            throw new ForbiddenException("You cannot view this order");
+        }
+        return order;
+    }
+
+    /** O2: order status workflow Pending -> Confirmed -> Shipped -> Delivered. */
+    public void advanceStatus(long orderId, Order.Status newStatus, User actor) throws AppException {
+        if (actor.getRole() != User.Role.SELLER && actor.getRole() != User.Role.ADMIN) {
+            throw new ForbiddenException("Only a seller or admin can update order status");
+        }
+        Order order = orderDAO.findById(orderId).orElseThrow(() -> new NotFoundException("Order not found"));
+        if (!isValidTransition(order.getStatus(), newStatus)) {
+            throw new ValidationException("status",
+                    "Cannot move order from " + order.getStatus() + " to " + newStatus);
+        }
+        orderDAO.updateStatus(orderId, newStatus);
+    }
+
+    private boolean isValidTransition(Order.Status from, Order.Status to) {
+        if (to == Order.Status.CANCELLED) {
+            return from == Order.Status.PENDING || from == Order.Status.CONFIRMED;
+        }
+        return switch (from) {
+            case PENDING -> to == Order.Status.CONFIRMED;
+            case CONFIRMED -> to == Order.Status.SHIPPED;
+            case SHIPPED -> to == Order.Status.DELIVERED;
+            default -> false;
+        };
+    }
+
+    private void requireAdmin(User user) throws ForbiddenException {
+        if (user == null || user.getRole() != User.Role.ADMIN) {
+            throw new ForbiddenException("Admin role required");
+        }
+    }
+}
