@@ -15,7 +15,9 @@ import com.krishva.krishvamart.service.UserService;
 import javax.sql.DataSource;
 
 public final class ServiceRegistry {
+
     public static final String ATTR = "krishvamart.services";
+
     private final UserService userService;
     private final ProductService productService;
     private final CartService cartService;
@@ -30,10 +32,12 @@ public final class ServiceRegistry {
         ProductDAO productDAO = new JdbcProductDAO(dataSource);
         CartDAO cartDAO = new JdbcCartDAO(dataSource);
         OrderDAO orderDAO = new JdbcOrderDAO(dataSource);
+
         this.userService = new UserService(userDAO);
         this.productService = new ProductService(productDAO);
         this.cartService = new CartService(cartDAO, productDAO);
-        this.orderService = new OrderService(orderDAO, cartDAO, productDAO);
+        // Updated to pass dataSource as 1st argument and productDAO before cartDAO
+        this.orderService = new OrderService(dataSource, orderDAO, productDAO, cartDAO);
     }
 
     private static java.util.Properties loadChatConfig() {
