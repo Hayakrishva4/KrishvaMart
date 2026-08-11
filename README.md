@@ -1,6 +1,6 @@
 # KrishvaMart
 Multi-seller e-commerce marketplace web application built with Java Servlets, JDBC, and Apache Tomcat.
-> Checkpoint window: Jul 27 - Oct 10, 2026 &middot; Builder: solo
+> Builder: solo
 ## Problem statement
 Sellers list products. Buyers browse, search, add to cart, and purchase. An admin manages users, orders, and listings. Checkout uses a mock payment confirmation step. An AI chatbot answers FAQ-style questions about products, orders, shipping, and returns.
 ## Feature status
@@ -21,7 +21,6 @@ Sellers list products. Buyers browse, search, add to cart, and purchase. An admi
 See `CHANGELOG.md` for release history and the timeline in the original spec
 ## Architecture
 Layered MVC over Servlets (Front Controller pattern):
-```
 Browser (JSP shell + vanilla JS/fetch)
   -> Filter layer: EncodingFilter, RequestIdFilter, AuthFilter
   -> Servlets (controller/*) - thin, no SQL, no business logic
@@ -29,12 +28,10 @@ Browser (JSP shell + vanilla JS/fetch)
   -> DAO layer (dao/impl/*) - all SQL, PreparedStatement only
   -> HikariCP connection pool (listener/AppContextListener)
   -> H2 Database (server mode)
-```
 See `docs/D1-er-diagram.puml`, `docs/D2-use-case-diagram.puml`, and
 `docs/D3-sequence-diagram.puml` for the three required design diagrams
 (render with the [PlantUML](https://plantuml.com/) VS Code extension, the online editor, or `plantuml docs/*.puml`).
 ### Package structure
-```
 com.krishva.krishvamart
 |-- controller   Servlets - thin, no SQL, no business logic
 |-- service      business rules, orchestration
@@ -46,7 +43,6 @@ com.krishva.krishvamart
 |-- chat         AI chatbot: ChatProvider strategy, MockChatProvider, GeminiChatProvider
 |-- util         PasswordUtil, ValidationUtil, JsonUtil, DbSeeder
 `-- exception    checked exceptions mapped to HTTP status codes
-```
 ## Tech stack
 | Component | Choice |
 |---|---|
