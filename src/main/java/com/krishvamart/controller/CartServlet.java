@@ -1,5 +1,4 @@
 package com.krishva.krishvamart.controller;
-
 import com.krishva.krishvamart.dto.CartItemRequestDTO;
 import com.krishva.krishvamart.exception.AppException;
 import com.krishva.krishvamart.exception.NotFoundException;
@@ -7,7 +6,6 @@ import com.krishva.krishvamart.exception.ValidationException;
 import com.krishva.krishvamart.model.CartItem;
 import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.util.JsonUtil;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,14 +13,8 @@ import java.util.Map;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-/**
- * F4: add, update, remove cart items; running total. Mapped at
- * /api/v1/cart (view) and /api/v1/cart/items/{productId} (mutate).
- */
 @WebServlet(urlPatterns = {"/api/v1/cart", "/api/v1/cart/items", "/api/v1/cart/items/*"})
 public class CartServlet extends BaseApiServlet {
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
@@ -34,7 +26,6 @@ public class CartServlet extends BaseApiServlet {
             handleError(resp, e);
         }
     }
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
@@ -49,7 +40,6 @@ public class CartServlet extends BaseApiServlet {
             handleError(resp, e);
         }
     }
-
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
@@ -67,7 +57,6 @@ public class CartServlet extends BaseApiServlet {
             JsonUtil.writeError(resp, HttpServletResponse.SC_BAD_REQUEST, "VALIDATION_ERROR", "Invalid product id");
         }
     }
-
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
@@ -81,7 +70,6 @@ public class CartServlet extends BaseApiServlet {
             JsonUtil.writeError(resp, HttpServletResponse.SC_BAD_REQUEST, "VALIDATION_ERROR", "Invalid product id");
         }
     }
-
     private long parseProductId(String pathInfo) throws NotFoundException {
         if (pathInfo == null || pathInfo.equals("/")) {
             throw new NotFoundException("Product id required in path");
