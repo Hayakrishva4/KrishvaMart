@@ -56,7 +56,10 @@ public final class ServiceRegistry {
         this.userService = new UserService(userDAO);
         this.productService = new ProductService(productDAO);
         this.cartService = new CartService(cartDAO, productDAO);
-        this.orderService = new OrderService(dataSource, orderDAO, productDAO, cartDAO);
+
+        // Correct parameter order for OrderService: (DataSource, OrderDAO, CartDAO, ProductDAO)
+        this.orderService = new OrderService(dataSource, orderDAO, cartDAO, productDAO);
+
         this.reviewService = new ReviewService(reviewDAO, productDAO);
         this.wishlistService = new WishlistService(wishlistDAO, productDAO);
         this.sellerAnalyticsService = new SellerAnalyticsService(analyticsDAO);
@@ -70,7 +73,8 @@ public final class ServiceRegistry {
                 ? new GeminiChatProvider(apiKey)
                 : new MockChatProvider();
 
-        ChatProvider catalogProvider = new CatalogAwareChatProvider(baseProvider, productDAO);
+        // Correct parameter order for CatalogAwareChatProvider: (productDAO, baseProvider)
+        ChatProvider catalogProvider = new CatalogAwareChatProvider(productDAO, baseProvider);
         this.chatService = new ChatService(catalogProvider);
     }
 
