@@ -1,27 +1,14 @@
-package com.krishva.krishvamart.chat;
-
+package com.krishva.krishvamart.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-/**
- * Real LLM-backed provider. The API key is read server-side only from
- * config.properties / environment (Section 11, Rule 1) and never appears in
- * client-side code - the browser only ever talks to ChatServlet.
- *
- * Swap the model/endpoint below for whichever provider your faculty guide
- * approves; the fixed server-side prompt template (Section 17, Rule 3)
- * restricts answers to the product/listing domain (Section 11, Rule 2).
- */
 public class GeminiChatProvider implements ChatProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(GeminiChatProvider.class);

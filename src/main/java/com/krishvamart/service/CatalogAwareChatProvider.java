@@ -1,29 +1,11 @@
-package com.krishva.krishvamart.chat;
-
+package com.krishva.krishvamart.service;
 import com.krishva.krishvamart.dao.ProductDAO;
 import com.krishva.krishvamart.model.Product;
-
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-/**
- * Decorator over any {@link ChatProvider} that intercepts stock/price
- * questions and answers them from the live catalog (real-time DB lookup)
- * instead of sending them to the LLM/canned-FAQ layer. Section 11 only
- * requires "5-10 FAQ-style domain questions" answered from a fixed script;
- * this goes further by grounding a subset of answers in actual product data,
- * so "is the wireless mouse in stock" gets today's real stock_qty rather
- * than a generic canned reply.
- *
- * Falls through to the wrapped provider for anything it doesn't recognize,
- * so it composes cleanly with either {@link MockChatProvider} or
- * {@link GeminiChatProvider} (Strategy pattern, Section 12) without either
- * of them needing to know about the catalog.
- */
 public class CatalogAwareChatProvider implements ChatProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(CatalogAwareChatProvider.class);
@@ -98,9 +80,6 @@ public class CatalogAwareChatProvider implements ChatProvider {
             List<Product> matches = productDAO.search(keyword, null, true);
             return matches.isEmpty() ? null : matches.get(0);
         } catch (Exception e) {
-            // Catalog lookup is a best-effort enhancement - any failure here
-            // (including a DataAccessException) just falls through to the
-            // wrapped provider rather than breaking the chat response.
             LOG.warn("Catalog lookup failed for chat query '{}': {}", keyword, e.getMessage());
             return null;
         }

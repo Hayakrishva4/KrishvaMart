@@ -1,17 +1,8 @@
-package com.krishva.krishvamart.chat;
-
+package com.krishva.krishvamart.service;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-/**
- * Canned FAQ answers, no network call. Default provider (ai.chatbot.provider=mock)
- * and the fallback used by ChatService when the real provider call fails
- * (Section 11, Rule 3: return a static degraded response instead of an error page).
- */
 public class MockChatProvider implements ChatProvider {
-
     private static final Map<String, String> FAQ = new LinkedHashMap<>();
-
     static {
         FAQ.put("shipping", "Orders are typically dispatched within 2 business days of a CONFIRMED status.");
         FAQ.put("return", "Items can be returned within 7 days of delivery if unused and in original packaging.");
@@ -36,7 +27,6 @@ public class MockChatProvider implements ChatProvider {
         }
         return defaultReply();
     }
-
     private String defaultReply() {
         return "I can help with questions about products, orders, shipping, returns, and reviews on KrishvaMart. "
                 + "Could you rephrase your question?";
