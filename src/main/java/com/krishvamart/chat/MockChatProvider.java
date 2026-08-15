@@ -1,4 +1,4 @@
-package com.krishva.krishvamart.chat;
+package com.krishvamart.chat;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
