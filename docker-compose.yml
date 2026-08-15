@@ -1,0 +1,37 @@
+# Local integration testing, or a simple single-VM cloud deployment (any
+# host that runs Docker Compose: a DigitalOcean droplet, an AWS EC2 box, a
+# free-tier Oracle Cloud VM, etc.). For fully-managed container platforms
+# (Render, Railway, Fly.io, Cloud Run) deploy the `app` image alone and point
+# DB_URL at a managed database instead - see docs/cloud-deployment.md.
+
+version: "3.8"
+
+services:
+  h2:
+    build:
+      context: .
+      dockerfile: Dockerfile.h2
+    ports:
+      - "9092:9092"
+    volumes:
+      - h2-data:/data
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:h2:tcp://h2:9092/./krishvamart
+      DB_USER: sa
+      DB_PASSWORD: ""
+      AI_CHATBOT_PROVIDER: mock
+      AI_CHATBOT_API_KEY: ""
+    depends_on:
+      - h2
+    restart: unless-stopped
+
+volumes:
+  h2-data:

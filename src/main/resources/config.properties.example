@@ -1,0 +1,24 @@
+# Copy this file to config.properties (same directory) and adjust values.
+# config.properties itself is excluded from version control via .gitignore
+# (Section 9 security checklist: "Database credentials excluded from version
+# control").
+#
+# CLOUD DEPLOYMENT: every key below can instead be set as an environment
+# variable (upper-cased, dots -> underscores, e.g. db.url -> DB_URL). Env
+# vars always win over this file - see ConfigResolver and .env.example.
+# This lets one WAR, built once in CI, be configured per-environment purely
+# through the cloud platform's "Environment Variables" screen.
+
+db.url=jdbc:h2:tcp://localhost:9092/./data/krishvamart
+db.user=sa
+db.password=
+db.pool.max.size=10
+db.pool.min.idle=2
+
+# AI chatbot (Section 11 / 17)
+ai.chatbot.provider=mock
+ai.chatbot.api.key=
+
+# Self-initializes schema + demo data on first boot (see SchemaInitializer).
+# Set to false against a database you manage migrations for separately.
+auto.init.schema=true
