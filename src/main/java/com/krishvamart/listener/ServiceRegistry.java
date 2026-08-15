@@ -1,5 +1,4 @@
 package com.krishva.krishvamart.listener;
-
 import com.krishva.krishvamart.dao.AnalyticsDAO;
 import com.krishva.krishvamart.dao.CartDAO;
 import com.krishva.krishvamart.dao.OrderDAO;
@@ -44,7 +43,6 @@ public final class ServiceRegistry {
     public ServiceRegistry(DataSource dataSource) {
         this(dataSource, loadChatConfig());
     }
-
     public ServiceRegistry(DataSource dataSource, java.util.Properties chatConfig) {
         UserDAO userDAO = new JdbcUserDAO(dataSource);
         ProductDAO productDAO = new JdbcProductDAO(dataSource);
@@ -53,14 +51,11 @@ public final class ServiceRegistry {
         ReviewDAO reviewDAO = new JdbcReviewDAO(dataSource);
         WishlistDAO wishlistDAO = new JdbcWishlistDAO(dataSource);
         AnalyticsDAO analyticsDAO = new JdbcAnalyticsDAO(dataSource);
-
         this.userService = new UserService(userDAO);
         this.productService = new ProductService(productDAO);
         this.cartService = new CartService(cartDAO, productDAO);
-        
-        // Exact signature matching compiler requirements
         this.orderService = new OrderService(dataSource, orderDAO, productDAO, cartDAO);
-        this.reviewService = new ReviewService(reviewDAO, orderDAO, productDAO);
+        this.reviewService = new ReviewService(reviewDAO, orderDAO);
         this.wishlistService = new WishlistService(wishlistDAO, productDAO);
         this.sellerAnalyticsService = new SellerAnalyticsService(analyticsDAO);
 
@@ -68,15 +63,12 @@ public final class ServiceRegistry {
         if (apiKey == null && chatConfig != null) {
             apiKey = chatConfig.getProperty("gemini.api.key");
         }
-
         ChatProvider baseProvider = (apiKey != null && !apiKey.isBlank())
                 ? new GeminiChatProvider(apiKey)
                 : new MockChatProvider();
-
         ChatProvider catalogProvider = new CatalogAwareChatProvider(productDAO, baseProvider);
         this.chatService = new ChatService(catalogProvider);
     }
-
     private static java.util.Properties loadChatConfig() {
         java.util.Properties props = new java.util.Properties();
         try (var in = ServiceRegistry.class.getClassLoader().getResourceAsStream("config.properties")) {
@@ -87,7 +79,6 @@ public final class ServiceRegistry {
         }
         return props;
     }
-
     public UserService userService() { return userService; }
     public ProductService productService() { return productService; }
     public CartService cartService() { return cartService; }
@@ -97,4 +88,3 @@ public final class ServiceRegistry {
     public SellerAnalyticsService sellerAnalyticsService() { return sellerAnalyticsService; }
     public ChatService chatService() { return chatService; }
 }
-
