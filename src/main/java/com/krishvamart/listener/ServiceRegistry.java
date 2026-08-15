@@ -1,4 +1,5 @@
 package com.krishva.krishvamart.listener;
+
 import com.krishva.krishvamart.dao.AnalyticsDAO;
 import com.krishva.krishvamart.dao.CartDAO;
 import com.krishva.krishvamart.dao.OrderDAO;
@@ -14,36 +15,41 @@ import com.krishva.krishvamart.dao.impl.JdbcReviewDAO;
 import com.krishva.krishvamart.dao.impl.JdbcUserDAO;
 import com.krishva.krishvamart.dao.impl.JdbcWishlistDAO;
 import com.krishva.krishvamart.service.CartService;
-import com.krishva.krishvamart.service.CatalogAwareChatProvider;
-import com.krishva.krishvamart.service.ChatProvider;
-import com.krishva.krishvamart.service.ChatService;
-import com.krishva.krishvamart.service.GeminiChatProvider;
-import com.krishva.krishvamart.service.MockChatProvider;
 import com.krishva.krishvamart.service.OrderService;
 import com.krishva.krishvamart.service.ProductService;
 import com.krishva.krishvamart.service.ReviewService;
 import com.krishva.krishvamart.service.SellerAnalyticsService;
 import com.krishva.krishvamart.service.UserService;
 import com.krishva.krishvamart.service.WishlistService;
+import com.krishva.krishvamart.util.ConfigResolver;
+
 import javax.sql.DataSource;
 
+/**
+ * ServiceRegistry - Hand-rolled DI container wiring DAOs into core and
+ * advanced services for KrishvaMart.
+ */
 public final class ServiceRegistry {
 
     public static final String ATTR = "krishvamart.services";
 
+    // --- Core Services (Week 1 & 2) ---
     private final UserService userService;
     private final ProductService productService;
     private final CartService cartService;
     private final OrderService orderService;
+
+    // --- Advanced Milestone Services (Week 3) ---
     private final ReviewService reviewService;
     private final WishlistService wishlistService;
     private final SellerAnalyticsService sellerAnalyticsService;
-    private final ChatService chatService;
 
     public ServiceRegistry(DataSource dataSource) {
-        this(dataSource, loadChatConfig());
+        this(dataSource, ConfigResolver.load());
     }
-    public ServiceRegistry(DataSource dataSource, java.util.Properties chatConfig) {
+
+    public ServiceRegistry(DataSource dataSource, ConfigResolver config) {
+        // 1. Initialize DAOs
         UserDAO userDAO = new JdbcUserDAO(dataSource);
         ProductDAO productDAO = new JdbcProductDAO(dataSource);
         CartDAO cartDAO = new JdbcCartDAO(dataSource);
@@ -51,40 +57,45 @@ public final class ServiceRegistry {
         ReviewDAO reviewDAO = new JdbcReviewDAO(dataSource);
         WishlistDAO wishlistDAO = new JdbcWishlistDAO(dataSource);
         AnalyticsDAO analyticsDAO = new JdbcAnalyticsDAO(dataSource);
+
+        // 2. Wire Core Services (Week 1 & 2)
         this.userService = new UserService(userDAO);
         this.productService = new ProductService(productDAO);
         this.cartService = new CartService(cartDAO, productDAO);
         this.orderService = new OrderService(dataSource, orderDAO, productDAO, cartDAO);
+
+        // 3. Wire Milestone Services (Week 3)
         this.reviewService = new ReviewService(reviewDAO, orderDAO);
         this.wishlistService = new WishlistService(wishlistDAO, productDAO);
         this.sellerAnalyticsService = new SellerAnalyticsService(analyticsDAO);
+    }
 
-        String apiKey = System.getenv("GEMINI_API_KEY");
-        if (apiKey == null && chatConfig != null) {
-            apiKey = chatConfig.getProperty("gemini.api.key");
-        }
-        ChatProvider baseProvider = (apiKey != null && !apiKey.isBlank())
-                ? new GeminiChatProvider(apiKey)
-                : new MockChatProvider();
-        ChatProvider catalogProvider = new CatalogAwareChatProvider(productDAO, baseProvider);
-        this.chatService = new ChatService(catalogProvider);
+    // --- Service Getters ---
+    public UserService userService() {
+        return userService;
     }
-    private static java.util.Properties loadChatConfig() {
-        java.util.Properties props = new java.util.Properties();
-        try (var in = ServiceRegistry.class.getClassLoader().getResourceAsStream("config.properties")) {
-            if (in != null) {
-                props.load(in);
-            }
-        } catch (java.io.IOException ignored) {
-        }
-        return props;
+
+    public ProductService productService() {
+        return productService;
     }
-    public UserService userService() { return userService; }
-    public ProductService productService() { return productService; }
-    public CartService cartService() { return cartService; }
-    public OrderService orderService() { return orderService; }
-    public ReviewService reviewService() { return reviewService; }
-    public WishlistService wishlistService() { return wishlistService; }
-    public SellerAnalyticsService sellerAnalyticsService() { return sellerAnalyticsService; }
-    public ChatService chatService() { return chatService; }
+
+    public CartService cartService() {
+        return cartService;
+    }
+
+    public OrderService orderService() {
+        return orderService;
+    }
+
+    public ReviewService reviewService() {
+        return reviewService;
+    }
+
+    public WishlistService wishlistService() {
+        return wishlistService;
+    }
+
+    public SellerAnalyticsService sellerAnalyticsService() {
+        return sellerAnalyticsService;
+    }
 }
