@@ -1,4 +1,5 @@
 package com.krishva.krishvamart.listener;
+
 import com.krishva.krishvamart.dao.AnalyticsDAO;
 import com.krishva.krishvamart.dao.CartDAO;
 import com.krishva.krishvamart.dao.OrderDAO;
@@ -55,10 +56,12 @@ public final class ServiceRegistry {
 
         this.userService = new UserService(userDAO);
         this.productService = new ProductService(productDAO);
-        this.cartService = new CartService(cartDAO, productDAO);
 
-        // Correct parameter order for OrderService: (DataSource, OrderDAO, CartDAO, ProductDAO)
-        this.orderService = new OrderService(dataSource, orderDAO, cartDAO, productDAO);
+        // 1. CartService: (productDAO, cartDAO)
+        this.cartService = new CartService(productDAO, cartDAO);
+
+        // 2. OrderService: (dataSource, orderDAO, productDAO, cartDAO)
+        this.orderService = new OrderService(dataSource, orderDAO, productDAO, cartDAO);
 
         this.reviewService = new ReviewService(reviewDAO, productDAO);
         this.wishlistService = new WishlistService(wishlistDAO, productDAO);
@@ -73,7 +76,7 @@ public final class ServiceRegistry {
                 ? new GeminiChatProvider(apiKey)
                 : new MockChatProvider();
 
-        // Correct parameter order for CatalogAwareChatProvider: (productDAO, baseProvider)
+        // 3. CatalogAwareChatProvider: (productDAO, baseProvider)
         ChatProvider catalogProvider = new CatalogAwareChatProvider(productDAO, baseProvider);
         this.chatService = new ChatService(catalogProvider);
     }
@@ -88,6 +91,7 @@ public final class ServiceRegistry {
         }
         return props;
     }
+
     public UserService userService() { return userService; }
     public ProductService productService() { return productService; }
     public CartService cartService() { return cartService; }
