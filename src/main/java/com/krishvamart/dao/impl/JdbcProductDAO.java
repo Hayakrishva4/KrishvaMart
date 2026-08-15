@@ -38,7 +38,7 @@ public class JdbcProductDAO implements ProductDAO {
     @Override
     public List<Product> findAll() {
         List<Product> list = new ArrayList<>();
-        String sql = "SELECT * FROM products ORDER BY id DESC";
+        String sql = "SELECT * FROM products WHERE active = true ORDER BY id DESC";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -52,7 +52,7 @@ public class JdbcProductDAO implements ProductDAO {
     }
 
     @Override
-    public List<Product> findBySellerId(Long sellerId) {
+    public List<Product> findBySeller(long sellerId) {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT * FROM products WHERE seller_id = ? ORDER BY id DESC";
         try (Connection conn = dataSource.getConnection();
@@ -72,23 +72,23 @@ public class JdbcProductDAO implements ProductDAO {
     @Override
     public List<Product> search(String keyword, String category, boolean inStockOnly) {
         List<Product> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM products WHERE 1=1 ");
+        StringBuilder sql = new StringBuilder("SELECT * FROM products WHERE active = true ");
         List<Object> params = new ArrayList<>();
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            sql.append(" AND (LOWER(title) LIKE ? OR LOWER(description) LIKE ?)");
+            sql.append(" AND (LOWER(name) LIKE ? OR LOWER(description) LIKE ?)");
             String pattern = "%" + keyword.trim().toLowerCase() + "%";
             params.add(pattern);
             params.add(pattern);
         }
 
-        if (category != null && !category.trim().isEmpty()) {
+        if (category != null && !category.trim().isEmpty() && !"ALL".equalsIgnoreCase(category)) {
             sql.append(" AND category = ?");
             params.add(category.trim());
         }
 
         if (inStockOnly) {
-            sql.append(" AND stock_quantity > 0");
+            sql.append(" AND stock > 0");
         }
 
         sql.append(" ORDER BY id DESC");
@@ -114,22 +114,23 @@ public class JdbcProductDAO implements ProductDAO {
         if (criteria == null) {
             return findAll();
         }
-        return search(criteria.getKeyword(), criteria.getCategory(), criteria.isInStockOnly());
+        return search(criteria.getKeyword(), criteria.getCategory(), criteria.inStockOnly());
     }
 
     @Override
-    public Product create(Product product) {
-        String sql = "INSERT INTO products (seller_id, title, description, price, stock_quantity, category, image_url) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+    public Product insert(Product product) {
+        String sql = "INSERT INTO products (seller_id, name, description, price, stock, category, image_url, active) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, product.getSellerId());
-            ps.setString(2, product.getTitle());
+            ps.setString(2, product.getName());
             ps.setString(3, product.getDescription());
             ps.setBigDecimal(4, product.getPrice());
-            ps.setInt(5, product.getStockQuantity());
+            ps.setInt(5, product.getStock());
             ps.setString(6, product.getCategory());
             ps.setString(7, product.getImageUrl());
+            ps.setBoolean(8, product.isActive());
             ps.executeUpdate();
 
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
@@ -144,18 +145,24 @@ public class JdbcProductDAO implements ProductDAO {
     }
 
     @Override
+    public Product create(Product product) {
+        return insert(product);
+    }
+
+    @Override
     public Product update(Product product) {
-        String sql = "UPDATE products SET title = ?, description = ?, price = ?, stock_quantity = ?, " +
-                     "category = ?, image_url = ? WHERE id = ?";
+        String sql = "UPDATE products SET name = ?, description = ?, price = ?, stock = ?, " +
+                     "category = ?, image_url = ?, active = ? WHERE id = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, product.getTitle());
+            ps.setString(1, product.getName());
             ps.setString(2, product.getDescription());
             ps.setBigDecimal(3, product.getPrice());
-            ps.setInt(4, product.getStockQuantity());
+            ps.setInt(4, product.getStock());
             ps.setString(5, product.getCategory());
             ps.setString(6, product.getImageUrl());
-            ps.setLong(7, product.getId());
+            ps.setBoolean(7, product.isActive());
+            ps.setLong(8, product.getId());
             ps.executeUpdate();
             return product;
         } catch (SQLException e) {
@@ -164,7 +171,7 @@ public class JdbcProductDAO implements ProductDAO {
     }
 
     @Override
-    public boolean delete(Long id) {
+    public boolean delete(long id) {
         String sql = "DELETE FROM products WHERE id = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -175,16 +182,45 @@ public class JdbcProductDAO implements ProductDAO {
         }
     }
 
+    @Override
+    public boolean delete(long id, long sellerId) {
+        String sql = "DELETE FROM products WHERE id = ? AND seller_id = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            ps.setLong(2, sellerId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void setActive(long id, boolean active) {
+        String sql = "UPDATE products SET active = ? WHERE id = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, active);
+            ps.setLong(2, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private Product mapRow(ResultSet rs) throws SQLException {
         Product p = new Product();
         p.setId(rs.getLong("id"));
         p.setSellerId(rs.getLong("seller_id"));
-        p.setTitle(rs.getString("title"));
+        p.setName(rs.getString("name"));
         p.setDescription(rs.getString("description"));
         p.setPrice(rs.getBigDecimal("price"));
-        p.setStockQuantity(rs.getInt("stock_quantity"));
+        p.setStock(rs.getInt("stock"));
         p.setCategory(rs.getString("category"));
         p.setImageUrl(rs.getString("image_url"));
+        try {
+            p.setActive(rs.getBoolean("active"));
+        } catch (SQLException ignored) {}
         Timestamp ts = rs.getTimestamp("created_at");
         if (ts != null) {
             p.setCreatedAt(ts.toLocalDateTime());

@@ -1,11 +1,8 @@
 package com.krishva.krishvamart.dao;
-
 import com.krishva.krishvamart.dto.ProductSearchCriteria;
 import com.krishva.krishvamart.model.Product;
-
 import java.util.List;
 import java.util.Optional;
-
 public interface ProductDAO {
     Optional<Product> findById(Long id);
     List<Product> findAll();

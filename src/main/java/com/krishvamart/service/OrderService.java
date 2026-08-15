@@ -8,6 +8,7 @@ import com.krishva.krishvamart.model.CartItem;
 import com.krishva.krishvamart.model.Order;
 import com.krishva.krishvamart.model.OrderItem;
 import com.krishva.krishvamart.model.Product;
+import com.krishva.krishvamart.model.User;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
@@ -36,7 +37,7 @@ public class OrderService {
     }
 
     public Order checkout(long buyerId, boolean paymentSuccess, String shippingAddress) {
-        List<CartItem> cartItems = cartDAO.findByUserId(buyerId);
+        List<CartItem> cartItems = cartDAO.findByBuyer(buyerId);
         if (cartItems.isEmpty()) {
             throw AppException.badRequest("Cart is empty");
         }
@@ -48,8 +49,8 @@ public class OrderService {
             Product product = productDAO.findById(item.getProductId())
                     .orElseThrow(() -> AppException.notFound("Product not found"));
 
-            if (product.getStockQuantity() < item.getQuantity()) {
-                throw AppException.badRequest("Insufficient stock for product: " + product.getTitle());
+            if (product.getStock() < item.getQuantity()) {
+                throw AppException.badRequest("Insufficient stock for product: " + product.getName());
             }
 
             BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
@@ -57,8 +58,7 @@ public class OrderService {
 
             OrderItem orderItem = new OrderItem();
             orderItem.setProductId(product.getId());
-            orderItem.setProductTitle(product.getTitle());
-            orderItem.setPriceAtPurchase(product.getPrice());
+            orderItem.setPrice(product.getPrice());
             orderItem.setQuantity(item.getQuantity());
             orderItems.add(orderItem);
         }
@@ -74,12 +74,12 @@ public class OrderService {
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                Order created = orderDAO.create(order);
+                Order created = orderDAO.insert(order);
 
                 if (paymentSuccess) {
                     for (CartItem item : cartItems) {
                         Product product = productDAO.findById(item.getProductId()).get();
-                        product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
+                        product.setStock(product.getStock() - item.getQuantity());
                         productDAO.update(product);
                     }
                     cartDAO.clear(buyerId);
@@ -96,18 +96,33 @@ public class OrderService {
         }
     }
 
-    public List<Order> getOrdersByBuyer(long buyerId) {
-        return orderDAO.findByBuyerId(buyerId);
+    public List<Order> historyForBuyer(Long buyerId) {
+        return orderDAO.findByBuyer(buyerId);
     }
 
-    public Order getOrderById(long orderId) {
-        return orderDAO.findById(orderId)
+    public List<Order> incomingForSeller(Long sellerId) {
+        return orderDAO.findBySeller(sellerId);
+    }
+
+    public List<Order> listAllForAdmin(User admin) {
+        if (admin == null || admin.getRole() != User.Role.ADMIN) {
+            throw AppException.forbidden("Admin access required");
+        }
+        return orderDAO.findAll();
+    }
+
+    public Order get(long orderId, User user) {
+        Order order = orderDAO.findById(orderId)
                 .orElseThrow(() -> AppException.notFound("Order not found"));
+        if (user.getRole() != User.Role.ADMIN && order.getBuyerId() != user.getId()) {
+            throw AppException.forbidden("Unauthorized access to order");
+        }
+        return order;
     }
 
-    public Order updateStatus(long orderId, Order.Status status) {
-        Order order = getOrderById(orderId);
-        order.setStatus(status);
+    public Order advanceStatus(long orderId, Order.Status newStatus, User user) {
+        Order order = get(orderId, user);
+        order.setStatus(newStatus);
         return orderDAO.update(order);
     }
 }
