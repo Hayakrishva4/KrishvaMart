@@ -1,21 +1,15 @@
 package com.krishva.krishvamart.dao.impl;
 
 import com.krishva.krishvamart.dao.ProductDAO;
-import com.krishva.krishvamart.exception.DataAccessException;
+import com.krishva.krishvamart.dto.ProductSearchCriteria;
 import com.krishva.krishvamart.model.Product;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import javax.sql.DataSource;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.sql.DataSource;
 
-/** All SQL for the products table lives here, PreparedStatement only (Section 2, Rule 1). */
 public class JdbcProductDAO implements ProductDAO {
 
     private final DataSource dataSource;
@@ -25,63 +19,79 @@ public class JdbcProductDAO implements ProductDAO {
     }
 
     @Override
-    public Product insert(Product product) throws DataAccessException {
-        String sql = "INSERT INTO products (seller_id, name, description, price, stock_qty, category, image_url, active) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setLong(1, product.getSellerId());
-            ps.setString(2, product.getName());
-            ps.setString(3, product.getDescription());
-            ps.setBigDecimal(4, product.getPrice());
-            ps.setInt(5, product.getStockQty());
-            ps.setString(6, product.getCategory());
-            ps.setString(7, product.getImageUrl());
-            ps.executeUpdate();
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) {
-                    product.setId(keys.getLong(1));
-                }
-            }
-            product.setActive(true);
-            return product;
-        } catch (SQLException e) {
-            throw new DataAccessException("Failed to insert product", e);
-        }
-    }
-
-    @Override
-    public Optional<Product> findById(long id) throws DataAccessException {
+    public Optional<Product> findById(Long id) {
         String sql = "SELECT * FROM products WHERE id = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? Optional.of(map(rs)) : Optional.empty();
+                if (rs.next()) {
+                    return Optional.of(mapRow(rs));
+                }
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Failed to load product " + id, e);
+            throw new RuntimeException(e);
         }
+        return Optional.empty();
     }
 
     @Override
-    public List<Product> search(String keyword, String category, boolean activeOnly) throws DataAccessException {
+    public List<Product> findAll() {
+        List<Product> list = new ArrayList<>();
+        String sql = "SELECT * FROM products ORDER BY id DESC";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return list;
+    }
+
+    @Override
+    public List<Product> findBySellerId(Long sellerId) {
+        List<Product> list = new ArrayList<>();
+        String sql = "SELECT * FROM products WHERE seller_id = ? ORDER BY id DESC";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, sellerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return list;
+    }
+
+    @Override
+    public List<Product> search(String keyword, String category, boolean inStockOnly) {
+        List<Product> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM products WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
-        if (activeOnly) {
-            sql.append("AND active = TRUE ");
-        }
-        if (keyword != null && !keyword.isBlank()) {
-            sql.append("AND (LOWER(name) LIKE ? OR LOWER(description) LIKE ?) ");
-            String pattern = "%" + keyword.toLowerCase() + "%";
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND (LOWER(title) LIKE ? OR LOWER(description) LIKE ?)");
+            String pattern = "%" + keyword.trim().toLowerCase() + "%";
             params.add(pattern);
             params.add(pattern);
         }
-        if (category != null && !category.isBlank()) {
-            sql.append("AND category = ? ");
-            params.add(category);
+
+        if (category != null && !category.trim().isEmpty()) {
+            sql.append(" AND category = ?");
+            params.add(category.trim());
         }
-        sql.append("ORDER BY created_at DESC");
+
+        if (inStockOnly) {
+            sql.append(" AND stock_quantity > 0");
+        }
+
+        sql.append(" ORDER BY id DESC");
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -89,118 +99,96 @@ public class JdbcProductDAO implements ProductDAO {
                 ps.setObject(i + 1, params.get(i));
             }
             try (ResultSet rs = ps.executeQuery()) {
-                List<Product> products = new ArrayList<>();
                 while (rs.next()) {
-                    products.add(map(rs));
+                    list.add(mapRow(rs));
                 }
-                return products;
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Failed to search products", e);
+            throw new RuntimeException(e);
+        }
+        return list;
+    }
+
+    @Override
+    public List<Product> search(ProductSearchCriteria criteria) {
+        if (criteria == null) {
+            return findAll();
+        }
+        return search(criteria.getKeyword(), criteria.getCategory(), criteria.isInStockOnly());
+    }
+
+    @Override
+    public Product create(Product product) {
+        String sql = "INSERT INTO products (seller_id, title, description, price, stock_quantity, category, image_url) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setLong(1, product.getSellerId());
+            ps.setString(2, product.getTitle());
+            ps.setString(3, product.getDescription());
+            ps.setBigDecimal(4, product.getPrice());
+            ps.setInt(5, product.getStockQuantity());
+            ps.setString(6, product.getCategory());
+            ps.setString(7, product.getImageUrl());
+            ps.executeUpdate();
+
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    product.setId(generatedKeys.getLong(1));
+                }
+            }
+            return product;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
     @Override
-    public List<Product> findBySeller(long sellerId) throws DataAccessException {
-        String sql = "SELECT * FROM products WHERE seller_id = ? ORDER BY created_at DESC";
+    public Product update(Product product) {
+        String sql = "UPDATE products SET title = ?, description = ?, price = ?, stock_quantity = ?, " +
+                     "category = ?, image_url = ? WHERE id = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, sellerId);
-            try (ResultSet rs = ps.executeQuery()) {
-                List<Product> products = new ArrayList<>();
-                while (rs.next()) {
-                    products.add(map(rs));
-                }
-                return products;
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("Failed to load seller products", e);
-        }
-    }
-
-    @Override
-    public boolean update(Product product) throws DataAccessException {
-        String sql = "UPDATE products SET name = ?, description = ?, price = ?, stock_qty = ?, "
-                + "category = ?, image_url = ? WHERE id = ? AND seller_id = ?";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, product.getName());
+            ps.setString(1, product.getTitle());
             ps.setString(2, product.getDescription());
             ps.setBigDecimal(3, product.getPrice());
-            ps.setInt(4, product.getStockQty());
+            ps.setInt(4, product.getStockQuantity());
             ps.setString(5, product.getCategory());
             ps.setString(6, product.getImageUrl());
             ps.setLong(7, product.getId());
-            ps.setLong(8, product.getSellerId());
-            return ps.executeUpdate() > 0;
+            ps.executeUpdate();
+            return product;
         } catch (SQLException e) {
-            throw new DataAccessException("Failed to update product " + product.getId(), e);
+            throw new RuntimeException(e);
         }
     }
 
     @Override
-    public boolean adjustStock(long productId, int delta) throws DataAccessException {
-        try (Connection conn = dataSource.getConnection()) {
-            return adjustStock(conn, productId, delta);
-        } catch (SQLException e) {
-            throw new DataAccessException("Failed to adjust stock for product " + productId, e);
-        }
-    }
-
-    @Override
-    public boolean adjustStock(Connection conn, long productId, int delta) throws DataAccessException {
-        String sql = "UPDATE products SET stock_qty = stock_qty + ? WHERE id = ? AND stock_qty + ? >= 0";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, delta);
-            ps.setLong(2, productId);
-            ps.setInt(3, delta);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new DataAccessException("Failed to adjust stock for product " + productId, e);
-        }
-    }
-
-    @Override
-    public boolean setActive(long productId, boolean active) throws DataAccessException {
-        String sql = "UPDATE products SET active = ? WHERE id = ?";
+    public boolean delete(Long id) {
+        String sql = "DELETE FROM products WHERE id = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setBoolean(1, active);
-            ps.setLong(2, productId);
+            ps.setLong(1, id);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new DataAccessException("Failed to set active flag for product " + productId, e);
+            throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public boolean delete(long productId, long sellerId) throws DataAccessException {
-        String sql = "DELETE FROM products WHERE id = ? AND seller_id = ?";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, productId);
-            ps.setLong(2, sellerId);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new DataAccessException("Failed to delete product " + productId, e);
+    private Product mapRow(ResultSet rs) throws SQLException {
+        Product p = new Product();
+        p.setId(rs.getLong("id"));
+        p.setSellerId(rs.getLong("seller_id"));
+        p.setTitle(rs.getString("title"));
+        p.setDescription(rs.getString("description"));
+        p.setPrice(rs.getBigDecimal("price"));
+        p.setStockQuantity(rs.getInt("stock_quantity"));
+        p.setCategory(rs.getString("category"));
+        p.setImageUrl(rs.getString("image_url"));
+        Timestamp ts = rs.getTimestamp("created_at");
+        if (ts != null) {
+            p.setCreatedAt(ts.toLocalDateTime());
         }
-    }
-
-    private Product map(ResultSet rs) throws SQLException {
-        Product product = new Product();
-        product.setId(rs.getLong("id"));
-        product.setSellerId(rs.getLong("seller_id"));
-        product.setName(rs.getString("name"));
-        product.setDescription(rs.getString("description"));
-        product.setPrice(rs.getBigDecimal("price"));
-        product.setStockQty(rs.getInt("stock_qty"));
-        product.setCategory(rs.getString("category"));
-        product.setImageUrl(rs.getString("image_url"));
-        product.setActive(rs.getBoolean("active"));
-        Timestamp createdAt = rs.getTimestamp("created_at");
-        if (createdAt != null) {
-            product.setCreatedAt(createdAt.toLocalDateTime());
-        }
-        return product;
+        return p;
     }
 }
