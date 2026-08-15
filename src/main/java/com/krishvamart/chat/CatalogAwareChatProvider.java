@@ -1,4 +1,4 @@
-package com.krishvamart.chat;
+package com.krishva.krishvamart.chat;
 
 import com.krishva.krishvamart.dao.ProductDAO;
 import com.krishva.krishvamart.model.Product;

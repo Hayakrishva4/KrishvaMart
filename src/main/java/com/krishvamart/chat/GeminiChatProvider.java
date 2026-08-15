@@ -1,4 +1,4 @@
-package com.krishvamart.chat;
+package com.krishva.krishvamart.chat;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

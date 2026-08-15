@@ -1,4 +1,4 @@
-package com.krishvamart.chat;
+package com.krishva.krishvamart.chat;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
