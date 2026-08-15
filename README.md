@@ -1,19 +1,13 @@
 # KrishvaMart
-
 Multi-seller e-commerce marketplace web application built with Java Servlets,
-JDBC, and Apache Tomcat, for Anna University R2025 Semester 3.
-
-> Checkpoint window: Jul 27 - Oct 10, 2026 &middot; Builder: solo
-
+JDBC, and Apache Tomcat.
+> Duration: Jul 27 - Oct 10, 2026 ; Builder: solo
 ## Problem statement
-
 Sellers list products. Buyers browse, search, add to cart, and purchase. An
 admin manages users, orders, and listings. Checkout uses a mock payment
 confirmation step (no real payment gateway is integrated). An AI chatbot
 answers FAQ-style questions about products, orders, shipping, and returns.
-
 ## Feature status
-
 | ID | Requirement | Status |
 |----|-------------|--------|
 | F1 | Registration/login, BUYER/SELLER roles, seed ADMIN | Implemented |
@@ -27,18 +21,11 @@ answers FAQ-style questions about products, orders, shipping, and returns.
 | O1 | Wishlist / save-for-later | Implemented |
 | O2 | Order status workflow (Pending->Confirmed->Shipped->Delivered) | Implemented |
 | O3 | Seller sales dashboard (counts/revenue) | Implemented |
-| O4 | AI chatbot (mandatory for Final Review) | Implemented (mock provider by default; swap in Gemini via config flag) |
-
-Also implemented beyond the base spec (see "What's distinct" below):
+| O4 | AI chatbot | Implemented (mock provider by default; swap in Gemini via config flag) |
+Also implemented beyond the base spec :
 shipping address capture at checkout, price-range/sort/pagination on browse.
-
-See `CHANGELOG.md` for release history and the timeline in the original spec
-(Section 6) for the week-by-week plan this status table should track against.
-
 ## Architecture
-
 Layered MVC over Servlets (Front Controller pattern):
-
 ```
 Browser (JSP shell + vanilla JS/fetch)
   -> Filter layer: EncodingFilter, RequestIdFilter, AuthFilter
@@ -48,21 +35,18 @@ Browser (JSP shell + vanilla JS/fetch)
   -> HikariCP connection pool (listener/AppContextListener)
   -> H2 Database (server mode)
 ```
-
 See `docs/D1-er-diagram.svg`, `docs/D2-use-case-diagram.svg`, and
 `docs/D3-sequence-diagram.svg` for the three required design diagrams
 (rendered images, ready to drop into the final report). PlantUML source for
 each is also checked in at `docs/*.puml` if you want to regenerate/edit them.
 `docs/design-patterns.md` documents where each of the six required design
 patterns (Section 12) is used.
-
 ### Package structure
-
 ```
 com.krishva.krishvamart
 |-- controller   Servlets - thin, no SQL, no business logic
 |-- service      business rules, orchestration
-|-- dao          interfaces + JDBC implementations
+|-- dao          interfaces + JDBC implementation
 |-- model        POJOs / entities
 |-- dto          request/response shapes for JSON endpoints
 |-- filter       auth, request-id, encoding
@@ -71,9 +55,7 @@ com.krishva.krishvamart
 |-- util         PasswordUtil, ValidationUtil, JsonUtil, ConfigResolver, DbSeeder
 `-- exception    checked exceptions mapped to HTTP status codes
 ```
-
 ## Tech stack
-
 | Component | Choice |
 |---|---|
 | JDK | 17 (LTS) |
@@ -88,11 +70,8 @@ com.krishva.krishvamart
 | Testing | JUnit 5 + Mockito |
 | Logging | SLF4J + Logback |
 | CI | GitHub Actions (`mvn -B test` on every push) |
-
 ## Setup instructions
-
 ### Fastest path: Docker (self-initializing, no manual DB steps)
-
 ```bash
 docker compose up -d --build
 ```
@@ -100,11 +79,8 @@ That's it - `SchemaInitializer` applies the schema and seeds demo accounts
 + sample products automatically on first boot. Visit
 `http://localhost:8080/`. See `docs/cloud-deployment.md` for pushing this
 same image to a live cloud URL (Render, Railway, a VM - several options).
-
 ### Manual (Maven + local Tomcat)
-
 See `CONTRIBUTING.md` for the full walkthrough. Quick version:
-
 ```bash
 cp src/main/resources/config.properties.example src/main/resources/config.properties
 mvn clean package
@@ -114,9 +90,7 @@ cp target/krishvamart.war $CATALINA_HOME/webapps/
 way it does in the Docker image - no separate seed step needed here either.
 (`DbSeeder` still exists for manually re-seeding without restarting Tomcat:
 `mvn exec:java -Dexec.mainClass="com.krishva.krishvamart.util.DbSeeder"`.)
-
 ### Demo accounts (seeded automatically on first boot)
-
 | Role | Email | Password |
 |---|---|---|
 | Admin | admin@krishvamart.com | Admin@12345 |
@@ -124,48 +98,33 @@ way it does in the Docker image - no separate seed step needed here either.
 | Seller | arjun.seller@krishvamart.com | Seller@123 |
 | Buyer | divya.buyer@krishvamart.com | Buyer@1234 |
 | Buyer | karthik.buyer@krishvamart.com | Buyer@1234 |
-
 Change or remove these before any real/public deployment.
-
 ## Running live on the cloud
-
 The app is packaged as a Docker image (`Dockerfile`) with environment-
 variable-driven config (`ConfigResolver`: env var > `config.properties` >
 default) and a self-initializing database (`SchemaInitializer`), so it
 deploys to any container-hosting platform without code changes. Full
 step-by-step instructions for Render, Railway, a plain VM, and Docker
 Compose: **`docs/cloud-deployment.md`**.
-
 ## Deployed link
-
 _Not yet deployed - add the live URL here once you've followed
-`docs/cloud-deployment.md` (due with the Full Build + Deploy checkpoint,
-Sep 21)._
-
+`docs/cloud-deployment.md`
 ## AI chatbot configuration
-
 `ai.chatbot.provider` in `config.properties` selects the implementation
-(Strategy pattern, Section 12):
-
 - `mock` (default) - canned FAQ answers, no network call, no API key needed.
 - `gemini` - calls the Gemini API server-side using `ai.chatbot.apiKey`
   (never exposed to the browser). See `com.krishva.krishvamart.chat.GeminiChatProvider`.
-
-Guardrails (Section 17): 10 messages/minute per session, 500-character input
+Guardrails : 10 messages/minute per session, 500-character input
 cap, 10s outbound timeout, fixed server-side prompt template restricting the
 bot to product/order/shipping/returns questions, and in-memory per-session
 caching of repeated questions.
-
 ## API contract
-
 All JSON endpoints are versioned under `/api/v1/...` and return the fixed
 envelope:
-
 ```json
 { "success": true, "data": { }, "error": null }
 { "success": false, "data": null, "error": { "code": "VALIDATION_ERROR", "message": "..." } }
 ```
-
 | Method | Path | Auth | Notes |
 |---|---|---|---|
 | POST | /api/v1/auth/register | Public | BUYER/SELLER only (admin is seed-only) |
@@ -186,55 +145,33 @@ envelope:
 | GET  | /api/v1/seller/analytics | Seller session | O3 sales dashboard |
 | POST | /api/v1/chat | Public | O4 |
 | GET  | /api/v1/health | Public | `{status, db}` |
-
 ## Docs & deployment reference
-
 | File | What it's for |
 |---|---|
-| `docs/D1-er-diagram.svg`, `docs/D2-use-case-diagram.svg`, `docs/D3-sequence-diagram.svg` | Rendered diagrams (Section 5) |
-| `docs/design-patterns.md` | Where each required pattern (Section 12) is used |
-| `docs/security-checklist.md` | Filled Section 9 security checklist + how to re-verify |
-| `docs/test-cases.md` | Manual end-to-end test case sheet (Section 9) |
-| `docs/load-testing.md`, `docs/load-test-plan.jmx` | Load test instructions + ready-to-run JMeter plan (Section 9) |
-| `docs/final-report.md` | Final Review report: architecture, ER diagram, technical decisions, known limitations (Section 7) |
-| `docs/demo-script.md` | Rehearsed demo script for the Final Review (Section 7) |
-| `docs/regression-checklist.md` | Final regression pass sign-off sheet (Section 7) |
-| `docs/presentation/KrishvaMart-Final-Review.pptx` | Slide deck for the Final Review (Section 7) |
+| `docs/D1-er-diagram.svg`, `docs/D2-use-case-diagram.svg`, `docs/D3-sequence-diagram.svg` | Rendered diagrams |
+| `docs/design-patterns.md` | Where each required pattern is used |
+| `docs/security-checklist.md` | Filled security checklist + how to re-verify |
+| `docs/test-cases.md` | Manual end-to-end test case sheet |
+| `docs/load-testing.md`, `docs/load-test-plan.jmx` | Load test instructions + ready-to-run JMeter plan |
+| `docs/final-report.md` | Final Review report: architecture, ER diagram, technical decisions, known limitations |
+| `docs/demo-script.md` | Rehearsed demo script for the Final Review |
+| `docs/regression-checklist.md` | Final regression pass sign-off sheet |
+| `docs/presentation/KrishvaMart-Final-Review.pptx` | Slide deck for the Final Review |
 | `docs/cloud-deployment.md` | Step-by-step cloud deployment: Render, Railway, VM, Docker Compose |
 | `Dockerfile`, `Dockerfile.h2`, `docker-compose.yml`, `.dockerignore` | Container images for cloud deployment |
-| `deploy/*.service`, `deploy/nginx-krishvamart.conf`, `deploy/docker-server.xml`, `deploy/README.md` | systemd + Nginx + Tomcat reference config matching the Section 10 setup |
-
+| `deploy/*.service`, `deploy/nginx-krishvamart.conf`, `deploy/docker-server.xml`, `deploy/README.md` | systemd + Nginx + Tomcat reference config setup |
 ## What's distinct about this build
-
-Beyond the minimum spec (documented honestly in `docs/final-report.md`,
-Section 5):
-
-- **Catalog-aware chatbot** (`chat/CatalogAwareChatProvider.java`) - answers
-  "is X in stock" / "price of X" from the live database, not just canned
-  FAQ text. A Decorator wrapped around the required `ChatProvider` Strategy.
-- **Dark mode** (`js/theme.js`), applied synchronously to avoid a flash of
-  the wrong theme, persisted per-browser.
-- **Recently viewed products** (`js/recently-viewed.js`), client-side only.
-- **Real-marketplace browse**: price range, sort order, and pagination on
-  top of the base keyword/category search (`ProductSearchCriteria`, built
-  via a Builder).
-- **Shipping address capture at checkout** - a real delivery address is
-  required and stored per order, not just a mock payment toggle.
-- **Self-initializing, cloud-ready deployment** - one Docker image, config
-  entirely via environment variables, schema + demo data bootstrap
-  automatically on first boot against an empty database (`SchemaInitializer`)
-  - no SSH/exec step needed to get a fresh cloud deployment usable.
-- **Transaction-tested checkout** (`OrderServiceTest`) - a real integration
-  test against embedded H2 covering both the success path and a simulated
-  mid-checkout stock race that must roll back cleanly.
-
+Beyond the Minimum features :
+- **Catalog-aware chatbot** 
+- **Dark mode** 
+- **Recently viewed products** 
+- **Real-marketplace browse**
+- **Shipping address capture at checkout** 
+- **Self-initializing, cloud-ready deployment** 
+- **Transaction-tested checkout** 
 ## Screenshots
-
 _Add screenshots here once the app is running against the deployed URL
-(Full Build + Deploy checkpoint requirement)._
-
 ## Known limitations (honest as of this scaffold)
-
 - `GeminiChatProvider` is wired but untested against a live API key in this
   environment; `mock` is the safe default until a key is configured.
 - Test coverage covers the highest-risk logic (checkout transaction incl.
@@ -247,10 +184,9 @@ _Add screenshots here once the app is running against the deployed URL
   against a live deployment yet.
 - Docker/cloud config has been written and manually reviewed (see
   `docs/cloud-deployment.md`) but not actually deployed and smoke-tested
-  against a real cloud platform in this environment - do that first before
-  trusting it fully.
-- Only a handful of commits exist so far (this scaffold). The 3-commits/week,
-  `feature/<name>`-branch workflow in Section 8 is a process to follow going
-  forward, not something that can be pre-generated.
-- A GitHub Projects Kanban board (Section 16) has to be created manually in
+  against a real cloud platform in this environment.
+- Only a handful of commits exist so far . The commits/week,
+  `feature/<name>`-branch workflow is a process to follow going
+  forward.
+- A GitHub Projects Kanban board has to be created manually in
   the GitHub UI - it isn't a repo file.
