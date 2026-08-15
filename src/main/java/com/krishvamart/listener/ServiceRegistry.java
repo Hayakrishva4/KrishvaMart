@@ -97,3 +97,4 @@ public final class ServiceRegistry {
     public SellerAnalyticsService sellerAnalyticsService() { return sellerAnalyticsService; }
     public ChatService chatService() { return chatService; }
 }
+
