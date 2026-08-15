@@ -1,0 +1,63 @@
+@startuml D3-Sequence-Diagram
+!theme plain
+title KrishvaMart - Place Order Sequence (D3)
+
+actor Buyer
+participant "Browser\n(fetch)" as Browser
+participant "AuthFilter" as Auth
+participant "OrderServlet" as Servlet
+participant "OrderService" as Service
+participant "CartDAO" as CartDAO
+participant "ProductDAO" as ProductDAO
+participant "OrderDAO" as OrderDAO
+database "H2 Database" as DB
+
+Buyer -> Browser : Click "Place order"
+Browser -> Auth : POST /api/v1/orders/checkout\n(session cookie)
+Auth -> Auth : validate session
+Auth -> Servlet : forward request
+Servlet -> Service : checkout(buyerId, mockPaymentConfirmed=true)
+
+Service -> CartDAO : findByUser(buyerId)
+CartDAO -> DB : SELECT cart_items JOIN products
+DB --> CartDAO : cart line items
+CartDAO --> Service : List<CartItem>
+
+Service -> Service : compute total, begin transaction\n(conn.setAutoCommit(false))
+
+Service -> OrderDAO : insert(conn, order)
+OrderDAO -> DB : INSERT INTO orders (...)
+DB --> OrderDAO : generated order id
+OrderDAO --> Service : Order (with id)
+
+loop for each cart item
+  Service -> ProductDAO : adjustStock(conn, productId, -qty)
+  ProductDAO -> DB : UPDATE products SET stock_qty = stock_qty - qty\nWHERE stock_qty - qty >= 0
+  DB --> ProductDAO : rows updated
+  ProductDAO --> Service : true/false
+
+  alt insufficient stock
+    Service -> Service : conn.rollback()
+    Service --> Servlet : throw ConflictException
+  else stock ok
+    Service -> OrderDAO : insertItem(conn, orderId, productId, qty, unitPrice)
+    OrderDAO -> DB : INSERT INTO order_items (...)
+    DB --> OrderDAO : ack
+  end
+end
+
+Service -> CartDAO : clear(conn, buyerId)
+CartDAO -> DB : DELETE FROM cart_items WHERE user_id = ?
+DB --> CartDAO : ack
+
+Service -> Service : conn.commit()
+Service -> OrderDAO : findById(orderId)
+OrderDAO -> DB : SELECT order + order_items
+DB --> OrderDAO : full order
+OrderDAO --> Service : Order
+Service --> Servlet : Order
+
+Servlet -> Browser : 201 { success:true, data: order }
+Browser -> Buyer : show order confirmation
+
+@enduml

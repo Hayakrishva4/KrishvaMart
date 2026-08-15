@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="760" viewBox="0 0 1180 760" font-family="Helvetica, Arial, sans-serif">
+  <style>
+    .table-title { fill: white; font-weight: bold; font-size: 14px; }
+    .field { font-size: 12px; fill: #222; }
+    .pk { font-weight: bold; }
+    .table-box { fill: #ffffff; stroke: #333; stroke-width: 1.2; }
+    .header { fill: #1a5d3a; }
+    rel { stroke: #555; stroke-width: 1.3; fill: none; }
+    .rel-label { font-size: 10px; fill: #555; }
+  </style>
+  <rect width="1180" height="760" fill="#f7f7f5"/>
+  <text x="20" y="28" font-size="18" font-weight="bold" fill="#0f3d26">D1 - KrishvaMart Entity Relationship Diagram</text>
+
+  <!-- users -->
+  <g transform="translate(40,60)">
+    <rect class="table-box" width="200" height="140"/>
+    <rect class="header" width="200" height="24"/>
+    <text class="table-title" x="10" y="17">users</text>
+    <text class="field pk" x="10" y="42">PK id : BIGINT</text>
+    <text class="field" x="10" y="60">name : VARCHAR(120)</text>
+    <text class="field" x="10" y="78">email : VARCHAR(180) UNIQUE</text>
+    <text class="field" x="10" y="96">password_hash : VARCHAR(100)</text>
+    <text class="field" x="10" y="114">role : ENUM</text>
+    <text class="field" x="10" y="132">created_at : TIMESTAMP</text>
+  </g>
+
+  <!-- products -->
+  <g transform="translate(440,60)">
+    <rect class="table-box" width="220" height="180"/>
+    <rect class="header" width="220" height="24"/>
+    <text class="table-title" x="10" y="17">products</text>
+    <text class="field pk" x="10" y="42">PK id : BIGINT</text>
+    <text class="field" x="10" y="60">FK seller_id -&gt; users.id</text>
+    <text class="field" x="10" y="78">name : VARCHAR(160)</text>
+    <text class="field" x="10" y="96">description : VARCHAR(2000)</text>
+    <text class="field" x="10" y="114">price : DECIMAL(10,2)</text>
+    <text class="field" x="10" y="132">stock_qty : INT</text>
+    <text class="field" x="10" y="150">category, image_url, active</text>
+    <text class="field" x="10" y="168">created_at : TIMESTAMP</text>
+  </g>
+
+  <!-- orders -->
+  <g transform="translate(40,300)">
+    <rect class="table-box" width="220" height="150"/>
+    <rect class="header" width="220" height="24"/>
+    <text class="table-title" x="10" y="17">orders</text>
+    <text class="field pk" x="10" y="42">PK id : BIGINT</text>
+    <text class="field" x="10" y="60">FK buyer_id -&gt; users.id</text>
+    <text class="field" x="10" y="78">status : ENUM</text>
+    <text class="field" x="10" y="96">  PENDING/CONFIRMED/</text>
+    <text class="field" x="10" y="112">  SHIPPED/DELIVERED/CANCELLED</text>
+    <text class="field" x="10" y="130">total_amount : DECIMAL(10,2)</text>
+    <text class="field" x="10" y="148">created_at : TIMESTAMP</text>
+  </g>
+
+  <!-- order_items -->
+  <g transform="translate(340,300)">
+    <rect class="table-box" width="220" height="150"/>
+    <rect class="header" width="220" height="24"/>
+    <text class="table-title" x="10" y="17">order_items</text>
+    <text class="field pk" x="10" y="42">PK id : BIGINT</text>
+    <text class="field" x="10" y="60">FK order_id -&gt; orders.id</text>
+    <text class="field" x="10" y="78">FK product_id -&gt; products.id</text>
+    <text class="field" x="10" y="96">quantity : INT</text>
+    <text class="field" x="10" y="114">unit_price : DECIMAL(10,2)</text>
+    <text class="field" x="10" y="132">created_at : TIMESTAMP</text>
+  </g>
+
+  <!-- cart_items -->
+  <g transform="translate(640,300)">
+    <rect class="table-box" width="220" height="150"/>
+    <rect class="header" width="220" height="24"/>
+    <text class="table-title" x="10" y="17">cart_items</text>
+    <text class="field pk" x="10" y="42">PK id : BIGINT</text>
+    <text class="field" x="10" y="60">FK user_id -&gt; users.id</text>
+    <text class="field" x="10" y="78">FK product_id -&gt; products.id</text>
+    <text class="field" x="10" y="96">quantity : INT</text>
+    <text class="field" x="10" y="114">UNIQUE(user_id, product_id)</text>
+    <text class="field" x="10" y="132">created_at : TIMESTAMP</text>
+  </g>
+
+  <!-- reviews -->
+  <g transform="translate(340,540)">
+    <rect class="table-box" width="240" height="170"/>
+    <rect class="header" width="240" height="24"/>
+    <text class="table-title" x="10" y="17">reviews</text>
+    <text class="field pk" x="10" y="42">PK id : BIGINT</text>
+    <text class="field" x="10" y="60">FK product_id -&gt; products.id</text>
+    <text class="field" x="10" y="78">FK user_id -&gt; users.id</text>
+    <text class="field" x="10" y="96">FK order_id -&gt; orders.id</text>
+    <text class="field" x="10" y="114">rating : INT (1-5)</text>
+    <text class="field" x="10" y="132">comment : VARCHAR(2000)</text>
+    <text class="field" x="10" y="150">created_at : TIMESTAMP</text>
+  </g>
+
+  <!-- relationships -->
+  <path class="rel" d="M140,200 L140,300"/>
+  <text class="rel-label" x="145" y="255">1 buyer -&gt; many orders</text>
+
+  <path class="rel" d="M240,130 L440,130"/>
+  <text class="rel-label" x="280" y="122">1 seller -&gt; many products</text>
+
+  <path class="rel" d="M260,340 L340,340"/>
+  <text class="rel-label" x="262" y="332">1 order -&gt; many items</text>
+
+  <path class="rel" d="M550,240 L470,300"/>
+  <text class="rel-label" x="480" y="270">product -&gt; order_items</text>
+
+  <path class="rel" d="M550,240 L700,300"/>
+  <text class="rel-label" x="600" y="270">product -&gt; cart_items</text>
+
+  <path class="rel" d="M140,240 Q140,470 340,600"/>
+  <text class="rel-label" x="150" y="470">user -&gt; reviews</text>
+
+  <path class="rel" d="M450,300 Q450,420 450,540"/>
+  <text class="rel-label" x="455" y="420">order -&gt; reviews</text>
+
+  <path class="rel" d="M550,240 Q560,400 460,555"/>
+  <text class="rel-label" x="540" y="400">product -&gt; reviews</text>
+
+  <text x="20" y="740" font-size="11" fill="#666">
+    Legend: PK = primary key, FK = foreign key. All FKs are indexed (see db/schema.sql). Source: docs/D1-er-diagram.puml
+  </text>
+</svg>

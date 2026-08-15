@@ -1,0 +1,79 @@
+@startuml D1-ER-Diagram
+!theme plain
+title KrishvaMart - Entity Relationship Diagram (D1)
+
+entity "users" as users {
+  * id : BIGINT <<PK>>
+  --
+  name : VARCHAR(120)
+  email : VARCHAR(180) <<UNIQUE>>
+  password_hash : VARCHAR(100)
+  role : ENUM('BUYER','SELLER','ADMIN')
+  created_at : TIMESTAMP
+}
+
+entity "products" as products {
+  * id : BIGINT <<PK>>
+  --
+  seller_id : BIGINT <<FK>>
+  name : VARCHAR(160)
+  description : VARCHAR(2000)
+  price : DECIMAL(10,2)
+  stock_qty : INT
+  category : VARCHAR(80)
+  image_url : VARCHAR(500)
+  active : BOOLEAN
+  created_at : TIMESTAMP
+}
+
+entity "orders" as orders {
+  * id : BIGINT <<PK>>
+  --
+  buyer_id : BIGINT <<FK>>
+  status : ENUM('PENDING','CONFIRMED','SHIPPED','DELIVERED','CANCELLED')
+  total_amount : DECIMAL(10,2)
+  created_at : TIMESTAMP
+}
+
+entity "order_items" as order_items {
+  * id : BIGINT <<PK>>
+  --
+  order_id : BIGINT <<FK>>
+  product_id : BIGINT <<FK>>
+  quantity : INT
+  unit_price : DECIMAL(10,2)
+  created_at : TIMESTAMP
+}
+
+entity "cart_items" as cart_items {
+  * id : BIGINT <<PK>>
+  --
+  user_id : BIGINT <<FK>>
+  product_id : BIGINT <<FK>>
+  quantity : INT
+  created_at : TIMESTAMP
+  .. UNIQUE(user_id, product_id) ..
+}
+
+entity "reviews" as reviews {
+  * id : BIGINT <<PK>>
+  --
+  product_id : BIGINT <<FK>>
+  user_id : BIGINT <<FK>>
+  order_id : BIGINT <<FK>>
+  rating : INT
+  comment : VARCHAR(2000)
+  created_at : TIMESTAMP
+}
+
+users ||--o{ products : "sells (seller_id)"
+users ||--o{ orders : "places (buyer_id)"
+users ||--o{ cart_items : "owns (user_id)"
+users ||--o{ reviews : "writes (user_id)"
+orders ||--o{ order_items : "contains"
+products ||--o{ order_items : "ordered as"
+products ||--o{ cart_items : "added as"
+products ||--o{ reviews : "reviewed as"
+orders ||--o{ reviews : "reviewed via"
+
+@enduml

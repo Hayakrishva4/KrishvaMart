@@ -2,18 +2,135 @@
 <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
-                              http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+                             http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
 
     <display-name>KrishvaMart</display-name>
 
+    <!-- Context Listener for Connection Pool & Database Initialization -->
+    <listener>
+        <listener-class>com.krishva.krishvamart.listener.AppContextListener</listener-class>
+    </listener>
+
+    <!-- Filters -->
+    <filter>
+        <filter-name>EncodingFilter</filter-name>
+        <filter-class>com.krishva.krishvamart.filter.EncodingFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>EncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>RequestIdFilter</filter-name>
+        <filter-class>com.krishva.krishvamart.filter.RequestIdFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>RequestIdFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>com.krishva.krishvamart.filter.AuthFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/api/v1/*</url-pattern>
+    </filter-mapping>
+
+    <!-- Servlets: Weeks 1 - 3 Scope -->
+    <servlet>
+        <servlet-name>HealthServlet</servlet-name>
+        <servlet-class>com.krishva.krishvamart.controller.HealthServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>HealthServlet</servlet-name>
+        <url-pattern>/api/v1/health</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AuthServlet</servlet-name>
+        <servlet-class>com.krishva.krishvamart.controller.AuthServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AuthServlet</servlet-name>
+        <url-pattern>/api/v1/auth/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ProductServlet</servlet-name>
+        <servlet-class>com.krishva.krishvamart.controller.ProductServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ProductServlet</servlet-name>
+        <url-pattern>/api/v1/products/*</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>CartServlet</servlet-name>
+        <servlet-class>com.krishva.krishvamart.controller.CartServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CartServlet</servlet-name>
+        <url-pattern>/api/v1/cart/*</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>OrderServlet</servlet-name>
+        <servlet-class>com.krishva.krishvamart.controller.OrderServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OrderServlet</servlet-name>
+        <url-pattern>/api/v1/orders/*</url-pattern>
+    </servlet-mapping>
     <!--
-      Servlets, filters, and the ServletContextListener are registered via
-      @WebServlet / @WebFilter / @WebListener annotations (see the controller,
-      filter, and listener packages). This file only carries configuration
-      that annotations cannot express: session timeout and custom error pages.
+    <servlet>
+        <servlet-name>AdminServlet</servlet-name>
+        <servlet-class>com.krishva.krishvamart.controller.AdminServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminServlet</servlet-name>
+        <url-pattern>/api/v1/admin/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>SellerAnalyticsServlet</servlet-name>
+        <servlet-class>com.krishva.krishvamart.controller.SellerAnalyticsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SellerAnalyticsServlet</servlet-name>
+        <url-pattern>/api/v1/seller/analytics/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ReviewServlet</servlet-name>
+        <servlet-class>com.krishva.krishvamart.controller.ReviewServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ReviewServlet</servlet-name>
+        <url-pattern>/api/v1/reviews/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>WishlistServlet</servlet-name>
+        <servlet-class>com.krishva.krishvamart.controller.WishlistServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>WishlistServlet</servlet-name>
+        <url-pattern>/api/v1/wishlist/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ChatServlet</servlet-name>
+        <servlet-class>com.krishva.krishvamart.controller.ChatServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ChatServlet</servlet-name>
+        <url-pattern>/api/v1/chat/*</url-pattern>
+    </servlet-mapping>
     -->
 
+    <!-- Session Configuration -->
     <session-config>
         <session-timeout>30</session-timeout>
         <cookie-config>
@@ -21,11 +138,12 @@
         </cookie-config>
     </session-config>
 
+    <!-- Welcome File -->
     <welcome-file-list>
         <welcome-file>jsp/index.jsp</welcome-file>
     </welcome-file-list>
 
-    <!-- Section 9 checklist: "Error pages do not expose stack traces". -->
+    <!-- Error Handling -->
     <error-page>
         <error-code>404</error-code>
         <location>/jsp/error.jsp</location>

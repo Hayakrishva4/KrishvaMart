@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700" font-family="Helvetica, Arial, sans-serif">
+  <style>
+    .actor-label { font-size: 13px; fill: #222; font-weight: bold; text-anchor: middle; }
+    .usecase { fill: #ffffff; stroke: #1a5d3a; stroke-width: 1.4; }
+    .usecase-text { font-size: 11.5px; fill: #222; text-anchor: middle; }
+    .conn { stroke: #888; stroke-width: 1; fill: none; }
+    .system-title { font-size: 14px; fill: #0f3d26; font-weight: bold; }
+  </style>
+  <rect width="1000" height="700" fill="#f7f7f5"/>
+  <text x="20" y="28" font-size="18" font-weight="bold" fill="#0f3d26">D2 - KrishvaMart Use Case Diagram</text>
+
+  <!-- Actors -->
+  <g transform="translate(40,120)">
+    <circle cx="20" cy="10" r="10" fill="none" stroke="#333" stroke-width="1.5"/>
+    <line x1="20" y1="20" x2="20" y2="55" stroke="#333" stroke-width="1.5"/>
+    <line x1="0" y1="32" x2="40" y2="32" stroke="#333" stroke-width="1.5"/>
+    <line x1="20" y1="55" x2="5" y2="80" stroke="#333" stroke-width="1.5"/>
+    <line x1="20" y1="55" x2="35" y2="80" stroke="#333" stroke-width="1.5"/>
+    <text class="actor-label" x="20" y="98">Buyer</text>
+  </g>
+
+  <g transform="translate(40,380)">
+    <circle cx="20" cy="10" r="10" fill="none" stroke="#333" stroke-width="1.5"/>
+    <line x1="20" y1="20" x2="20" y2="55" stroke="#333" stroke-width="1.5"/>
+    <line x1="0" y1="32" x2="40" y2="32" stroke="#333" stroke-width="1.5"/>
+    <line x1="20" y1="55" x2="5" y2="80" stroke="#333" stroke-width="1.5"/>
+    <line x1="20" y1="55" x2="35" y2="80" stroke="#333" stroke-width="1.5"/>
+    <text class="actor-label" x="20" y="98">Seller</text>
+  </g>
+
+  <g transform="translate(900,260)">
+    <circle cx="20" cy="10" r="10" fill="none" stroke="#333" stroke-width="1.5"/>
+    <line x1="20" y1="20" x2="20" y2="55" stroke="#333" stroke-width="1.5"/>
+    <line x1="0" y1="32" x2="40" y2="32" stroke="#333" stroke-width="1.5"/>
+    <line x1="20" y1="55" x2="5" y2="80" stroke="#333" stroke-width="1.5"/>
+    <line x1="20" y1="55" x2="35" y2="80" stroke="#333" stroke-width="1.5"/>
+    <text class="actor-label" x="20" y="98">Admin</text>
+  </g>
+
+  <!-- System boundary -->
+  <rect x="150" y="55" width="700" height="600" fill="none" stroke="#1a5d3a" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text class="system-title" x="420" y="45">KrishvaMart</text>
+
+  <!-- Use cases -->
+  <g id="usecases">
+    <ellipse class="usecase" cx="280" cy="90" rx="105" ry="26"/>
+    <text class="usecase-text" x="280" y="94">Register / Login (F1)</text>
+
+    <ellipse class="usecase" cx="500" cy="90" rx="120" ry="26"/>
+    <text class="usecase-text" x="500" y="94">Create/Edit/Delete Listing (F2)</text>
+
+    <ellipse class="usecase" cx="280" cy="160" rx="120" ry="26"/>
+    <text class="usecase-text" x="280" y="164">Browse &amp; Search Products (F3)</text>
+
+    <ellipse class="usecase" cx="280" cy="230" rx="95" ry="26"/>
+    <text class="usecase-text" x="280" y="234">Manage Cart (F4)</text>
+
+    <ellipse class="usecase" cx="280" cy="300" rx="130" ry="26"/>
+    <text class="usecase-text" x="280" y="304">Checkout via Mock Payment (F5)</text>
+
+    <ellipse class="usecase" cx="280" cy="370" rx="115" ry="26"/>
+    <text class="usecase-text" x="280" y="374">View Order History (F6)</text>
+
+    <ellipse class="usecase" cx="500" cy="370" rx="120" ry="26"/>
+    <text class="usecase-text" x="500" y="374">View Incoming Orders (F6)</text>
+
+    <ellipse class="usecase" cx="720" cy="230" rx="125" ry="26"/>
+    <text class="usecase-text" x="720" y="234">View All Users &amp; Orders (F7)</text>
+
+    <ellipse class="usecase" cx="720" cy="300" rx="125" ry="26"/>
+    <text class="usecase-text" x="720" y="304">Moderate / Remove Listings (F7)</text>
+
+    <ellipse class="usecase" cx="280" cy="440" rx="130" ry="26"/>
+    <text class="usecase-text" x="280" y="444">Submit Review &amp; Rating (F8)</text>
+
+    <ellipse class="usecase" cx="500" cy="440" rx="110" ry="26"/>
+    <text class="usecase-text" x="500" y="444">View Reviews (F8)</text>
+
+    <ellipse class="usecase" cx="500" cy="510" rx="115" ry="26"/>
+    <text class="usecase-text" x="500" y="514">Update Order Status (O2)</text>
+
+    <ellipse class="usecase" cx="280" cy="580" rx="140" ry="26"/>
+    <text class="usecase-text" x="280" y="584">Chat with AI Assistant (O4)</text>
+  </g>
+
+  <!-- Buyer connections -->
+  <path class="conn" d="M90,160 L175,95"/>
+  <path class="conn" d="M90,175 L160,160"/>
+  <path class="conn" d="M90,190 L185,230"/>
+  <path class="conn" d="M90,205 L150,300"/>
+  <path class="conn" d="M90,220 L165,370"/>
+  <path class="conn" d="M90,235 L150,440"/>
+  <path class="conn" d="M90,250 L140,580"/>
+
+  <!-- Seller connections -->
+  <path class="conn" d="M90,420 L175,105"/>
+  <path class="conn" d="M90,440 L380,95"/>
+  <path class="conn" d="M90,460 L160,170"/>
+  <path class="conn" d="M90,480 L390,370"/>
+  <path class="conn" d="M90,500 L400,440"/>
+  <path class="conn" d="M90,520 L400,510"/>
+  <path class="conn" d="M90,540 L200,580"/>
+
+  <!-- Admin connections -->
+  <path class="conn" d="M920,340 L830,230"/>
+  <path class="conn" d="M920,360 L830,300"/>
+  <path class="conn" d="M920,380 L590,440"/>
+  <path class="conn" d="M920,400 L600,510"/>
+
+  <text x="20" y="690" font-size="11" fill="#666">Source: docs/D2-use-case-diagram.puml</text>
+</svg>

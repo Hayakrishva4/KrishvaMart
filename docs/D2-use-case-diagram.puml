@@ -1,0 +1,48 @@
+@startuml D2-Use-Case-Diagram
+!theme plain
+title KrishvaMart - Use Case Diagram (D2)
+left to right direction
+
+actor Buyer
+actor Seller
+actor Admin
+
+rectangle "KrishvaMart" {
+  usecase "Register / Login (F1)" as UC1
+  usecase "Create/Edit/Delete Listing (F2)" as UC2
+  usecase "Browse & Search Products (F3)" as UC3
+  usecase "Manage Cart (F4)" as UC4
+  usecase "Checkout via Mock Payment (F5)" as UC5
+  usecase "View Order History (F6)" as UC6
+  usecase "View Incoming Orders (F6)" as UC6b
+  usecase "View All Users & Orders (F7)" as UC7
+  usecase "Moderate / Remove Listings (F7)" as UC7b
+  usecase "Submit Review & Rating (F8)" as UC8
+  usecase "View Reviews & Ratings (F8)" as UC8b
+  usecase "Update Order Status (O2)" as UC9
+  usecase "Chat with AI Assistant (O4)" as UC10
+}
+
+Buyer --> UC1
+Buyer --> UC3
+Buyer --> UC4
+Buyer --> UC5
+Buyer --> UC6
+Buyer --> UC8
+Buyer --> UC8b
+Buyer --> UC10
+
+Seller --> UC1
+Seller --> UC2
+Seller --> UC3
+Seller --> UC6b
+Seller --> UC8b
+Seller --> UC9
+Seller --> UC10
+
+Admin --> UC7
+Admin --> UC7b
+Admin --> UC8b
+Admin --> UC9
+
+@enduml

@@ -6,29 +6,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KrishvaMart</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <script>
+        if (localStorage.getItem("krishvamart-theme") === "dark") {
+            document.documentElement.setAttribute("data-theme", "dark");
+        }
+    </script>
 </head>
 <body>
-<header class="site-header">
-    <a class="brand" href="${pageContext.request.contextPath}/jsp/index.jsp">KrishvaMart</a>
-    <nav>
-        <a href="${pageContext.request.contextPath}/jsp/index.jsp">Browse</a>
-        <a href="${pageContext.request.contextPath}/jsp/cart.jsp">Cart</a>
-        <a href="${pageContext.request.contextPath}/jsp/orders.jsp">Orders</a>
-        <a href="${pageContext.request.contextPath}/jsp/seller-dashboard.jsp">Sell</a>
-        <a href="${pageContext.request.contextPath}/jsp/admin.jsp">Admin</a>
-    </nav>
-    <div class="session-box" id="sessionBox">
-        <c:choose>
-            <c:when test="${not empty sessionScope.authUser}">
-                Signed in as <c:out value="${sessionScope.authUser.name}"/>
-                (<c:out value="${sessionScope.authUser.role}"/>)
-                <button id="logoutBtn">Log out</button>
-            </c:when>
-            <c:otherwise>
-                <a href="${pageContext.request.contextPath}/jsp/login.jsp">Log in</a>
-                <a href="${pageContext.request.contextPath}/jsp/register.jsp">Register</a>
-            </c:otherwise>
-        </c:choose>
-    </div>
-</header>
-<main class="site-main">
+    <header class="site-header">
+        <a class="brand" href="${pageContext.request.contextPath}/jsp/index.jsp">KrishvaMart</a>
+        <nav>
+            <a href="${pageContext.request.contextPath}/jsp/index.jsp">Browse</a>
+            <a href="${pageContext.request.contextPath}/jsp/cart.jsp">Cart</a>
+            <!-- Deferred to Week 6: Wishlist -->
+            <!-- <a href="${pageContext.request.contextPath}/jsp/wishlist.jsp">Wishlist</a> -->
+            <a href="${pageContext.request.contextPath}/jsp/orders.jsp">Orders</a>
+            <a href="${pageContext.request.contextPath}/jsp/seller-dashboard.jsp">Sell</a>
+            <!-- Deferred to Week 4: Admin Panel -->
+            <!-- <a href="${pageContext.request.contextPath}/jsp/admin.jsp">Admin</a> -->
+        </nav>
+        <div class="session-box" id="sessionBox">
+            <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">&#9788;</button>
+            <c:choose>
+                <c:when test="${not empty sessionScope.authUser}">
+                    Signed in as <c:out value="${sessionScope.authUser.name}"/>
+                    (<c:out value="${sessionScope.authUser.role}"/>)
+                    <button id="logoutBtn">Log out</button>
+                </c:when>
+                <c:otherwise>
+                    <a href="${pageContext.request.contextPath}/jsp/login.jsp">Log in</a>
+                    <a href="${pageContext.request.contextPath}/jsp/register.jsp">Register</a>
+                </c:otherwise>
+            </c:choose>
+        </div>
+    </header>
+    <main class="site-main">
