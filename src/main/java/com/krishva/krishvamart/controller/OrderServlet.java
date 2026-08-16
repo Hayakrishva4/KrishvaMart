@@ -8,22 +8,13 @@ import com.krishva.krishvamart.exception.ValidationException;
 import com.krishva.krishvamart.model.Order;
 import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.util.JsonUtil;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * F5: checkout from cart via mock payment. F6: buyer order history / seller
- * incoming orders. O2: status workflow. Mapped at /api/v1/orders,
- * /api/v1/orders/{id}, /api/v1/orders/{id}/status, /api/v1/orders/checkout.
- */
-@WebServlet(urlPatterns = {"/api/v1/orders", "/api/v1/orders/*"})
 public class OrderServlet extends BaseApiServlet {
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
@@ -62,8 +53,6 @@ public class OrderServlet extends BaseApiServlet {
             com.krishva.krishvamart.dto.CheckoutRequestDTO body =
                     readBody(req, com.krishva.krishvamart.dto.CheckoutRequestDTO.class);
             String shippingAddress = body == null ? null : body.getShippingAddress();
-            // Section 1 scope constraint: no real payment gateway - a boolean mock
-            // confirmation stands in for a successful charge.
             Order order = services().orderService().checkout(user.getId(), true, shippingAddress);
             JsonUtil.writeSuccess(resp, HttpServletResponse.SC_CREATED,
                     com.krishva.krishvamart.dto.OrderConfirmationDTO.fromOrder(order));

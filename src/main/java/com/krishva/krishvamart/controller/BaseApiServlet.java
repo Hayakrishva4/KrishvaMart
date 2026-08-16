@@ -11,34 +11,18 @@ import com.krishva.krishvamart.filter.AuthFilter;
 import com.krishva.krishvamart.listener.ServiceRegistry;
 import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.util.JsonUtil;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringWriter;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-/**
- * Thin base for all JSON API servlets (Section 12 SOLID rule: "Servlets
- * restricted to HTTP orchestration"). Handles request body parsing, the
- * current session user, and translating AppException subtypes to the fixed
- * response envelope (Section 13) with the right HTTP status code.
- */
 public abstract class BaseApiServlet extends HttpServlet {
-
     private static final Logger LOG = LoggerFactory.getLogger(BaseApiServlet.class);
     private static final String METHOD_PATCH = "PATCH";
-
-    /**
-     * javax.servlet.http.HttpServlet has no doPatch hook, so PATCH requests
-     * are routed here explicitly before falling back to the standard verbs.
-     */
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp)
             throws javax.servlet.ServletException, IOException {
@@ -53,8 +37,6 @@ public abstract class BaseApiServlet extends HttpServlet {
         }
         super.service(req, resp);
     }
-
-    /** Override in subclasses that support PATCH; default is 405. */
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
@@ -87,7 +69,6 @@ public abstract class BaseApiServlet extends HttpServlet {
         }
         return user;
     }
-
     protected void handleError(HttpServletResponse resp, Exception e) throws IOException {
         if (e instanceof ValidationException ve) {
             JsonUtil.writeError(resp, HttpServletResponse.SC_BAD_REQUEST, ve.getErrorCode(), ve.getMessage());
@@ -106,7 +87,6 @@ public abstract class BaseApiServlet extends HttpServlet {
         } else if (e instanceof AppException ae) {
             JsonUtil.writeError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ae.getErrorCode(), ae.getMessage());
         } else {
-            // Never leak stack traces to the client (Section 9 checklist).
             LOG.error("Unhandled error", e);
             JsonUtil.writeError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",
                     "A server error occurred. Please try again.");

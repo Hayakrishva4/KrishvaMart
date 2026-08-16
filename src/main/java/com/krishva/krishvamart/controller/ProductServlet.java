@@ -10,22 +10,12 @@ import com.krishva.krishvamart.exception.ValidationException;
 import com.krishva.krishvamart.model.Product;
 import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.util.JsonUtil;
-
 import java.io.IOException;
 import java.math.BigDecimal;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * F2: seller create/edit/delete listings. F3 (extended): buyer browse/search
- * by category, keyword, price range, sort order, and pagination - public,
- * no login required (see AuthFilter). Mapped at /api/v1/products and
- * /api/v1/products/{id}.
- */
-@WebServlet(urlPatterns = {"/api/v1/products", "/api/v1/products/*"})
 public class ProductServlet extends BaseApiServlet {
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {

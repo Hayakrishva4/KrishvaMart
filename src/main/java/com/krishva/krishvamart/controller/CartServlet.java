@@ -12,15 +12,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * F4: add, update, remove cart items; running total. Mapped at
- * /api/v1/cart (view) and /api/v1/cart/items/{productId} (mutate).
- */
-@WebServlet(urlPatterns = {"/api/v1/cart", "/api/v1/cart/items", "/api/v1/cart/items/*"})
 public class CartServlet extends BaseApiServlet {
 
     @Override

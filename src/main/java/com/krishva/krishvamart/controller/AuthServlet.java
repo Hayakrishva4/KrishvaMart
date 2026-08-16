@@ -1,5 +1,4 @@
 package com.krishva.krishvamart.controller;
-
 import com.krishva.krishvamart.dto.LoginRequestDTO;
 import com.krishva.krishvamart.dto.RegisterRequestDTO;
 import com.krishva.krishvamart.dto.UserResponseDTO;
@@ -7,21 +6,11 @@ import com.krishva.krishvamart.exception.AppException;
 import com.krishva.krishvamart.filter.AuthFilter;
 import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.util.JsonUtil;
-
 import java.io.IOException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-/**
- * F1: registration and login for BUYER/SELLER roles (admin is seed-only).
- * Section 2, Rule 3: session id is regenerated on login and an explicit
- * timeout is set (also configured in web.xml).
- */
-@WebServlet(urlPatterns = {"/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/logout", "/api/v1/auth/me"})
 public class AuthServlet extends BaseApiServlet {
-
     private static final int SESSION_TIMEOUT_SECONDS = 30 * 60;
 
     @Override
@@ -82,7 +71,6 @@ public class AuthServlet extends BaseApiServlet {
         JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK, null);
     }
 
-    /** Regenerates the session id on login/register to prevent session fixation (Section 2, Rule 3). */
     private void establishSession(HttpServletRequest req, User user) {
         HttpSession oldSession = req.getSession(false);
         if (oldSession != null) {
