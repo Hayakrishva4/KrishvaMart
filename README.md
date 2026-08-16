@@ -1,23 +1,19 @@
 # KrishvaMart
-Multi-seller e-commerce marketplace web application built with Java Servlets,
-JDBC, and Apache Tomcat.
+Multi-seller e-commerce marketplace web application built with Java Servlets, JDBC, and Apache Tomcat.
 > Duration: Jul 27 - Oct 10, 2026 ; Builder: solo
 ## Problem statement
-Sellers list products. Buyers browse, search, add to cart, and purchase. An
-admin manages users, orders, and listings. Checkout uses a mock payment
-confirmation step (no real payment gateway is integrated). An AI chatbot
-answers FAQ-style questions about products, orders, shipping, and returns.
+Sellers list products. Buyers browse, search, add to cart, and purchase. An admin manages users, orders, and listings. Checkout uses a payment confirmation step. An AI chatbot answers FAQ-style questions about products, orders, shipping, and returns.
 ## Feature status
 | ID | Requirement | Status |
 |----|-------------|--------|
-| F1 | Registration/login, BUYER/SELLER roles, seed ADMIN | Implemented |
+| F1 | Login, BUYER/SELLER roles, seed ADMIN | Implemented |
 | F2 | Seller create/edit/delete listings | Implemented |
 | F3 | Buyer browse/search by category & keyword | Implemented |
 | F4 | Cart: add/update/remove, running total | Implemented |
 | F5 | Checkout via mock payment confirmation | Implemented |
 | F6 | Buyer order history / seller incoming orders | Implemented |
 | F7 | Admin: view users/orders, moderate listings | Implemented |
-| F8 | Product reviews & star ratings on completed orders | Implemented |
+| F8 | Product reviews & ratings on completed orders | Implemented |
 | O1 | Wishlist / save-for-later | Implemented |
 | O2 | Order status workflow (Pending->Confirmed->Shipped->Delivered) | Implemented |
 | O3 | Seller sales dashboard (counts/revenue) | Implemented |
@@ -37,10 +33,8 @@ Browser (JSP shell + vanilla JS/fetch)
 ```
 See `docs/D1-er-diagram.svg`, `docs/D2-use-case-diagram.svg`, and
 `docs/D3-sequence-diagram.svg` for the three required design diagrams
-(rendered images, ready to drop into the final report). PlantUML source for
-each is also checked in at `docs/*.puml` if you want to regenerate/edit them.
-`docs/design-patterns.md` documents where each of the six required design
-patterns (Section 12) is used.
+(rendered images, ready to drop into the final report). PlantUML source for each is also checked in at `docs/*.puml` if you want to regenerate/edit them.
+`docs/design-patterns.md` documents where each of the six required design patterns is used.
 ### Package structure
 ```
 com.krishva.krishvamart
@@ -86,8 +80,7 @@ cp src/main/resources/config.properties.example src/main/resources/config.proper
 mvn clean package
 cp target/krishvamart.war $CATALINA_HOME/webapps/
 ```
-`SchemaInitializer` runs automatically when Tomcat starts the app, the same
-way it does in the Docker image - no separate seed step needed here either.
+`SchemaInitializer` runs automatically when Tomcat starts the app, the same way it does in the Docker image - no separate seed step needed here either.
 (`DbSeeder` still exists for manually re-seeding without restarting Tomcat:
 `mvn exec:java -Dexec.mainClass="com.krishva.krishvamart.util.DbSeeder"`.)
 ### Demo accounts (seeded automatically on first boot)
@@ -101,7 +94,7 @@ way it does in the Docker image - no separate seed step needed here either.
 Change or remove these before any real/public deployment.
 ## Running live on the cloud
 The app is packaged as a Docker image (`Dockerfile`) with environment-
-variable-driven config (`ConfigResolver`: env var > `config.properties` >
+variable-driven config (`ConfigResolver`: env var > `config.properties` >  
 default) and a self-initializing database (`SchemaInitializer`), so it
 deploys to any container-hosting platform without code changes. Full
 step-by-step instructions for Render, Railway, a plain VM, and Docker
@@ -115,8 +108,7 @@ _Not yet deployed - add the live URL here once you've followed
 - `gemini` - calls the Gemini API server-side using `ai.chatbot.apiKey`
   (never exposed to the browser). See `com.krishva.krishvamart.chat.GeminiChatProvider`.
 Guardrails : 10 messages/minute per session, 500-character input
-cap, 10s outbound timeout, fixed server-side prompt template restricting the
-bot to product/order/shipping/returns questions, and in-memory per-session
+cap, 10s outbound timeout, fixed server-side prompt template restricting the bot to product/order/shipping/returns questions, and in-memory per-session
 caching of repeated questions.
 ## API contract
 All JSON endpoints are versioned under `/api/v1/...` and return the fixed
@@ -171,20 +163,12 @@ Beyond the Minimum features :
 - **Transaction-tested checkout** 
 ## Screenshots
 _Add screenshots here once the app is running against the deployed URL
-## Known limitations (honest as of this scaffold)
+## Known limitations
 - `GeminiChatProvider` is wired but untested against a live API key in this
   environment; `mock` is the safe default until a key is configured.
-- Test coverage covers the highest-risk logic (checkout transaction incl.
-  rollback, auth, cart limits, catalog-aware chat, product ownership,
-  wishlist, criteria-based product search/pagination) but doesn't exhaustively
-  cover every DAO/service (no dedicated Order/Review DAO tests beyond what
-  the integration tests exercise indirectly, no servlet-level tests). See
-  `docs/test-cases.md` for the manual E2E sheet and `docs/load-testing.md` /
-  `docs/load-test-plan.jmx` for the load test - neither has been executed
-  against a live deployment yet.
-- Docker/cloud config has been written and manually reviewed (see
-  `docs/cloud-deployment.md`) but not actually deployed and smoke-tested
-  against a real cloud platform in this environment.
+- Test coverage covers the highest-risk logic (checkout transaction incl.rollback, auth, cart limits, catalog-aware chat, product ownership, wishlist, criteria-based product search/pagination) but doesn't exhaustively cover every DAO/service
+  `docs/test-cases.md` for the manual E2E sheet and `docs/load-testing.md` / `docs/load-test-plan.jmx` for the load test - neither has been executed against a live deployment yet.
+- Docker/cloud config has been written and manually reviewed but not    actually deployed and smoke-tested against a real cloud platform in this environment.
 - Only a handful of commits exist so far . The commits/week,
   `feature/<name>`-branch workflow is a process to follow going
   forward.
