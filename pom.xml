@@ -3,19 +3,16 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>com.krishva</groupId>
   <artifactId>krishvamart</artifactId>
   <version>0.1.0</version>
   <packaging>war</packaging>
   <name>KrishvaMart</name>
-  <description>Multi-seller e-commerce marketplace - Anna University R2025 Semester 3 Capstone</description>
-
+  <description>Multi-seller, E-commerce marketplace</description>
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
     <servlet.version>4.0.1</servlet.version>
     <jstl.version>1.2</jstl.version>
     <h2.version>2.2.224</h2.version>
@@ -27,7 +24,6 @@
     <junit.version>5.10.2</junit.version>
     <mockito.version>5.11.0</mockito.version>
   </properties>
-
   <dependencies>
     <!-- Servlet API (provided by Tomcat) -->
     <dependency>
@@ -36,42 +32,36 @@
       <version>${servlet.version}</version>
       <scope>provided</scope>
     </dependency>
-
     <!-- JSTL -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>jstl</artifactId>
       <version>${jstl.version}</version>
     </dependency>
-
     <!-- H2 Database -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <version>${h2.version}</version>
     </dependency>
-
     <!-- HikariCP connection pool -->
     <dependency>
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>
       <version>${hikaricp.version}</version>
     </dependency>
-
     <!-- Gson -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>${gson.version}</version>
     </dependency>
-
     <!-- jBCrypt -->
     <dependency>
       <groupId>org.mindrot</groupId>
       <artifactId>jbcrypt</artifactId>
       <version>${jbcrypt.version}</version>
     </dependency>
-
     <!-- SLF4J + Logback -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -83,7 +73,6 @@
       <artifactId>logback-classic</artifactId>
       <version>${logback.version}</version>
     </dependency>
-
     <!-- Testing -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -104,7 +93,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <build>
     <finalName>krishvamart</finalName>
     <resources>
@@ -112,11 +100,6 @@
         <directory>src/main/resources</directory>
       </resource>
       <resource>
-        <!-- Bundles db/schema.sql and db/seed.sql onto the classpath (under
-             WEB-INF/classes/db/) so SchemaInitializer can self-initialize a
-             fresh database on first boot - including on a cloud platform
-             where nobody can SSH in to run `mvn exec:java`. db/ stays the
-             single source of truth; this just copies it at build time. -->
         <directory>${project.basedir}/db</directory>
         <targetPath>db</targetPath>
         <excludes>
@@ -179,6 +162,23 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.2.0</version>
+      </plugin>
+      <!-- Embedded Tomcat 9 Server for local execution -->
+      <plugin>
+        <groupId>org.codehaus.cargo</groupId>
+        <artifactId>cargo-maven3-plugin</artifactId>
+        <version>1.10.13</version>
+        <configuration>
+          <container>
+            <containerId>tomcat9x</containerId>
+            <type>embedded</type>
+          </container>
+          <configuration>
+            <properties>
+              <cargo.servlet.port>8080</cargo.servlet.port>
+            </properties>
+          </configuration>
+        </configuration>
       </plugin>
     </plugins>
   </build>
