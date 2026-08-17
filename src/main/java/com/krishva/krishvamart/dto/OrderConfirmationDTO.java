@@ -1,23 +1,17 @@
 package com.krishva.krishvamart.dto;
 
 import com.krishva.krishvamart.model.Order;
-
+import com.krishva.krishvamart.model.OrderItem;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
-/**
- * Response shape for a successful checkout (Section 12 required pattern:
- * Builder, for complex DTO construction). Combines the persisted order with
- * a human-readable confirmation message, so OrderServlet doesn't hand-build
- * an ad hoc Map for this one response the way the simpler endpoints do.
- */
 public final class OrderConfirmationDTO {
-
     private final Long orderId;
     private final String status;
     private final BigDecimal totalAmount;
     private final String shippingAddress;
-    private final List<com.krishva.krishvamart.model.OrderItem> items;
+    private final List<OrderItem> items;
     private final String message;
 
     private OrderConfirmationDTO(Builder builder) {
@@ -25,7 +19,7 @@ public final class OrderConfirmationDTO {
         this.status = builder.status;
         this.totalAmount = builder.totalAmount;
         this.shippingAddress = builder.shippingAddress;
-        this.items = builder.items;
+        this.items = builder.items == null ? List.of() : List.copyOf(builder.items);
         this.message = builder.message;
     }
 
@@ -48,7 +42,7 @@ public final class OrderConfirmationDTO {
         return orderId;
     }
 
-    public String getStatus() {
+    public String getStatus() { 
         return status;
     }
 
@@ -60,25 +54,23 @@ public final class OrderConfirmationDTO {
         return shippingAddress;
     }
 
-    public List<com.krishva.krishvamart.model.OrderItem> getItems() {
-        return items;
+    public List<OrderItem> getItems() {
+        return items == null ? List.of() : Collections.unmodifiableList(items);
     }
 
     public String getMessage() {
         return message;
     }
 
-    /** Builder for {@link OrderConfirmationDTO}. */
     public static final class Builder {
         private Long orderId;
         private String status;
         private BigDecimal totalAmount;
         private String shippingAddress;
-        private List<com.krishva.krishvamart.model.OrderItem> items;
+        private List<OrderItem> items;
         private String message;
 
-        private Builder() {
-        }
+        private Builder() {}
 
         public Builder orderId(Long orderId) {
             this.orderId = orderId;
@@ -100,8 +92,8 @@ public final class OrderConfirmationDTO {
             return this;
         }
 
-        public Builder items(List<com.krishva.krishvamart.model.OrderItem> items) {
-            this.items = items;
+        public Builder items(List<OrderItem> items) {
+            this.items = items == null ? List.of() : List.copyOf(items);
             return this;
         }
 

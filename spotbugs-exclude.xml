@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <Match>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    <Or>
+      <Package name="~com\.krishva\.krishvamart\.(dao|service|listener).*"/>
+      <Class name="com.krishva.krishvamart.listener.ServiceRegistry"/>
+    </Or>
+  </Match>
+  <Match>
+    <Class name="com.krishva.krishvamart.util.DbSeeder"/>
+    <Bug pattern="DMI_EMPTY_DB_PASSWORD,DMI_CONSTANT_DB_PASSWORD"/>
+  </Match>
+</FindBugsFilter>
