@@ -179,6 +179,16 @@
               <cargo.servlet.port>8080</cargo.servlet.port>
             </properties>
           </configuration>
+          <deployables>
+            <deployable>
+              <groupId>com.krishva</groupId>
+              <artifactId>krishvamart</artifactId>
+              <type>war</type>
+              <properties>
+                <context>/</context>
+              </properties>
+            </deployable>
+          </deployables>
         </configuration>
       </plugin>
     </plugins>
