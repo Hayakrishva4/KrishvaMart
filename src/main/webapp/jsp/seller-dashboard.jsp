@@ -1,13 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
-
 <section class="seller-dashboard">
     <h1>Seller Dashboard</h1>
-<!--
-    <h2>Sales overview</h2>
-    <div id="salesSummary" class="sales-summary"></div>
-    <div id="salesByProduct"></div>
--->
     <h2>Manage listings</h2>
     <form id="productForm" class="product-form">
         <input type="hidden" id="editingId">
@@ -31,7 +25,5 @@
     <h2>Your listings</h2>
     <div id="sellerProductList"></div>
 </section>
-
-<!--<script src="${pageContext.request.contextPath}/js/seller-analytics.js"></script>-->
 <script src="${pageContext.request.contextPath}/js/seller.js"></script>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
