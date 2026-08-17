@@ -46,6 +46,9 @@ public class ProductServlet extends BaseApiServlet {
         try {
             User seller = requireSeller(req);
             ProductRequestDTO body = readBody(req, ProductRequestDTO.class);
+            if (body == null) {
+                throw new ValidationException("body", "Request body is required");
+            }
             Product created = services().productService().create(seller.getId(), body.getName(), body.getDescription(),
                     body.getPrice(), body.getStockQty(), body.getCategory(), body.getImageUrl());
             JsonUtil.writeSuccess(resp, HttpServletResponse.SC_CREATED, created);
@@ -60,12 +63,15 @@ public class ProductServlet extends BaseApiServlet {
             User seller = requireSeller(req);
             long id = parseId(req.getPathInfo());
             ProductRequestDTO body = readBody(req, ProductRequestDTO.class);
+            if (body == null) {
+                throw new ValidationException("body", "Request body is required");
+            }
             Product updated = services().productService().update(id, seller.getId(), body.getName(), body.getDescription(),
                     body.getPrice(), body.getStockQty(), body.getCategory(), body.getImageUrl());
             JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK, updated);
         } catch (AppException e) {
             handleError(resp, e);
-        } catch (NumberFormatException | NullPointerException e) {
+        } catch (NumberFormatException e) {
             JsonUtil.writeError(resp, HttpServletResponse.SC_BAD_REQUEST, "VALIDATION_ERROR", "Invalid product id");
         }
     }
@@ -79,7 +85,7 @@ public class ProductServlet extends BaseApiServlet {
             JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK, null);
         } catch (AppException e) {
             handleError(resp, e);
-        } catch (NumberFormatException | NullPointerException e) {
+        } catch (NumberFormatException e) {
             JsonUtil.writeError(resp, HttpServletResponse.SC_BAD_REQUEST, "VALIDATION_ERROR", "Invalid product id");
         }
     }

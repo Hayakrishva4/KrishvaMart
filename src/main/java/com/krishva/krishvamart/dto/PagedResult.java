@@ -1,8 +1,8 @@
 package com.krishva.krishvamart.dto;
 
+import java.util.Collections;
 import java.util.List;
 
-/** Generic paginated response wrapper (page/pageSize/totalItems/totalPages + the page's items). */
 public final class PagedResult<T> {
 
     private final List<T> items;
@@ -11,14 +11,14 @@ public final class PagedResult<T> {
     private final long totalItems;
 
     public PagedResult(List<T> items, int page, int pageSize, long totalItems) {
-        this.items = items;
+        this.items = items == null ? List.of() : List.copyOf(items);
         this.page = page;
         this.pageSize = pageSize;
         this.totalItems = totalItems;
     }
 
     public List<T> getItems() {
-        return items;
+        return items == null ? List.of() : Collections.unmodifiableList(items);
     }
 
     public int getPage() {
