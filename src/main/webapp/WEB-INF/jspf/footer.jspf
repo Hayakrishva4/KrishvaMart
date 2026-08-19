@@ -1,9 +1,7 @@
 </main>
     <footer class="site-footer">
-        <p>KrishvaMart &mdash; Anna University R2025 Semester 3 Capstone Project.</p>
+        <p>&copy;KrishvaMart - All Rights Reserved.</p>
     </footer>
-
-    <!-- Deferred to Week 9/10: AI Chatbot Widget -->
     <!--
     <div id="chatWidget" class="chat-widget">
         <button id="chatToggle" class="chat-toggle" aria-label="Open support chat">&#128172;</button>

@@ -1,6 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
-
 <section class="search-bar">
     <input type="text" id="searchInput" placeholder="Search products...">
     <select id="categorySelect">
@@ -13,8 +12,8 @@
     <input type="number" id="maxPriceInput" placeholder="Max price" min="0" step="0.01" style="width:110px;">
     <select id="sortSelect">
         <option value="RELEVANCE">Newest first</option>
-        <option value="PRICE_ASC">Price: low to high</option>
-        <option value="PRICE_DESC">Price: high to low</option>
+        <option value="PRICE_ASC">Price: Low to High</option>
+        <option value="PRICE_DESC">Price: High to Low</option>
     </select>
     <button id="searchBtn">Search</button>
 </section>
