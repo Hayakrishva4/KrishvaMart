@@ -1,10 +1,9 @@
-
 INSERT INTO products (seller_id, name, description, price, stock_qty, category, image_url) VALUES
-  (2, 'Wireless Mouse',        'Ergonomic 2.4GHz wireless mouse with USB receiver.',        699.00,  50, 'Electronics', 'https://picsum.photos/seed/mouse/400'),
-  (2, 'Mechanical Keyboard',   '87-key hot-swappable mechanical keyboard, blue switches.',  2499.00, 30, 'Electronics', 'https://picsum.photos/seed/keyboard/400'),
-  (2, 'USB-C Hub',             '7-in-1 USB-C hub with HDMI, SD card and PD passthrough.',    1299.00, 40, 'Electronics', 'https://picsum.photos/seed/hub/400'),
-  (3, 'Cotton T-Shirt',        'Breathable 100% cotton crew-neck t-shirt.',                   499.00, 100, 'Apparel',     'https://picsum.photos/seed/tshirt/400'),
-  (3, 'Denim Jacket',          'Classic fit unisex denim jacket.',                           1899.00,  25, 'Apparel',     'https://picsum.photos/seed/jacket/400'),
-  (3, 'Running Shoes',         'Lightweight breathable running shoes.',                      2199.00,  35, 'Apparel',     'https://stock.adobe.com/in/search?k=nike+shoes&asset_id=587110417'),
-  (2, 'Stainless Steel Bottle','1L double-wall insulated stainless steel water bottle.',      599.00,  60, 'Home',        'https://www.magnific.com/free-psd/stylish-light-blue-water-bottle-with-carry-handle_406457209.htm#fromView=keyword&page=1&position=2&track=ais_hybrid&query=Stainless+steel+bottle'),
-  (3, 'Desk Lamp',             'LED desk lamp with adjustable brightness and color temp.',    899.00,  45, 'Home',        'https://unsplash.com/photos/brown-and-white-table-lamp-with-light-pdIwPL3HU2s');
+  (2, 'Wireless Mouse',        'Ergonomic 2.4GHz wireless mouse with USB receiver.',        699.00,  50, 'Electronics', 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=600&q=80'),
+  (2, 'Mechanical Keyboard',   '87-key hot-swappable mechanical keyboard, blue switches.',  2499.00, 30, 'Electronics', 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=600&q=80'),
+  (2, 'USB-C Hub',             '7-in-1 USB-C hub with HDMI, SD card and PD passthrough.',    1299.00, 40, 'Electronics', 'https://images.unsplash.com/photo-1625842268584-8f3296236761?auto=format&fit=crop&w=600&q=80'),
+  (3, 'Cotton T-Shirt',        'Breathable 100% cotton crew-neck t-shirt.',                   499.00, 100, 'Apparel',     'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80'),
+  (3, 'Denim Jacket',          'Classic fit unisex denim jacket.',                           1899.00,  25, 'Apparel',     'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=600&q=80'),
+  (3, 'Running Shoes',         'Lightweight breathable running shoes.',                      2199.00,  35, 'Apparel',     'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80'),
+  (2, 'Stainless Steel Bottle','1L double-wall insulated stainless steel water bottle.',      599.00,  60, 'Home',        'https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=600&q=80'),
+  (3, 'Desk Lamp',             'LED desk lamp with adjustable brightness and color temp.',    899.00,  45, 'Home',        'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80');
