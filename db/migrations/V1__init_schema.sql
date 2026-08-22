@@ -1,5 +1,3 @@
--- KrishvaMart schema (H2 dialect)
-
 CREATE TABLE IF NOT EXISTS users (
     id            BIGINT AUTO_INCREMENT PRIMARY KEY,
     name          VARCHAR(120)  NOT NULL,
@@ -9,7 +7,6 @@ CREATE TABLE IF NOT EXISTS users (
     created_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_users_email UNIQUE (email)
 );
-
 CREATE TABLE IF NOT EXISTS products (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     seller_id   BIGINT         NOT NULL,
@@ -25,7 +22,6 @@ CREATE TABLE IF NOT EXISTS products (
 );
 CREATE INDEX IF NOT EXISTS idx_products_seller ON products(seller_id);
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
-
 CREATE TABLE IF NOT EXISTS orders (
     id           BIGINT AUTO_INCREMENT PRIMARY KEY,
     buyer_id     BIGINT         NOT NULL,
@@ -37,7 +33,6 @@ CREATE TABLE IF NOT EXISTS orders (
 );
 CREATE INDEX IF NOT EXISTS idx_orders_buyer ON orders(buyer_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
-
 CREATE TABLE IF NOT EXISTS order_items (
     id         BIGINT AUTO_INCREMENT PRIMARY KEY,
     order_id   BIGINT         NOT NULL,
@@ -50,7 +45,6 @@ CREATE TABLE IF NOT EXISTS order_items (
 );
 CREATE INDEX IF NOT EXISTS idx_orderitems_order ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_orderitems_product ON order_items(product_id);
-
 CREATE TABLE IF NOT EXISTS cart_items (
     id         BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id    BIGINT      NOT NULL,
@@ -63,7 +57,6 @@ CREATE TABLE IF NOT EXISTS cart_items (
 );
 CREATE INDEX IF NOT EXISTS idx_cartitems_user ON cart_items(user_id);
 CREATE INDEX IF NOT EXISTS idx_cartitems_product ON cart_items(product_id);
-
 CREATE TABLE IF NOT EXISTS reviews (
     id         BIGINT AUTO_INCREMENT PRIMARY KEY,
     product_id BIGINT      NOT NULL,
@@ -79,8 +72,6 @@ CREATE TABLE IF NOT EXISTS reviews (
 CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_user ON reviews(user_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_order ON reviews(order_id);
-
--- O1: wishlist / save-for-later
 CREATE TABLE IF NOT EXISTS wishlist_items (
     id         BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id    BIGINT      NOT NULL,
@@ -92,6 +83,4 @@ CREATE TABLE IF NOT EXISTS wishlist_items (
 );
 CREATE INDEX IF NOT EXISTS idx_wishlist_user ON wishlist_items(user_id);
 CREATE INDEX IF NOT EXISTS idx_wishlist_product ON wishlist_items(product_id);
-
--- Real-marketplace checkout: capture a delivery address per order.
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_address VARCHAR(500);

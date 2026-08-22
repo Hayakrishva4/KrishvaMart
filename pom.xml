@@ -104,6 +104,8 @@
         <targetPath>db</targetPath>
         <excludes>
           <exclude>migrations/**</exclude>
+          <exclude>**/*.mv.db</exclude>
+          <exclude>**/*.trace.db</exclude>
         </excludes>
       </resource>
     </resources>

@@ -23,7 +23,7 @@
             <a href="${pageContext.request.contextPath}/jsp/orders.jsp">Orders</a>
             <a href="${pageContext.request.contextPath}/jsp/seller-dashboard.jsp">Sell</a>
             <!-- Deferred to Week 4: Admin Panel -->
-            <!-- <a href="${pageContext.request.contextPath}/jsp/admin.jsp">Admin</a> -->
+            <a href="${pageContext.request.contextPath}/jsp/admin.jsp">Admin</a>
         </nav>
         <div class="session-box" id="sessionBox">
             <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">&#9788;</button>

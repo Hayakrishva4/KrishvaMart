@@ -18,7 +18,6 @@
         </div>
     </div>
     -->
-
     <script src="${pageContext.request.contextPath}/js/api.js"></script>
     <script src="${pageContext.request.contextPath}/js/theme.js"></script>
     <script src="${pageContext.request.contextPath}/js/auth.js"></script>

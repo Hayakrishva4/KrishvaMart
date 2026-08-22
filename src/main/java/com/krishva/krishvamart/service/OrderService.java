@@ -1,5 +1,4 @@
 package com.krishva.krishvamart.service;
-
 import com.krishva.krishvamart.dao.CartDAO;
 import com.krishva.krishvamart.dao.OrderDAO;
 import com.krishva.krishvamart.dao.ProductDAO;
@@ -12,36 +11,22 @@ import com.krishva.krishvamart.exception.ValidationException;
 import com.krishva.krishvamart.model.CartItem;
 import com.krishva.krishvamart.model.Order;
 import com.krishva.krishvamart.model.User;
-
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import javax.sql.DataSource;
-
-/**
- * Business rules for checkout (F5) and order history (F6), plus the optional
- * status workflow (O2). No SQL statements are written here (Section 2, Rule 1
- * confines those to the DAO layer) - this class only demarcates the checkout
- * transaction boundary (getConnection / commit / rollback) around calls into
- * OrderDAO, ProductDAO and CartDAO, all of which execute PreparedStatements
- * against the Connection this class hands them.
- */
 public class OrderService {
-
     private final DataSource dataSource;
     private final OrderDAO orderDAO;
     private final ProductDAO productDAO;
     private final CartDAO cartDAO;
-
     public OrderService(DataSource dataSource, OrderDAO orderDAO, ProductDAO productDAO, CartDAO cartDAO) {
         this.dataSource = dataSource;
         this.orderDAO = orderDAO;
         this.productDAO = productDAO;
         this.cartDAO = cartDAO;
     }
-
-    /** F5: places an order from the current cart contents via mock payment confirmation, capturing a delivery address. */
     public Order checkout(long buyerId, boolean mockPaymentConfirmed, String shippingAddress) throws AppException {
         if (!mockPaymentConfirmed) {
             throw new ValidationException("payment", "Mock payment confirmation is required to place an order");
@@ -53,17 +38,14 @@ public class OrderService {
         if (cartItems.isEmpty()) {
             throw new ValidationException("cart", "Your cart is empty");
         }
-
         BigDecimal total = cartItems.stream()
                 .map(CartItem::getLineTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         Order order = new Order();
         order.setBuyerId(buyerId);
         order.setStatus(Order.Status.CONFIRMED);
         order.setTotalAmount(total);
         order.setShippingAddress(shippingAddress.trim());
-
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
             try {
@@ -90,24 +72,16 @@ public class OrderService {
             throw new DataAccessException("Failed to open checkout transaction", e);
         }
     }
-
-    /** F6: buyer view of past orders. */
     public List<Order> historyForBuyer(long buyerId) throws AppException {
         return orderDAO.findByBuyer(buyerId);
     }
-
-    /** F6: seller view of incoming orders for their products. */
     public List<Order> incomingForSeller(long sellerId) throws AppException {
         return orderDAO.findBySeller(sellerId);
     }
-
-    /** F7: admin view of all orders. */
     public List<Order> listAllForAdmin(User admin) throws AppException {
         requireAdmin(admin);
         return orderDAO.findAll();
     }
-
-    /** Looks up a single order, scoped by role: the buyer who placed it, an admin, or a seller with a product in it. */
     public Order get(long orderId, User requester) throws AppException {
         Order order = orderDAO.findById(orderId).orElseThrow(() -> new NotFoundException("Order not found"));
         boolean isOwner = order.getBuyerId().equals(requester.getId());
@@ -127,8 +101,6 @@ public class OrderService {
         }
         return order;
     }
-
-    /** O2: order status workflow Pending -> Confirmed -> Shipped -> Delivered. */
     public void advanceStatus(long orderId, Order.Status newStatus, User actor) throws AppException {
         if (actor.getRole() != User.Role.SELLER && actor.getRole() != User.Role.ADMIN) {
             throw new ForbiddenException("Only a seller or admin can update order status");

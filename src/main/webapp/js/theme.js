@@ -1,6 +1,3 @@
-// Dark mode toggle button wiring (Week 10 UI polish). The theme itself is
-// applied earlier, synchronously in <head> (see header.jspf), to avoid a
-// flash of the wrong theme before this script loads.
 document.addEventListener("DOMContentLoaded", () => {
     const toggle = document.getElementById("themeToggle");
     if (!toggle) return;
