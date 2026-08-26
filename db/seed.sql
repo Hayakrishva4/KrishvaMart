@@ -1,7 +1,7 @@
 INSERT INTO products (seller_id, name, description, price, stock_qty, category, image_url, active) VALUES
   (2, 'Wireless Mouse',         'Ergonomic 2.4GHz wireless mouse with USB receiver.',        699.00,  50, 'Electronics', 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=600&q=80', TRUE),
   (2, 'Mechanical Keyboard',    '87-key hot-swappable mechanical keyboard, blue switches.',  2499.00, 30, 'Electronics', 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=600&q=80', TRUE),
-  (2, 'USB-C Hub',              '7-in-1 USB-C hub with HDMI, SD card and PD passthrough.',   1299.00, 40, 'Electronics', 'https://images.unsplash.com/photo-1625842268584-8f3296236761?auto=format&fit=crop&w=600&q=80', TRUE),
+  (2, 'USB-C Hub',              '7-in-1 USB-C hub with HDMI, SD card and PD passthrough.',   1299.00, 40, 'Electronics', 'https://images.unsplash.com/photo-1544652478-6653e09f18a2?auto=format&fit=crop&w=600&q=80', TRUE),
   (3, 'Cotton T-Shirt',         'Breathable 100% cotton crew-neck t-shirt.',                  499.00, 100, 'Apparel',     'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=600&q=80', TRUE),
   (3, 'Denim Jacket',           'Classic fit unisex denim jacket.',                          1899.00,  25, 'Apparel',     'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=600&q=80', TRUE),
   (3, 'Running Shoes',          'Lightweight breathable running shoes.',                     2199.00,  35, 'Apparel',     'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80', TRUE),
