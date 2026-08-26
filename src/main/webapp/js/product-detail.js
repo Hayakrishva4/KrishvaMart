@@ -1,119 +1,187 @@
-function getProductIdFromUrl() {
+document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
-    return params.get("id");
-}
+    const productId = params.get('id');
 
-async function loadProduct() {
-    const container = document.getElementById("productDetail");
-    const id = getProductIdFromUrl();
-    if (!id) {
-        container.innerHTML = "<p>No product specified.</p>";
-        return;
-    }
-    try {
-        const [product, reviewData] = await Promise.all([
-            api.get("/products/" + id),
-            api.get("/reviews/product/" + id)
-        ]);
-        container.innerHTML = `
-            ${product.imageUrl ? `<img src="${escapeHtml(product.imageUrl)}" alt="${escapeHtml(product.name)}" style="max-width:280px;">` : ""}
-            <h1>${escapeHtml(product.name)}</h1>
-            <p>${escapeHtml(product.description || "")}</p>
-            <p class="price">${formatMoney(product.price)}</p>
-            <p>${product.stockQty > 0 ? product.stockQty + " in stock" : "Out of stock"}</p>
-            <p>Average rating: ${reviewData.averageRating ? reviewData.averageRating.toFixed(1) : "No ratings yet"} / 5</p>
-            <label for="qty">Quantity</label>
-            <input type="number" id="qty" min="1" value="1" style="width:80px;">
-            <button id="addToCartBtn" ${product.stockQty > 0 ? "" : "disabled"}>Add to cart</button>
-            <button id="wishlistBtn" class="wishlist-btn" title="Save for later">&#9825;</button>
-            <p id="addToCartMsg"></p>
-        `;
-        document.getElementById("addToCartBtn").addEventListener("click", () => addToCart(product.id));
-        wireWishlistButton(product.id);
-        renderReviews(reviewData.reviews);
-        document.getElementById("reviewForm").classList.remove("hidden");
-        document.getElementById("reviewForm").dataset.productId = product.id;
+    const detailContainer = document.getElementById('productDetail');
+    const reviewList = document.getElementById('reviewList');
+    const reviewForm = document.getElementById('reviewForm');
+    const reviewError = document.getElementById('reviewError');
+    const ratingSummary = document.getElementById('ratingSummary');
 
-        recordRecentlyViewed(product);
-        renderRecentlyViewedStrip("recentlyViewed", product.id);
-    } catch (err) {
-        container.innerHTML = "<p>Could not load product: " + escapeHtml(err.message) + "</p>";
-    }
-}
-
-function renderReviews(reviews) {
-    const list = document.getElementById("reviewList");
-    if (!reviews || reviews.length === 0) {
-        list.innerHTML = "<p>No reviews yet.</p>";
-        return;
-    }
-    list.innerHTML = reviews.map(r => `
-        <div class="order-card">
-            <strong>${"&#9733;".repeat(r.rating)}${"&#9734;".repeat(5 - r.rating)}</strong>
-            by ${escapeHtml(r.userName)}
-            <p>${escapeHtml(r.comment || "")}</p>
-        </div>
-    `).join("");
-}
-
-async function addToCart(productId) {
-    const msg = document.getElementById("addToCartMsg");
-    const qty = parseInt(document.getElementById("qty").value, 10) || 1;
-    try {
-        await api.post("/cart/items", { productId, quantity: qty });
-        msg.textContent = "Added to cart.";
-    } catch (err) {
-        msg.textContent = err.message;
-    }
-}
-
-async function wireWishlistButton(productId) {
-    const btn = document.getElementById("wishlistBtn");
-    let saved = false;
-    try {
-        const items = await api.get("/wishlist");
-        saved = items.some(i => String(i.productId) === String(productId));
-        updateWishlistBtn(btn, saved);
-    } catch (err) {
-        // Not logged in as a buyer, or request failed - button still works,
-        // it just can't show the current saved state up front.
-    }
-    btn.addEventListener("click", async () => {
-        try {
-            if (saved) {
-                await api.del("/wishlist/" + productId);
-                saved = false;
-            } else {
-                await api.post("/wishlist", { productId });
-                saved = true;
-            }
-            updateWishlistBtn(btn, saved);
-        } catch (err) {
-            alert(err.message);
+    if (!productId) {
+        if (detailContainer) {
+            detailContainer.innerHTML = '<p class="error-text">No product ID specified.</p>';
         }
-    });
-}
+        return;
+    }
 
-function updateWishlistBtn(btn, saved) {
-    btn.classList.toggle("saved", saved);
-    btn.innerHTML = saved ? "&#9829;" : "&#9825;";
-    btn.title = saved ? "Remove from wishlist" : "Save for later";
-}
+    // 1. Fetch Product
+    fetch('/api/v1/products/' + productId)
+        .then(res => {
+            if (!res.ok && res.status !== 404) {
+                return fetch('/api/v1/products?id=' + productId).then(r => r.json());
+            }
+            return res.json();
+        })
+        .then(res => {
+            if (!res.success || !res.data) {
+                throw new Error(res.error ? res.error.message : 'Product not found');
+            }
+            renderProduct(res.data);
+            if (window.RecentlyViewed && typeof window.RecentlyViewed.push === 'function') {
+                window.RecentlyViewed.push(res.data);
+            }
+        })
+        .catch(err => {
+            if (detailContainer) {
+                detailContainer.innerHTML = '<p class="error-text">' + (err.message || 'Failed to load product details.') + '</p>';
+            }
+        });
 
-document.getElementById("reviewForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const errorEl = document.getElementById("reviewError");
-    errorEl.textContent = "";
-    const productId = parseInt(e.target.dataset.productId, 10);
-    const orderId = parseInt(document.getElementById("orderIdForReview").value, 10);
-    const rating = parseInt(document.getElementById("rating").value, 10);
-    const comment = document.getElementById("comment").value;
-    try {
-        await api.post("/reviews", { productId, orderId, rating, comment });
-        loadProduct();
-    } catch (err) {
-        errorEl.textContent = err.message;
+    // 2. Fetch Reviews
+    fetchReviews(productId);
+
+    // 3. Render Product Card
+    function renderProduct(p) {
+        if (!detailContainer) return;
+
+        const inStock = p.stockQty > 0;
+        const stockBadge = inStock 
+            ? '<span class="badge in-stock">In Stock (' + p.stockQty + ' available)</span>'
+            : '<span class="badge out-of-stock">Out of Stock</span>';
+
+        detailContainer.innerHTML = 
+            '<div class="product-card-detail">' +
+                '<div class="product-image">' +
+                    '<img src="' + escapeHtml(p.imageUrl || 'https://via.placeholder.com/400') + '" alt="' + escapeHtml(p.name) + '">' +
+                '</div>' +
+                '<div class="product-info">' +
+                    '<span class="category-tag">' + escapeHtml(p.category || 'General') + '</span>' +
+                    '<h1>' + escapeHtml(p.name) + '</h1>' +
+                    '<p class="price">₹' + Number(p.price).toFixed(2) + '</p>' +
+                    '<div class="stock-status">' + stockBadge + '</div>' +
+                    '<p class="description">' + escapeHtml(p.description || '') + '</p>' +
+                    '<div class="actions">' +
+                        '<input type="number" id="quantityInput" value="1" min="1" max="' + p.stockQty + '" ' + (!inStock ? 'disabled' : '') + '>' +
+                        '<button id="addToCartBtn" class="btn btn-primary" ' + (!inStock ? 'disabled' : '') + '>Add to Cart</button>' +
+                    '</div>' +
+                    '<p id="cartFeedback" class="feedback-msg"></p>' +
+                '</div>' +
+            '</div>';
+
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', () => {
+                const qty = parseInt(document.getElementById('quantityInput').value, 10) || 1;
+                addToCart(p.id, qty);
+            });
+        }
+    }
+
+    // 4. Add to Cart Handler
+    function addToCart(prodId, quantity) {
+        const feedback = document.getElementById('cartFeedback');
+        if (feedback) feedback.textContent = 'Adding to cart...';
+
+        fetch('/api/v1/cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: prodId, quantity: quantity })
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (feedback) {
+                feedback.textContent = res.success ? 'Added to cart!' : (res.error ? res.error.message : 'Failed to add.');
+            }
+        })
+        .catch(() => {
+            if (feedback) feedback.textContent = 'Please log in to add items.';
+        });
+    }
+
+    // 5. Fetch Reviews Handler
+    function fetchReviews(pId) {
+        if (!reviewList) return;
+
+        fetch('/api/v1/reviews/product/' + pId)
+            .then(res => res.json())
+            .then(res => {
+                if (res.success && res.data) {
+                    const { reviews, averageRating } = res.data;
+                    renderReviews(reviews || [], averageRating || 0);
+                }
+            })
+            .catch(() => {});
+    }
+
+    // 6. Render Reviews List
+    function renderReviews(reviews, avgRating) {
+        if (!reviewList) return;
+
+        const roundedRating = Math.round(avgRating);
+        const stars = '★'.repeat(roundedRating) + '☆'.repeat(5 - roundedRating);
+        
+        if (ratingSummary) {
+            ratingSummary.innerHTML = '<strong>Average Rating: <span class="stars">' + stars + '</span> (' + (avgRating ? avgRating.toFixed(1) : '0.0') + ' / 5.0)</strong> — ' + reviews.length + ' review(s)';
+        }
+
+        if (reviews.length === 0) {
+            reviewList.innerHTML = '<p class="muted-text">No reviews yet for this product.</p>';
+            return;
+        }
+
+        reviewList.innerHTML = reviews.map(r => 
+            '<div class="review-item">' +
+                '<div class="review-header">' +
+                    '<span class="stars">' + '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating) + '</span>' +
+                    '<small class="muted-text">' + (r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '') + '</small>' +
+                '</div>' +
+                '<p>' + escapeHtml(r.comment || '') + '</p>' +
+            '</div>'
+        ).join('');
+    }
+
+    // 7. Submit Review
+    if (reviewForm) {
+        reviewForm.classList.remove('hidden');
+
+        reviewForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (reviewError) reviewError.textContent = 'Submitting...';
+
+            const orderIdInput = document.getElementById('orderIdForReview');
+            const ratingInput = document.getElementById('rating');
+            const commentInput = document.getElementById('comment');
+
+            fetch('/api/v1/reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    productId: parseInt(productId, 10),
+                    orderId: parseInt(orderIdInput.value, 10),
+                    rating: parseInt(ratingInput.value, 10),
+                    comment: commentInput ? commentInput.value.trim() : ''
+                })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    reviewForm.reset();
+                    if (reviewError) reviewError.textContent = 'Review submitted!';
+                    fetchReviews(productId);
+                } else {
+                    if (reviewError) reviewError.textContent = res.error ? res.error.message : 'Failed to submit.';
+                }
+            })
+            .catch(() => {
+                if (reviewError) reviewError.textContent = 'Login required or invalid order ID.';
+            });
+        });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 });
-
-loadProduct();

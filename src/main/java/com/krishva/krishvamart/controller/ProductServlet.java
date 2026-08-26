@@ -16,24 +16,40 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class ProductServlet extends BaseApiServlet {
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             String idPart = req.getPathInfo();
-            if (idPart == null || idPart.equals("/")) {
-                if ("true".equalsIgnoreCase(req.getParameter("sellerOnly"))) {
-                    User seller = requireSeller(req);
-                    JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK,
-                            services().productService().listForSeller(seller.getId()));
-                    return;
-                }
-                PagedResult<Product> results = services().productService().search(buildCriteria(req));
-                JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK, results);
-            } else {
+            String idParam = req.getParameter("id");
+
+            // 1. Fetch single product via query param: ?id=5
+            if (idParam != null && !idParam.isBlank()) {
+                long id = Long.parseLong(idParam.trim());
+                Product product = services().productService().get(id);
+                JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK, product);
+                return;
+            }
+
+            // 2. Fetch single product via path variable: /api/v1/products/5
+            if (idPart != null && !idPart.equals("/") && idPart.length() > 1) {
                 long id = parseId(idPart);
                 Product product = services().productService().get(id);
                 JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK, product);
+                return;
             }
+
+            // 3. Seller listings
+            if ("true".equalsIgnoreCase(req.getParameter("sellerOnly"))) {
+                User seller = requireSeller(req);
+                JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK,
+                        services().productService().listForSeller(seller.getId()));
+                return;
+            }
+
+            // 4. Catalog search / pagination
+            PagedResult<Product> results = services().productService().search(buildCriteria(req));
+            JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK, results);
         } catch (AppException e) {
             handleError(resp, e);
         } catch (NumberFormatException e) {
@@ -150,6 +166,6 @@ public class ProductServlet extends BaseApiServlet {
         if (pathInfo == null || pathInfo.equals("/")) {
             throw new NotFoundException("Product id required");
         }
-        return Long.parseLong(pathInfo.substring(1));
+        return Long.parseLong(pathInfo.startsWith("/") ? pathInfo.substring(1) : pathInfo);
     }
 }
