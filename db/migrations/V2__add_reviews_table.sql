@@ -1,0 +1,3 @@
+-- Reviews table was included directly in V1 for this project's initial
+-- release. This file documents the migration-numbering convention required
+-- by Section 14; future review-related schema changes should be added here.

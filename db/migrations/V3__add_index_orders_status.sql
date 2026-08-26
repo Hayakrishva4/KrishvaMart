@@ -1,0 +1,3 @@
+-- Index on orders.status was already created in V1 (idx_orders_status).
+-- Placeholder retained to demonstrate the numbered-migration convention
+-- described in Section 14 of the project spec.

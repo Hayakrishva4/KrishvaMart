@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Optional;
 import javax.sql.DataSource;
 
-/** All SQL for the products table lives here, PreparedStatement only (Section 2, Rule 1). */
 public class JdbcProductDAO implements ProductDAO {
 
     private final DataSource dataSource;
@@ -83,7 +82,7 @@ public class JdbcProductDAO implements ProductDAO {
             sql.append("AND category = ? ");
             params.add(category);
         }
-        sql.append("ORDER BY created_at DESC");
+        sql.append("ORDER BY created_at DESC, id DESC");
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -128,14 +127,21 @@ public class JdbcProductDAO implements ProductDAO {
             params.add(criteria.getMaxPrice());
         }
 
-        String orderBy = switch (criteria.getSortBy()) {
-            case PRICE_ASC -> "ORDER BY price ASC";
-            case PRICE_DESC -> "ORDER BY price DESC";
-            case NEWEST -> "ORDER BY created_at DESC";
-            case RELEVANCE -> "ORDER BY created_at DESC";
-        };
+        String orderBy;
+        if (criteria.getSortBy() == null) {
+            orderBy = " ORDER BY id DESC ";
+        } else {
+            orderBy = switch (criteria.getSortBy()) {
+                case PRICE_ASC -> " ORDER BY price ASC, id ASC ";
+                case PRICE_DESC -> " ORDER BY price DESC, id DESC ";
+                case NEWEST -> " ORDER BY created_at DESC, id DESC ";
+                case RELEVANCE -> " ORDER BY created_at DESC, id DESC ";
+            };
+        }
 
-        int offset = (criteria.getPage() - 1) * criteria.getPageSize();
+        int page = criteria.getPage() <= 0 ? 1 : criteria.getPage();
+        int pageSize = criteria.getPageSize() <= 0 ? 12 : criteria.getPageSize();
+        int offset = (page - 1) * pageSize;
 
         try (Connection conn = dataSource.getConnection()) {
             long totalItems;
@@ -151,7 +157,7 @@ public class JdbcProductDAO implements ProductDAO {
             List<Product> items = new ArrayList<>();
             try (PreparedStatement pagePs = conn.prepareStatement(pageSql)) {
                 int idx = bindParams(pagePs, params);
-                pagePs.setInt(idx, criteria.getPageSize());
+                pagePs.setInt(idx, pageSize);
                 pagePs.setInt(idx + 1, offset);
                 try (ResultSet rs = pagePs.executeQuery()) {
                     while (rs.next()) {
@@ -159,7 +165,7 @@ public class JdbcProductDAO implements ProductDAO {
                     }
                 }
             }
-            return new PagedResult<>(items, criteria.getPage(), criteria.getPageSize(), totalItems);
+            return new PagedResult<>(items, page, pageSize, totalItems);
         } catch (SQLException e) {
             throw new DataAccessException("Failed to search products with criteria", e);
         }
@@ -175,7 +181,7 @@ public class JdbcProductDAO implements ProductDAO {
 
     @Override
     public List<Product> findBySeller(long sellerId) throws DataAccessException {
-        String sql = "SELECT * FROM products WHERE seller_id = ? ORDER BY created_at DESC";
+        String sql = "SELECT * FROM products WHERE seller_id = ? ORDER BY created_at DESC, id DESC";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, sellerId);
