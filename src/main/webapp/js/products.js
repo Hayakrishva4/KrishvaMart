@@ -16,7 +16,7 @@ async function loadProducts(page) {
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (sort) params.set("sort", sort);
     params.set("page", currentPage);
-    params.set("pageSize", 12);
+    params.set("pageSize", 30);
 
     grid.innerHTML = "<p>Loading products...</p>";
     try {
@@ -70,3 +70,4 @@ document.getElementById("searchInput").addEventListener("keydown", (e) => {
 });
 loadProducts(1);
 renderRecentlyViewedStrip("recentlyViewed");
+
