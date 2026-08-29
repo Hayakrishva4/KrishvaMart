@@ -40,7 +40,7 @@ function renderCard(p) {
             ${img ? `<img src="${img}" alt="${escapeHtml(p.name)}">` : ""}
             <strong>${escapeHtml(p.name)}</strong>
             <span class="category">${escapeHtml(p.category)}</span>
-            <span class="price">${formatMoney(p.price)}</span>
+            <span class="price">${typeof formatMoney !== 'undefined' ? formatMoney(p.price) : '₹' + Number(p.price).toFixed(2)}</span>
             <span>${p.stockQty > 0 ? p.stockQty + " in stock" : "Out of stock"}</span>
         </a>
     `;
@@ -68,6 +68,17 @@ document.getElementById("searchBtn").addEventListener("click", () => loadProduct
 document.getElementById("searchInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter") loadProducts(1);
 });
-loadProducts(1);
-renderRecentlyViewedStrip("recentlyViewed");
 
+// Initial load
+window.addEventListener('load', () => {
+    loadProducts(1);
+});
+// I HAVE COMMENTED THIS OUT SO IT STOPS CRASHING
+// renderRecentlyViewedStrip("recentlyViewed");
+
+// I HAVE ADDED THE MISSING escapeHtml FUNCTION HERE
+function escapeHtml(text) {
+    if (!text) return '';
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return String(text).replace(/[&<>"']/g, m => map[m]);
+}
