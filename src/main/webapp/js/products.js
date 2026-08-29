@@ -1,5 +1,4 @@
 let currentPage = 1;
-
 async function loadProducts(page) {
     currentPage = page || 1;
     const grid = document.getElementById("productGrid");
@@ -8,7 +7,6 @@ async function loadProducts(page) {
     const minPrice = document.getElementById("minPriceInput").value;
     const maxPrice = document.getElementById("maxPriceInput").value;
     const sort = document.getElementById("sortSelect").value;
-
     const params = new URLSearchParams();
     if (keyword) params.set("q", keyword);
     if (category) params.set("category", category);
@@ -16,8 +14,7 @@ async function loadProducts(page) {
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (sort) params.set("sort", sort);
     params.set("page", currentPage);
-    params.set("pageSize", 30);
-
+    params.set("pageSize", 50);
     grid.innerHTML = "<p>Loading products...</p>";
     try {
         const result = await api.get("/products?" + params.toString());
@@ -32,7 +29,6 @@ async function loadProducts(page) {
         grid.innerHTML = "<p>Could not load products: " + escapeHtml(err.message) + "</p>";
     }
 }
-
 function renderCard(p) {
     const img = p.imageUrl ? escapeHtml(p.imageUrl) : "";
     return `
@@ -40,12 +36,11 @@ function renderCard(p) {
             ${img ? `<img src="${img}" alt="${escapeHtml(p.name)}">` : ""}
             <strong>${escapeHtml(p.name)}</strong>
             <span class="category">${escapeHtml(p.category)}</span>
-            <span class="price">${typeof formatMoney !== 'undefined' ? formatMoney(p.price) : '₹' + Number(p.price).toFixed(2)}</span>
+            <span class="price">&#8377;${Number(p.price).toFixed(2)}</span>           
             <span>${p.stockQty > 0 ? p.stockQty + " in stock" : "Out of stock"}</span>
         </a>
     `;
 }
-
 function renderPagination(result) {
     const nav = document.getElementById("pagination");
     const totalPages = result.totalPages;
@@ -63,20 +58,16 @@ function renderPagination(result) {
         btn.addEventListener("click", () => loadProducts(parseInt(btn.dataset.page, 10)));
     });
 }
-
 document.getElementById("searchBtn").addEventListener("click", () => loadProducts(1));
 document.getElementById("searchInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter") loadProducts(1);
 });
-
 // Initial load
 window.addEventListener('load', () => {
     loadProducts(1);
 });
 // I HAVE COMMENTED THIS OUT SO IT STOPS CRASHING
 // renderRecentlyViewedStrip("recentlyViewed");
-
-// I HAVE ADDED THE MISSING escapeHtml FUNCTION HERE
 function escapeHtml(text) {
     if (!text) return '';
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
