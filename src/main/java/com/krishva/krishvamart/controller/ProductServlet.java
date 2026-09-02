@@ -12,9 +12,11 @@ import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.util.JsonUtil;
 import java.io.IOException;
 import java.math.BigDecimal;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+@WebServlet(urlPatterns = {"/api/v1/products", "/api/v1/products/*"})
 public class ProductServlet extends BaseApiServlet {
 
     @Override
@@ -23,7 +25,6 @@ public class ProductServlet extends BaseApiServlet {
             String idPart = req.getPathInfo();
             String idParam = req.getParameter("id");
 
-            // 1. Fetch single product via query param: ?id=5
             if (idParam != null && !idParam.isBlank()) {
                 long id = Long.parseLong(idParam.trim());
                 Product product = services().productService().get(id);
@@ -31,15 +32,13 @@ public class ProductServlet extends BaseApiServlet {
                 return;
             }
 
-            // 2. Fetch single product via path variable: /api/v1/products/5
-            if (idPart != null && !idPart.equals("/") && idPart.length() > 1) {
+            if (idPart != null && !idPart.isBlank() && !"/".equals(idPart)) {
                 long id = parseId(idPart);
                 Product product = services().productService().get(id);
                 JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK, product);
                 return;
             }
 
-            // 3. Seller listings
             if ("true".equalsIgnoreCase(req.getParameter("sellerOnly"))) {
                 User seller = requireSeller(req);
                 JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK,
@@ -47,7 +46,6 @@ public class ProductServlet extends BaseApiServlet {
                 return;
             }
 
-            // 4. Catalog search / pagination
             PagedResult<Product> results = services().productService().search(buildCriteria(req));
             JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK, results);
         } catch (AppException e) {
@@ -163,7 +161,7 @@ public class ProductServlet extends BaseApiServlet {
     }
 
     private long parseId(String pathInfo) throws NotFoundException {
-        if (pathInfo == null || pathInfo.equals("/")) {
+        if (pathInfo == null || pathInfo.isBlank() || "/".equals(pathInfo)) {
             throw new NotFoundException("Product id required");
         }
         return Long.parseLong(pathInfo.startsWith("/") ? pathInfo.substring(1) : pathInfo);

@@ -25,5 +25,6 @@
     <h2>Your listings</h2>
     <div id="sellerProductList"></div>
 </section>
-<script src="${pageContext.request.contextPath}/js/seller.js"></script>
+
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
+<script src="${pageContext.request.contextPath}/js/seller.js"></script>

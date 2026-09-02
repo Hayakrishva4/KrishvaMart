@@ -1,5 +1,7 @@
 package com.krishva.krishvamart.controller;
 
+import com.krishva.krishvamart.dto.CheckoutRequestDTO;
+import com.krishva.krishvamart.dto.OrderConfirmationDTO;
 import com.krishva.krishvamart.dto.OrderStatusRequestDTO;
 import com.krishva.krishvamart.exception.AppException;
 import com.krishva.krishvamart.exception.ForbiddenException;
@@ -11,16 +13,18 @@ import com.krishva.krishvamart.util.JsonUtil;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+@WebServlet(urlPatterns = {"/api/v1/orders", "/api/v1/orders/*"})
 public class OrderServlet extends BaseApiServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             User user = requireUser(req);
             String pathInfo = req.getPathInfo();
-            if (pathInfo == null || pathInfo.equals("/")) {
+            if (pathInfo == null || pathInfo.isEmpty() || "/".equals(pathInfo)) {
                 List<Order> orders = switch (user.getRole()) {
                     case BUYER -> services().orderService().historyForBuyer(user.getId());
                     case SELLER -> services().orderService().incomingForSeller(user.getId());
@@ -46,16 +50,16 @@ public class OrderServlet extends BaseApiServlet {
             if (user.getRole() != User.Role.BUYER) {
                 throw new ForbiddenException("Only buyers can place orders");
             }
-            if (!"/checkout".equals(req.getPathInfo())) {
+            String pathInfo = req.getPathInfo();
+            if (pathInfo == null || !"/checkout".equals(pathInfo)) {
                 JsonUtil.writeError(resp, HttpServletResponse.SC_NOT_FOUND, "NOT_FOUND", "Unknown route");
                 return;
             }
-            com.krishva.krishvamart.dto.CheckoutRequestDTO body =
-                    readBody(req, com.krishva.krishvamart.dto.CheckoutRequestDTO.class);
+            CheckoutRequestDTO body = readBody(req, CheckoutRequestDTO.class);
             String shippingAddress = body == null ? null : body.getShippingAddress();
             Order order = services().orderService().checkout(user.getId(), true, shippingAddress);
             JsonUtil.writeSuccess(resp, HttpServletResponse.SC_CREATED,
-                    com.krishva.krishvamart.dto.OrderConfirmationDTO.fromOrder(order));
+                    OrderConfirmationDTO.fromOrder(order));
         } catch (AppException e) {
             handleError(resp, e);
         }
@@ -82,11 +86,35 @@ public class OrderServlet extends BaseApiServlet {
         }
     }
 
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            User user = requireUser(req);
+            String pathInfo = req.getPathInfo();
+            long id = parseOrderId(pathInfo);
+            services().orderService().cancelOrder(id, user);
+            JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK, Map.of("message", "Order cancelled successfully"));
+        } catch (AppException e) {
+            handleError(resp, e);
+        } catch (NumberFormatException e) {
+            JsonUtil.writeError(resp, HttpServletResponse.SC_BAD_REQUEST, "VALIDATION_ERROR", "Invalid order id");
+        }
+    }
+
     private long parseOrderId(String pathInfo) throws NotFoundException {
-        if (pathInfo == null || pathInfo.equals("/") || pathInfo.equals("/checkout")) {
+        if (pathInfo == null || pathInfo.isEmpty() || "/".equals(pathInfo) || "/checkout".equals(pathInfo)) {
             throw new NotFoundException("Order id required");
         }
-        return Long.parseLong(pathInfo.substring(1));
+        String cleanPath = pathInfo.startsWith("/") ? pathInfo.substring(1) : pathInfo;
+        String[] parts = cleanPath.split("/");
+        if (parts.length == 0 || parts[0].isEmpty()) {
+            throw new NotFoundException("Order id required");
+        }
+        try {
+            return Long.parseLong(parts[0]);
+        } catch (NumberFormatException e) {
+            throw new NotFoundException("Invalid order id");
+        }
     }
 
     private Order.Status parseStatus(String raw) throws ValidationException {

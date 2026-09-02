@@ -1,4 +1,5 @@
 package com.krishva.krishvamart.controller;
+
 import com.krishva.krishvamart.dto.LoginRequestDTO;
 import com.krishva.krishvamart.dto.RegisterRequestDTO;
 import com.krishva.krishvamart.dto.UserResponseDTO;
@@ -7,20 +8,34 @@ import com.krishva.krishvamart.filter.AuthFilter;
 import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.util.JsonUtil;
 import java.io.IOException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+@WebServlet(urlPatterns = {
+    "/api/v1/auth/register",
+    "/api/v1/auth/login",
+    "/api/v1/auth/logout",
+    "/api/v1/auth/me"
+})
 public class AuthServlet extends BaseApiServlet {
     private static final int SESSION_TIMEOUT_SECONDS = 30 * 60;
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String servletPath = req.getServletPath() != null ? req.getServletPath() : "";
+        String pathInfo = req.getPathInfo() != null ? req.getPathInfo() : "";
+        String fullPath = servletPath + pathInfo;
+
         try {
-            switch (req.getServletPath()) {
-                case "/api/v1/auth/register" -> register(req, resp);
-                case "/api/v1/auth/login" -> login(req, resp);
-                case "/api/v1/auth/logout" -> logout(req, resp);
-                default -> JsonUtil.writeError(resp, HttpServletResponse.SC_NOT_FOUND, "NOT_FOUND", "Unknown route");
+            if (fullPath.endsWith("/register") || "/api/v1/auth/register".equals(fullPath)) {
+                register(req, resp);
+            } else if (fullPath.endsWith("/login") || "/api/v1/auth/login".equals(fullPath)) {
+                login(req, resp);
+            } else if (fullPath.endsWith("/logout") || "/api/v1/auth/logout".equals(fullPath)) {
+                logout(req, resp);
+            } else {
+                JsonUtil.writeError(resp, HttpServletResponse.SC_NOT_FOUND, "NOT_FOUND", "Unknown route");
             }
         } catch (AppException e) {
             handleError(resp, e);
@@ -29,10 +44,15 @@ public class AuthServlet extends BaseApiServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (!"/api/v1/auth/me".equals(req.getServletPath())) {
+        String servletPath = req.getServletPath() != null ? req.getServletPath() : "";
+        String pathInfo = req.getPathInfo() != null ? req.getPathInfo() : "";
+        String fullPath = servletPath + pathInfo;
+
+        if (!fullPath.endsWith("/me") && !"/api/v1/auth/me".equals(fullPath)) {
             JsonUtil.writeError(resp, HttpServletResponse.SC_NOT_FOUND, "NOT_FOUND", "Unknown route");
             return;
         }
+
         User user = currentUser(req);
         if (user == null) {
             JsonUtil.writeError(resp, HttpServletResponse.SC_UNAUTHORIZED, "UNAUTHENTICATED", "Not logged in");

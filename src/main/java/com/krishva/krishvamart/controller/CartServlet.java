@@ -7,14 +7,15 @@ import com.krishva.krishvamart.exception.ValidationException;
 import com.krishva.krishvamart.model.CartItem;
 import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.util.JsonUtil;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+@WebServlet(urlPatterns = {"/api/v1/cart", "/api/v1/cart/*"})
 public class CartServlet extends BaseApiServlet {
 
     @Override

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.krishva</groupId>
   <artifactId>krishvamart</artifactId>
@@ -9,6 +9,7 @@
   <packaging>war</packaging>
   <name>KrishvaMart</name>
   <description>Multi-seller, E-commerce marketplace</description>
+
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
@@ -24,6 +25,7 @@
     <junit.version>5.10.2</junit.version>
     <mockito.version>5.11.0</mockito.version>
   </properties>
+
   <dependencies>
     <!-- Servlet API (provided by Tomcat) -->
     <dependency>
@@ -93,6 +95,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
     <finalName>krishvamart</finalName>
     <resources>
@@ -118,11 +121,17 @@
           <failOnMissingWebXml>true</failOnMissingWebXml>
         </configuration>
       </plugin>
+
+      <!-- Configured with argLine to allow Mockito dynamic agent self-attachment on Java 17+ -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
+        <configuration>
+          <argLine>-XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
+        </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>

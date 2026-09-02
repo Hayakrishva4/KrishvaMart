@@ -1,4 +1,5 @@
 package com.krishva.krishvamart.service;
+
 import com.krishva.krishvamart.dao.CartDAO;
 import com.krishva.krishvamart.dao.OrderDAO;
 import com.krishva.krishvamart.dao.ProductDAO;
@@ -10,6 +11,7 @@ import com.krishva.krishvamart.exception.NotFoundException;
 import com.krishva.krishvamart.exception.ValidationException;
 import com.krishva.krishvamart.model.CartItem;
 import com.krishva.krishvamart.model.Order;
+import com.krishva.krishvamart.model.OrderItem;
 import com.krishva.krishvamart.model.User;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -22,12 +24,14 @@ public class OrderService {
     private final OrderDAO orderDAO;
     private final ProductDAO productDAO;
     private final CartDAO cartDAO;
+
     public OrderService(DataSource dataSource, OrderDAO orderDAO, ProductDAO productDAO, CartDAO cartDAO) {
         this.dataSource = dataSource;
         this.orderDAO = orderDAO;
         this.productDAO = productDAO;
         this.cartDAO = cartDAO;
     }
+
     public Order checkout(long buyerId, boolean mockPaymentConfirmed, String shippingAddress) throws AppException {
         if (!mockPaymentConfirmed) {
             throw new ValidationException("payment", "Mock payment confirmation is required to place an order");
@@ -73,16 +77,62 @@ public class OrderService {
             throw new DataAccessException("Failed to open checkout transaction", e);
         }
     }
+
+    public void cancelOrder(long orderId, User requester) throws AppException {
+        Order order = get(orderId, requester);
+
+        boolean isOwner = order.getBuyerId().equals(requester.getId());
+        boolean isAdmin = requester.getRole() == User.Role.ADMIN;
+
+        if (!isOwner && !isAdmin) {
+            throw new ForbiddenException("You can only cancel your own orders");
+        }
+
+        if (order.getStatus() != Order.Status.PENDING && order.getStatus() != Order.Status.CONFIRMED) {
+            throw new ValidationException("status", "Only PENDING or CONFIRMED orders can be cancelled");
+        }
+
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                if (order.getItems() != null) {
+                    for (OrderItem item : order.getItems()) {
+                        boolean success = productDAO.adjustStock(conn, item.getProductId(), item.getQuantity());
+                        if (!success) {
+                            throw new DataAccessException("Failed to restore stock for product ID: " + item.getProductId(), new RuntimeException("Stock adjustment failed"));
+                        }
+                    }
+                }
+
+                boolean updated = orderDAO.updateStatus(orderId, Order.Status.CANCELLED);
+                if (!updated) {
+                    throw new DataAccessException("Failed to update order status to cancelled", new RuntimeException("Update status returned false"));
+                }
+
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                if (e instanceof AppException) throw (AppException) e;
+                throw new DataAccessException("Transaction failed during order cancellation", e);
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Database connection error during cancellation", e);
+        }
+    }
+
     public List<Order> historyForBuyer(long buyerId) throws AppException {
         return orderDAO.findByBuyer(buyerId);
     }
+
     public List<Order> incomingForSeller(long sellerId) throws AppException {
         return orderDAO.findBySeller(sellerId);
     }
+
     public List<Order> listAllForAdmin(User admin) throws AppException {
         requireAdmin(admin);
         return orderDAO.findAll();
     }
+
     public Order get(long orderId, User requester) throws AppException {
         Order order = orderDAO.findById(orderId).orElseThrow(() -> new NotFoundException("Order not found"));
         boolean isOwner = order.getBuyerId().equals(requester.getId());
@@ -102,6 +152,7 @@ public class OrderService {
         }
         return order;
     }
+
     public void advanceStatus(long orderId, Order.Status newStatus, User actor) throws AppException {
         if (actor.getRole() != User.Role.SELLER && actor.getRole() != User.Role.ADMIN) {
             throw new ForbiddenException("Only a seller or admin can update order status");

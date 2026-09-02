@@ -6,5 +6,5 @@
     <div id="ordersList"></div>
 </section>
 
-<script src="${pageContext.request.contextPath}/js/orders.js"></script>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
+<script src="${pageContext.request.contextPath}/js/orders.js"></script>

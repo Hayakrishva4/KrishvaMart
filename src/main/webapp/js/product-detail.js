@@ -65,10 +65,12 @@ document.addEventListener('DOMContentLoaded', () =>
                     '<div class="actions">' +
                         '<input type="number" id="quantityInput" value="1" min="1" max="' + p.stockQty + '" ' + (!inStock ? 'disabled' : '') + '>' +
                         '<button id="addToCartBtn" class="btn btn-primary" ' + (!inStock ? 'disabled' : '') + '>Add to Cart</button>' +
+                        '<button id="wishlistBtn" class="btn btn-secondary wishlist-btn" title="Save to Wishlist">&#10084; Save to Wishlist</button>' +
                     '</div>' +
                     '<p id="cartFeedback" class="feedback-msg"></p>' +
                 '</div>' +
             '</div>';
+            
         const addToCartBtn = document.getElementById('addToCartBtn');
         if (addToCartBtn) 
         {
@@ -76,6 +78,13 @@ document.addEventListener('DOMContentLoaded', () =>
             {
              const qty = parseInt(document.getElementById('quantityInput').value, 10) || 1;
                 addToCart(p.id, qty);
+            });
+        }
+
+        const wishlistBtn = document.getElementById('wishlistBtn');
+        if (wishlistBtn) {
+            wishlistBtn.addEventListener('click', () => {
+                addToWishlist(p.id);
             });
         }
     }
@@ -102,6 +111,22 @@ document.addEventListener('DOMContentLoaded', () =>
           if (feedback) feedback.textContent = 'Please log in to add items.';
         });
     }
+
+    async function addToWishlist(prodId) {
+        const feedback = document.getElementById('cartFeedback');
+        if (feedback) feedback.textContent = 'Saving to wishlist...';
+        try {
+            // FIXED LINE: Sending productId in the JSON body, not the URL
+            await window.api.post("/wishlist", { productId: prodId });
+            
+            if (feedback) feedback.textContent = 'Saved to Wishlist! \u2764';
+            const btn = document.getElementById('wishlistBtn');
+            if (btn) btn.classList.add('wishlist-active');
+        } catch (err) {
+            if (feedback) feedback.textContent = err.message || 'Login required to use wishlist.';
+        }
+    }
+
     function fetchReviews(pId) 
     {
         if (!reviewList) return;

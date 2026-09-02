@@ -1,4 +1,20 @@
-const API_BASE = "/api/v1";
+function getBaseContext() {
+    const pathname = window.location.pathname;
+    const knownDirs = ["/jsp/", "/css/", "/js/", "/api/"];
+    for (const dir of knownDirs) {
+        const idx = pathname.indexOf(dir);
+        if (idx !== -1) {
+            return pathname.substring(0, idx);
+        }
+    }
+    return "";
+}
+
+if (typeof window.API_BASE === "undefined") {
+    window.API_BASE = getBaseContext() + "/api/v1";
+}
+var API_BASE = window.API_BASE;
+
 async function apiRequest(method, path, body) {
     const opts = {
         method,
@@ -24,13 +40,16 @@ async function apiRequest(method, path, body) {
     }
     return envelope.data;
 }
-const api = {
+
+var api = window.api || {
     get: (path) => apiRequest("GET", path),
     post: (path, body) => apiRequest("POST", path, body),
     put: (path, body) => apiRequest("PUT", path, body),
     patch: (path, body) => apiRequest("PATCH", path, body),
     del: (path) => apiRequest("DELETE", path)
 };
+window.api = api;
+
 function escapeHtml(str) {
     if (str === null || str === undefined) return "";
     return String(str)
@@ -40,6 +59,7 @@ function escapeHtml(str) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
 }
+
 function formatMoney(value) {
     const num = Number(value);
     return "$" + (isNaN(num) ? "0.00" : num.toFixed(2));

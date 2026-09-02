@@ -14,5 +14,6 @@
     </form>
     <p id="moderateMessage"></p>
 </section>
-<script src="${pageContext.request.contextPath}/js/admin.js"></script>
+
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
+<script src="${pageContext.request.contextPath}/js/admin.js"></script>
