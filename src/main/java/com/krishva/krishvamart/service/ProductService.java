@@ -8,21 +8,15 @@ import com.krishva.krishvamart.exception.ValidationException;
 import com.krishva.krishvamart.model.Product;
 import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.util.ValidationUtil;
-
 import java.util.List;
 
-/** Business rules for listing management (F2) and browse/search (F3). No JDBC here. */
 public class ProductService {
-
     private final ProductDAO productDAO;
-
     public ProductService(ProductDAO productDAO) {
         this.productDAO = productDAO;
     }
-
-    /** F2: seller creates a new listing; stock/price/category are validated before insert. */
     public Product create(long sellerId, String name, String description, java.math.BigDecimal price,
-                           Integer stockQty, String category, String imageUrl) throws AppException {
+      Integer stockQty, String category, String imageUrl) throws AppException {
         validateListing(name, price, stockQty, category);
         Product product = new Product();
         product.setSellerId(sellerId);
@@ -35,9 +29,8 @@ public class ProductService {
         return productDAO.insert(product);
     }
 
-    /** F2: seller edits an existing listing; throws ForbiddenException if the seller doesn't own it. */
     public Product update(long productId, long sellerId, String name, String description,
-                           java.math.BigDecimal price, Integer stockQty, String category, String imageUrl)
+      java.math.BigDecimal price, Integer stockQty, String category, String imageUrl)
             throws AppException {
         validateListing(name, price, stockQty, category);
         Product existing = getOwnedOrThrow(productId, sellerId);
@@ -53,13 +46,11 @@ public class ProductService {
         return existing;
     }
 
-    /** F2: seller deletes a listing; throws ForbiddenException if the seller doesn't own it. */
     public void delete(long productId, long sellerId) throws AppException {
         getOwnedOrThrow(productId, sellerId);
         productDAO.delete(productId, sellerId);
     }
 
-    /** Looks up a single product by id, regardless of active status. */
     public Product get(long productId) throws AppException {
         return productDAO.findById(productId).orElseThrow(() -> new NotFoundException("Product not found"));
     }
@@ -68,19 +59,15 @@ public class ProductService {
         return productDAO.search(keyword, category, true);
     }
 
-    /** F3 extended: price range, sort order, and pagination on top of keyword/category. */
     public com.krishva.krishvamart.dto.PagedResult<Product> search(com.krishva.krishvamart.dto.ProductSearchCriteria criteria)
             throws AppException {
         return productDAO.search(criteria);
     }
 
-    /** Every listing (active or not) owned by a seller, for their dashboard. */
     public List<Product> listForSeller(long sellerId) throws AppException {
         return productDAO.findBySeller(sellerId);
     }
 
-    /** F7: admin moderation - remove/deactivate any listing regardless of owner. */
-    /** F7: admin deactivates any listing regardless of owner. */
     public void moderateRemove(long productId, User admin) throws AppException {
         requireAdmin(admin);
         productDAO.setActive(productId, false);

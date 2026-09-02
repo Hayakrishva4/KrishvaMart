@@ -9,7 +9,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 
-/** Forces UTF-8 request/response encoding on every request. Runs first in the filter chain. */
 @WebFilter(urlPatterns = "/*")
 public class EncodingFilter implements Filter {
 

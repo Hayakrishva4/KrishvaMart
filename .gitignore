@@ -5,11 +5,8 @@ logs/
 data/
 *.mv.db
 *.trace.db
-
-# Local-only secrets (Section 9 checklist: credentials excluded from VCS)
 src/main/resources/config.properties
 .env
-
 .idea/
 *.iml
 .vscode/

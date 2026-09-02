@@ -22,14 +22,8 @@ import com.krishva.krishvamart.service.SellerAnalyticsService;
 import com.krishva.krishvamart.service.UserService;
 import com.krishva.krishvamart.service.WishlistService;
 import com.krishva.krishvamart.util.ConfigResolver;
-
 import javax.sql.DataSource;
 
-/**
- * Small hand-rolled DI container: wires DAO implementations into services
- * once at application startup and hands the same instances to every servlet
- * via the ServletContext.
- */
 public final class ServiceRegistry {
 
     public static final String ATTR = "krishvamart.services";

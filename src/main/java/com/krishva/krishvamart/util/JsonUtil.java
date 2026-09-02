@@ -6,14 +6,11 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.krishva.krishvamart.dto.ApiResponse;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import javax.servlet.http.HttpServletResponse;
 
-/** Central Gson instance and small helpers for writing the fixed API response envelope. */
 public final class JsonUtil {
-
     private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new TypeAdapter<LocalDateTime>() {
                 @Override

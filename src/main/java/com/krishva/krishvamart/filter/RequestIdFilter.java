@@ -10,10 +10,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.MDC;
 
-/** Generates a request id per incoming request and attaches it to the SLF4J MDC (Section 18). */
 @WebFilter(urlPatterns = "/*")
 public class RequestIdFilter implements Filter {
 

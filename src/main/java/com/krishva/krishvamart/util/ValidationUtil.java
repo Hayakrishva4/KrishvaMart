@@ -3,7 +3,6 @@ package com.krishva.krishvamart.util;
 import java.math.BigDecimal;
 import java.util.regex.Pattern;
 
-/** Small stateless helpers for field-level input validation used by the service layer. */
 public final class ValidationUtil {
 
     private static final Pattern EMAIL_PATTERN =

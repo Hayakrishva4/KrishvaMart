@@ -18,22 +18,12 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import java.math.BigDecimal;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Integration-style test for the checkout transaction (Section 9: the
- * highest-risk logic in the app - order insert, stock decrement, and cart
- * clear must all commit together or none of them do). Runs the real DAOs
- * against an embedded H2 instance rather than mocks, since the behavior
- * under test is the transaction boundary itself.
- */
 class OrderServiceTest {
-
     private HikariDataSource dataSource;
     private OrderService orderService;
     private CartService cartService;
@@ -48,24 +38,20 @@ class OrderServiceTest {
         productDAO = new JdbcProductDAO(dataSource);
         CartDAO cartDAO = new JdbcCartDAO(dataSource);
         OrderDAO orderDAO = new JdbcOrderDAO(dataSource);
-
         orderService = new OrderService(dataSource, orderDAO, productDAO, cartDAO);
         cartService = new CartService(cartDAO, productDAO);
-
         User seller = new User();
         seller.setName("Seller");
         seller.setEmail("seller@example.com");
         seller.setPasswordHash("x");
         seller.setRole(User.Role.SELLER);
         long sellerId = userDAO.insert(seller).getId();
-
         User buyer = new User();
         buyer.setName("Buyer");
         buyer.setEmail("buyer@example.com");
         buyer.setPasswordHash("x");
         buyer.setRole(User.Role.BUYER);
         buyerId = userDAO.insert(buyer).getId();
-
         Product product = new Product();
         product.setSellerId(sellerId);
         product.setName("Widget");
@@ -100,32 +86,21 @@ class OrderServiceTest {
     @Test
     void checkout_decrementsStockAndClearsCartOnSuccess() throws Exception {
         cartService.addItem(buyerId, productId, 3);
-
         Order order = orderService.checkout(buyerId, true, "123 Main St, Chennai, TN 600001");
-
         assertEquals(Order.Status.CONFIRMED, order.getStatus());
         assertEquals(0, new BigDecimal("30.00").compareTo(order.getTotalAmount()));
         assertEquals(1, order.getItems().size());
-
         Product afterCheckout = productDAO.findById(productId).orElseThrow();
         assertEquals(2, afterCheckout.getStockQty(), "Stock should be decremented by the ordered quantity");
-
         assertTrue(cartService.view(buyerId).isEmpty(), "Cart should be cleared after checkout");
     }
 
     @Test
     void checkout_rollsBackEverythingWhenStockRaceLeavesInsufficientStock() throws Exception {
         cartService.addItem(buyerId, productId, 3);
-
-        // Simulate a concurrent sale that drops stock below what this cart needs,
-        // after CartService validated availability but before checkout runs.
         productDAO.adjustStock(productId, -3);
         assertEquals(2, productDAO.findById(productId).orElseThrow().getStockQty());
-
         assertThrows(ConflictException.class, () -> orderService.checkout(buyerId, true, "123 Main St, Chennai, TN 600001"));
-
-        // Nothing should have been persisted: stock unchanged by the failed
-        // checkout, and the cart item should still be present (not cleared).
         assertEquals(2, productDAO.findById(productId).orElseThrow().getStockQty());
         assertEquals(1, cartService.view(buyerId).size(), "Cart should not be cleared when checkout rolls back");
     }

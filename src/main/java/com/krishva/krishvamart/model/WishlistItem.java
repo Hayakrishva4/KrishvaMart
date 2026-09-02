@@ -3,7 +3,6 @@ package com.krishva.krishvamart.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/** O1: a product a buyer has saved for later, outside their active cart. */
 public class WishlistItem {
 
     private Long id;

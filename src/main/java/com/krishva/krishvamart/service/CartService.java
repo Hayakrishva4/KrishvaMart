@@ -12,18 +12,13 @@ import com.krishva.krishvamart.model.Product;
 import java.math.BigDecimal;
 import java.util.List;
 
-/** Business rules for the cart (F4): add, update, remove, running total. No JDBC here. */
 public class CartService {
-
     private final CartDAO cartDAO;
     private final ProductDAO productDAO;
-
     public CartService(CartDAO cartDAO, ProductDAO productDAO) {
         this.cartDAO = cartDAO;
         this.productDAO = productDAO;
     }
-
-    /** F4: adds a product to the cart (or increases quantity if already present); rejects over-stock quantities. */
     public CartItem addItem(long userId, long productId, int quantity) throws AppException {
         if (quantity <= 0) {
             throw new ValidationException("quantity", "Quantity must be at least 1");
@@ -41,7 +36,6 @@ public class CartService {
         return cartDAO.upsert(userId, productId, newQty);
     }
 
-    /** F4: sets the exact quantity of an existing cart line; rejects quantities beyond current stock. */
     public void updateQuantity(long userId, long productId, int quantity) throws AppException {
         if (quantity <= 0) {
             throw new ValidationException("quantity", "Quantity must be at least 1");

@@ -15,18 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-/**
- * Enforces session checks on every protected servlet (Section 9 checklist item
- * "All protected servlets enforce session checks via AuthFilter").
- *
- * Public (unauthenticated) routes:
- *  - POST /api/v1/auth/register, POST /api/v1/auth/login
- *  - GET  /api/v1/products/**        (F3: buyer browse/search does not require login)
- *  - GET  /api/v1/reviews/**         (public star ratings)
- *  - GET  /api/v1/health
- * Everything else under /api/v1/** requires an authenticated session.
- * Role-specific checks (seller-only, admin-only) are enforced in the service layer.
- */
 @WebFilter(urlPatterns = "/api/v1/*")
 public class AuthFilter implements Filter {
 

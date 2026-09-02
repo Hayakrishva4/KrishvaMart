@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () =>
      }
       return;
     }
-    // 1. Fetch Product
     fetch('/api/v1/products/' + productId)
      .then(res => 
         {
@@ -45,16 +44,13 @@ document.addEventListener('DOMContentLoaded', () =>
           detailContainer.innerHTML = '<p class="error-text">' + (err.message || 'Failed to load product details.') + '</p>';
          }
         });
-    // 2. Fetch Reviews
     fetchReviews(productId);
-    // 3. Render Product Card
     function renderProduct(p) {
         if (!detailContainer) return;
         const inStock = p.stockQty > 0;
         const stockBadge = inStock 
             ? '<span class="badge in-stock">In Stock (' + p.stockQty + ' available)</span>'
             : '<span class="badge out-of-stock">Out of Stock</span>';
-        // \u20B9 is the Unicode symbol for ₹ (Indian Rupee)
         detailContainer.innerHTML = 
             '<div class="product-card-detail">' +
                 '<div class="product-image">' +
@@ -83,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () =>
             });
         }
     }
-    // 4. Add to Cart Handler
     function addToCart(prodId, quantity) 
     {
         const feedback = document.getElementById('cartFeedback');
@@ -107,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () =>
           if (feedback) feedback.textContent = 'Please log in to add items.';
         });
     }
-    // 5. Fetch Reviews Handler
     function fetchReviews(pId) 
     {
         if (!reviewList) return;
@@ -123,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () =>
             })
             .catch(() => {});
     }
-    // 6. Render Reviews List (using Unicode escapes for star icons)
     function renderReviews(reviews, avgRating) 
     {
         if (!reviewList) return;
@@ -146,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () =>
                 '<small class="muted-text">' + (r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '') + '</small>' +
             '</div>' + '<p>' + escapeHtml(r.comment || '') + '</p>' + '</div>').join('');
     }
-    // 7. Submit Review
     if (reviewForm) {
         reviewForm.classList.remove('hidden');
         reviewForm.addEventListener('submit', (e) => {

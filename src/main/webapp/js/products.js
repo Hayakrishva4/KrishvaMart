@@ -62,7 +62,6 @@ document.getElementById("searchBtn").addEventListener("click", () => loadProduct
 document.getElementById("searchInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter") loadProducts(1);
 });
-// Initial load
 window.addEventListener('load', () => {
     loadProducts(1);
 });

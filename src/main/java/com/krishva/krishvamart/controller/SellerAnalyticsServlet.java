@@ -5,13 +5,11 @@ import com.krishva.krishvamart.exception.AppException;
 import com.krishva.krishvamart.exception.ForbiddenException;
 import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.util.JsonUtil;
-
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** O3: seller sales dashboard (order counts, revenue totals). Mapped at /api/v1/seller/analytics. */
 @WebServlet(urlPatterns = "/api/v1/seller/analytics")
 public class SellerAnalyticsServlet extends BaseApiServlet {
 

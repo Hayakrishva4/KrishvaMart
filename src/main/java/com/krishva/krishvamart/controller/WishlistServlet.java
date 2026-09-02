@@ -8,20 +8,14 @@ import com.krishva.krishvamart.exception.ValidationException;
 import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.model.WishlistItem;
 import com.krishva.krishvamart.util.JsonUtil;
-
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * O1: wishlist / save-for-later. Mapped at /api/v1/wishlist (view/add) and
- * /api/v1/wishlist/{productId} (remove). Buyer-only, like the cart.
- */
 @WebServlet(urlPatterns = {"/api/v1/wishlist", "/api/v1/wishlist/*"})
 public class WishlistServlet extends BaseApiServlet {
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
@@ -32,7 +26,6 @@ public class WishlistServlet extends BaseApiServlet {
             handleError(resp, e);
         }
     }
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
@@ -47,7 +40,6 @@ public class WishlistServlet extends BaseApiServlet {
             handleError(resp, e);
         }
     }
-
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {

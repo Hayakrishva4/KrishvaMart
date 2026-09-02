@@ -3,7 +3,6 @@ package com.krishva.krishvamart.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/** A listing created by a seller. */
 public class Product {
 
     private Long id;

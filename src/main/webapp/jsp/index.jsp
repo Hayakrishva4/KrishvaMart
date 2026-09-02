@@ -2,7 +2,6 @@
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
 
 <style>
-    /* Banner Layout & Styling (Theme Independent) */
     .promo-container {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -17,7 +16,7 @@
         align-items: center;
         justify-content: center;
         text-align: center;
-        color: #ffffff; /* Always white text over images */
+        color: #ffffff; 
         cursor: pointer;
         transition: transform 0.2s ease;
         text-decoration: none;
@@ -26,7 +25,6 @@
     .promo-banner:hover {
         transform: scale(1.02);
     }
-    /* Dark overlay so text is readable on ANY image */
     .promo-banner::before {
         content: '';
         position: absolute;
@@ -39,10 +37,8 @@
         z-index: 2;
         padding: 30px 20px;
     }
-    
-    /* Specific Banner Images */
     .promo-discount {
-        grid-column: 1 / -1; /* Makes this banner full width */
+        grid-column: 1 / -1;
         min-height: 220px;
         background: url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1200&q=80') center/cover;
     }
@@ -54,15 +50,11 @@
         min-height: 180px;
         background: url('https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80') center/cover;
     }
-
-    /* Mobile Responsiveness */
     @media (max-width: 768px) {
         .promo-container { grid-template-columns: 1fr; }
     }
 </style>
-
 <script>
-    // This perfectly links your banners to your existing search filters
     function autoFilterCategory(category) {
         const select = document.getElementById('categorySelect');
         const btn = document.getElementById('searchBtn');
@@ -73,26 +65,19 @@
         }
     }
 </script>
-
-<!-- === PROMOTIONAL BANNERS === -->
 <section class="promo-container">
-    <!-- Full Width Discount Banner -->
     <div class="promo-banner promo-discount" onclick="document.getElementById('productGrid').scrollIntoView({ behavior: 'smooth' });">
         <div>
             <h1 style="margin: 0 0 10px 0; font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">🎉 Grand Opening!</h1>
             <p style="margin: 0; font-size: 1.2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">Get <strong>10% OFF</strong> all items during your first week. Start exploring below!</p>
         </div>
     </div>
-
-    <!-- Electronics Category Banner -->
     <div class="promo-banner promo-elec" onclick="autoFilterCategory('Electronics')">
         <div>
             <h2 style="margin: 0 0 5px 0; font-size: 2rem;">Electronics</h2>
             <p style="margin: 0;">Shop latest gadgets & tech</p>
         </div>
     </div>
-
-    <!-- Home Category Banner -->
     <div class="promo-banner promo-home" onclick="autoFilterCategory('Home')">
         <div>
             <h2 style="margin: 0 0 5px 0; font-size: 2rem;">Home & Living</h2>
@@ -100,8 +85,6 @@
         </div>
     </div>
 </section>
-<!-- =========================== -->
-
 <section class="search-bar">
     <input type="text" id="searchInput" placeholder="Search products...">
     <select id="categorySelect">
@@ -119,15 +102,10 @@
     </select>
     <button id="searchBtn">Search</button>
 </section>
-
 <section id="recentlyViewed" class="recently-viewed hidden"></section>
-
 <section id="productGrid" class="product-grid">
     <p>Loading products...</p>
 </section>
-
 <nav id="pagination" class="pagination hidden"></nav>
-
-<!-- FIXED SCRIPT TAGS: Added api.js and removed the broken recently-viewed.js -->
 <script src="${pageContext.request.contextPath}/js/products.js"></script>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>

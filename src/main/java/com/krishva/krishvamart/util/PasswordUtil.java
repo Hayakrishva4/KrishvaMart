@@ -2,7 +2,6 @@ package com.krishva.krishvamart.util;
 
 import org.mindrot.jbcrypt.BCrypt;
 
-/** Password hashing helpers backed by jBCrypt. Never store or log plaintext passwords. */
 public final class PasswordUtil {
 
     private static final int WORK_FACTOR = 12;
@@ -21,7 +20,6 @@ public final class PasswordUtil {
         try {
             return BCrypt.checkpw(plainPassword, hashed);
         } catch (IllegalArgumentException ex) {
-            // Malformed hash in storage - treat as non-match rather than propagating.
             return false;
         }
     }

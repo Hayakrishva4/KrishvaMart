@@ -9,7 +9,6 @@ import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.util.PasswordUtil;
 import com.krishva.krishvamart.util.ValidationUtil;
 
-/** Business rules for registration and login (F1). No JDBC here - all persistence goes through UserDAO. */
 public class UserService {
 
     private final UserDAO userDAO;
@@ -18,7 +17,6 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
-    /** F1: buyer/seller self-registration. Admin accounts are seed-only, never created here. */
     public User register(String name, String email, String password, String roleRaw) throws AppException {
         if (ValidationUtil.isBlank(name)) {
             throw new ValidationException("name", "Name is required");
@@ -43,7 +41,6 @@ public class UserService {
         return userDAO.insert(user);
     }
 
-    /** F1: verifies email/password against the stored bcrypt hash; never reveals which field was wrong. */
     public User login(String email, String password) throws AppException {
         if (ValidationUtil.isBlank(email) || ValidationUtil.isBlank(password)) {
             throw new ValidationException("email", "Email and password are required");
@@ -56,15 +53,10 @@ public class UserService {
         return user;
     }
 
-    /** F7: every registered user, for the admin view. */
     public java.util.List<User> listAll() throws AppException {
         return userDAO.findAll();
     }
 
-    /**
-     * F1: "Admin role assigned via a seed account; no separate admin signup
-     * flow" - self-service registration is restricted to BUYER/SELLER.
-     */
     private User.Role parseSignupRole(String roleRaw) throws ValidationException {
         if (ValidationUtil.isBlank(roleRaw)) {
             throw new ValidationException("role", "Role is required");

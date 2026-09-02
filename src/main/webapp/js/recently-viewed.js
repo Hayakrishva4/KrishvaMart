@@ -1,9 +1,5 @@
-// Recently viewed products (Week 10 UI polish). Purely a client-side
-// convenience - stored per-browser in localStorage, never sent to the
-// server, so it needs no auth and works for anonymous browsing too.
 const RECENTLY_VIEWED_KEY = "krishvamart-recently-viewed";
 const RECENTLY_VIEWED_MAX = 8;
-
 function recordRecentlyViewed(product) {
     let list = readRecentlyViewed();
     list = list.filter(p => p.id !== product.id);
@@ -16,7 +12,6 @@ function recordRecentlyViewed(product) {
     list = list.slice(0, RECENTLY_VIEWED_MAX);
     localStorage.setItem(RECENTLY_VIEWED_KEY, JSON.stringify(list));
 }
-
 function readRecentlyViewed() {
     try {
         const raw = localStorage.getItem(RECENTLY_VIEWED_KEY);
@@ -25,7 +20,6 @@ function readRecentlyViewed() {
         return [];
     }
 }
-
 function renderRecentlyViewedStrip(containerId, excludeId) {
     const container = document.getElementById(containerId);
     if (!container) return;

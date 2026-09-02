@@ -3,7 +3,6 @@ package com.krishva.krishvamart.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/** A single line item within an order, capturing the price at purchase time. */
 public class OrderItem {
 
     private Long id;

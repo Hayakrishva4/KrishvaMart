@@ -2,9 +2,7 @@ package com.krishva.krishvamart.model;
 
 import java.time.LocalDateTime;
 
-/** A star rating and comment left by a buyer on a completed order's product. */
 public class Review {
-
     private Long id;
     private Long productId;
     private Long userId;
@@ -13,7 +11,6 @@ public class Review {
     private int rating;
     private String comment;
     private LocalDateTime createdAt;
-
     public Review() {
     }
 
