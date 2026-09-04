@@ -3,78 +3,79 @@ package com.krishva.krishvamart.model;
 import java.time.LocalDateTime;
 
 public class Review {
-    private Long id;
-    private Long productId;
-    private Long userId;
-    private String userName;
-    private Long orderId;
-    private int rating;
-    private String comment;
-    private LocalDateTime createdAt;
-    public Review() {
-    }
+  private Long id;
+  private Long productId;
+  private Long userId;
+  private String userName;
+  private Long orderId;
+  private int rating;
+  private String comment;
+  private LocalDateTime createdAt;
 
-    public Long getId() {
-        return id;
-    }
+  public Review() {
+  }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public Long getProductId() {
-        return productId;
-    }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
+  public Long getProductId() {
+    return productId;
+  }
 
-    public Long getUserId() {
-        return userId;
-    }
+  public void setProductId(Long productId) {
+    this.productId = productId;
+  }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+  public Long getUserId() {
+    return userId;
+  }
 
-    public String getUserName() {
-        return userName;
-    }
+  public void setUserId(Long userId) {
+    this.userId = userId;
+  }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
+  public String getUserName() {
+    return userName;
+  }
 
-    public Long getOrderId() {
-        return orderId;
-    }
+  public void setUserName(String userName) {
+    this.userName = userName;
+  }
 
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
+  public Long getOrderId() {
+    return orderId;
+  }
 
-    public int getRating() {
-        return rating;
-    }
+  public void setOrderId(Long orderId) {
+    this.orderId = orderId;
+  }
 
-    public void setRating(int rating) {
-        this.rating = rating;
-    }
+  public int getRating() {
+    return rating;
+  }
 
-    public String getComment() {
-        return comment;
-    }
+  public void setRating(int rating) {
+    this.rating = rating;
+  }
 
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
+  public String getComment() {
+    return comment;
+  }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+  public void setComment(String comment) {
+    this.comment = comment;
+  }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
 }

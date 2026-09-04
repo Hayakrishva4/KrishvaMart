@@ -6,7 +6,8 @@ import java.util.regex.Pattern;
 public final class ValidationUtil {
 
     private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+            Pattern.compile(
+                    "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
     private ValidationUtil() {
     }
@@ -16,7 +17,8 @@ public final class ValidationUtil {
     }
 
     public static boolean isValidEmail(String email) {
-        return !isBlank(email) && EMAIL_PATTERN.matcher(email.trim()).matches();
+        return !isBlank(email)
+                && EMAIL_PATTERN.matcher(email.trim()).matches();
     }
 
     public static boolean isValidPassword(String password) {
@@ -24,11 +26,13 @@ public final class ValidationUtil {
     }
 
     public static boolean isPositive(BigDecimal value) {
-        return value != null && value.compareTo(BigDecimal.ZERO) > 0;
+        return value != null
+                && value.compareTo(BigDecimal.ZERO) > 0;
     }
 
     public static boolean isNonNegative(BigDecimal value) {
-        return value != null && value.compareTo(BigDecimal.ZERO) >= 0;
+        return value != null
+                && value.compareTo(BigDecimal.ZERO) >= 0;
     }
 
     public static boolean isValidRating(int rating) {
