@@ -1,0 +1,17 @@
+[Unit]
+Description=KrishvaMart H2 Database (server mode)
+After=network.target
+
+[Service]
+Type=simple
+User=krishvamart
+WorkingDirectory=/opt/krishvamart
+# Point H2_JAR at the actual jar path on the box, e.g.
+# /home/krishvamart/.m2/repository/com/h2database/h2/2.2.224/h2-2.2.224.jar
+Environment=H2_JAR=/opt/krishvamart/lib/h2.jar
+ExecStart=/usr/bin/java -cp ${H2_JAR} org.h2.tools.Server -tcp -tcpAllowOthers -baseDir /opt/krishvamart/data
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

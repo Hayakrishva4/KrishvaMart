@@ -1,0 +1,20 @@
+[Unit]
+Description=Apache Tomcat 9 (KrishvaMart)
+After=network.target krishvamart-h2.service
+Requires=krishvamart-h2.service
+
+[Service]
+Type=forking
+User=tomcat
+Environment=JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+Environment=CATALINA_HOME=/opt/tomcat9
+Environment=CATALINA_BASE=/opt/tomcat9
+Environment=CATALINA_PID=/opt/tomcat9/temp/tomcat.pid
+Environment=CATALINA_OPTS=-Xms256M -Xmx512M
+ExecStart=/opt/tomcat9/bin/startup.sh
+ExecStop=/opt/tomcat9/bin/shutdown.sh
+RestartSec=10
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
