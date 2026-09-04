@@ -52,7 +52,8 @@ public final class ServiceRegistry {
         this.userService = new UserService(userDAO);
         this.productService = new ProductService(productDAO);
         this.cartService = new CartService(cartDAO, productDAO);
-        this.orderService = new OrderService(dataSource, orderDAO, productDAO, cartDAO);
+        this.orderService = new OrderService(
+                dataSource, orderDAO, productDAO, cartDAO);
         this.reviewService = new ReviewService(reviewDAO, orderDAO);
         this.wishlistService = new WishlistService(wishlistDAO, productDAO);
         this.sellerAnalyticsService = new SellerAnalyticsService(analyticsDAO);
