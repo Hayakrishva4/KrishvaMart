@@ -1,13 +1,8 @@
 package com.krishva.krishvamart.dto;
 
 import com.krishva.krishvamart.model.User;
-
 import java.time.LocalDateTime;
 
-/**
- * Client-facing user shape. Deliberately excludes passwordHash (Section 13,
- * Rule 4: DTOs are separate classes from entities and must not leak secrets).
- */
 public class UserResponseDTO {
 
     private final Long id;

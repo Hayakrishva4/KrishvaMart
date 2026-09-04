@@ -5,7 +5,6 @@ import com.krishva.krishvamart.dto.PagedResult;
 import com.krishva.krishvamart.dto.ProductSearchCriteria;
 import com.krishva.krishvamart.exception.DataAccessException;
 import com.krishva.krishvamart.model.Product;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

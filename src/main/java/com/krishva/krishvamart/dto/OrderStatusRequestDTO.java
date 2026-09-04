@@ -1,6 +1,5 @@
 package com.krishva.krishvamart.dto;
 
-/** Incoming JSON body for PATCH /api/v1/orders/{id}/status (O2). */
 public class OrderStatusRequestDTO {
     private String status;
 

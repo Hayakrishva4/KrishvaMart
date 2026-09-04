@@ -3,7 +3,6 @@ package com.krishva.krishvamart.dao.impl;
 import com.krishva.krishvamart.dao.CartDAO;
 import com.krishva.krishvamart.exception.DataAccessException;
 import com.krishva.krishvamart.model.CartItem;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,9 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.sql.DataSource;
 
-/** All SQL for the cart_items table lives here, PreparedStatement only (Section 2, Rule 1). */
 public class JdbcCartDAO implements CartDAO {
-
     private final DataSource dataSource;
 
     public JdbcCartDAO(DataSource dataSource) {

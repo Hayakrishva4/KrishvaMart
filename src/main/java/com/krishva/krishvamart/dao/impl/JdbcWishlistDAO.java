@@ -3,7 +3,6 @@ package com.krishva.krishvamart.dao.impl;
 import com.krishva.krishvamart.dao.WishlistDAO;
 import com.krishva.krishvamart.exception.DataAccessException;
 import com.krishva.krishvamart.model.WishlistItem;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
 
-/** All SQL for the wishlist_items table lives here, PreparedStatement only (Section 2, Rule 1). */
 public class JdbcWishlistDAO implements WishlistDAO {
 
     private final DataSource dataSource;

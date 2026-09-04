@@ -1,6 +1,5 @@
 package com.krishva.krishvamart.dto;
 
-/** Incoming JSON body for POST /api/v1/auth/register. */
 public class RegisterRequestDTO {
     private String name;
     private String email;

@@ -1,6 +1,5 @@
 package com.krishva.krishvamart.dto;
 
-/** Incoming JSON body for POST /api/v1/reviews (F8). */
 public class ReviewRequestDTO {
     private Long productId;
     private Long orderId;

@@ -1,6 +1,5 @@
 package com.krishva.krishvamart.dto;
 
-/** Incoming JSON body for POST /api/v1/orders/checkout. */
 public class CheckoutRequestDTO {
     private String shippingAddress;
 

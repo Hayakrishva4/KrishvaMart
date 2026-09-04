@@ -15,8 +15,7 @@ public final class SellerSalesSummaryDTO {
         this.totalOrders = b.totalOrders;
         this.totalUnitsSold = b.totalUnitsSold;
         this.totalRevenue = b.totalRevenue;
-        this.byProduct = b.byProduct == null
-                ? Collections.emptyList()
+     this.byProduct = b.byProduct == null ? Collections.emptyList()
                 : Collections.unmodifiableList(new ArrayList<>(b.byProduct));
     }
 
@@ -37,10 +36,10 @@ public final class SellerSalesSummaryDTO {
     }
 
     public List<ProductSalesDTO> getByProduct() {
-        return byProduct == null ? Collections.emptyList() : Collections.unmodifiableList(byProduct);
-    }
+     return byProduct == null ? Collections.emptyList()
+         : Collections.unmodifiableList(byProduct);
+        }
 
-    /** Builder for {@link SellerSalesSummaryDTO}. */
     public static final class Builder {
         private long totalOrders;
         private long totalUnitsSold;
@@ -61,12 +60,12 @@ public final class SellerSalesSummaryDTO {
         }
 
         public Builder totalRevenue(BigDecimal totalRevenue) {
-            this.totalRevenue = totalRevenue == null ? BigDecimal.ZERO : totalRevenue;
+         this.totalRevenue = totalRevenue == null ? BigDecimal.ZERO : totalRevenue;
             return this;
         }
 
         public Builder byProduct(List<ProductSalesDTO> byProduct) {
-            this.byProduct = byProduct == null ? null : new ArrayList<>(byProduct);
+         this.byProduct = byProduct == null ? null : new ArrayList<>(byProduct);
             return this;
         }
 

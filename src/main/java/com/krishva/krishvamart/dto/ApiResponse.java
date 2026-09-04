@@ -1,12 +1,6 @@
 package com.krishva.krishvamart.dto;
 
-/**
- * Fixed JSON response envelope required by Section 13:
- * { "success": true, "data": {...}, "error": null }
- * { "success": false, "data": null, "error": { "code": "...", "message": "..." } }
- */
 public class ApiResponse<T> {
-
     private final boolean success;
     private final T data;
     private final ErrorBody error;
@@ -37,7 +31,6 @@ public class ApiResponse<T> {
         return error;
     }
 
-    /** Nested error shape: { "code": "...", "message": "..." }. */
     public static class ErrorBody {
         private final String code;
         private final String message;

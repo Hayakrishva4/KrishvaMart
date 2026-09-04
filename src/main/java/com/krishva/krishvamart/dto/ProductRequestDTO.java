@@ -2,7 +2,6 @@ package com.krishva.krishvamart.dto;
 
 import java.math.BigDecimal;
 
-/** Incoming JSON body for creating/editing a product listing (F2). */
 public class ProductRequestDTO {
     private String name;
     private String description;

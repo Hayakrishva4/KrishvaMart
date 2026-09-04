@@ -1,6 +1,5 @@
 package com.krishva.krishvamart.dto;
 
-/** Incoming JSON body for POST/PUT /api/v1/cart/items (F4). */
 public class CartItemRequestDTO {
     private Long productId;
     private Integer quantity;

@@ -3,7 +3,6 @@ package com.krishva.krishvamart.dao.impl;
 import com.krishva.krishvamart.dao.ReviewDAO;
 import com.krishva.krishvamart.exception.DataAccessException;
 import com.krishva.krishvamart.model.Review;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,9 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
 
-/** All SQL for the reviews table lives here, PreparedStatement only (Section 2, Rule 1). */
 public class JdbcReviewDAO implements ReviewDAO {
-
     private final DataSource dataSource;
 
     public JdbcReviewDAO(DataSource dataSource) {

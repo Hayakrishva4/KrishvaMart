@@ -2,12 +2,6 @@ package com.krishva.krishvamart.dto;
 
 import java.math.BigDecimal;
 
-/**
- * Search/filter/sort/pagination criteria for F3 browse (extended beyond the
- * minimum keyword+category spec with a price range, sort order, and
- * pagination - the kind of browse experience real marketplaces offer).
- * Built via {@link Builder} since it has several optional fields.
- */
 public final class ProductSearchCriteria {
 
     public enum SortBy {
@@ -70,7 +64,6 @@ public final class ProductSearchCriteria {
         return activeOnly;
     }
 
-    /** Builder for {@link ProductSearchCriteria}; defaults to page 1, 12 per page, relevance order, active-only. */
     public static final class Builder {
         private String keyword;
         private String category;

@@ -4,7 +4,6 @@ import com.krishva.krishvamart.dao.AnalyticsDAO;
 import com.krishva.krishvamart.dto.ProductSalesDTO;
 import com.krishva.krishvamart.dto.SellerSalesSummaryDTO;
 import com.krishva.krishvamart.exception.DataAccessException;
-
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,12 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
 
-/**
- * All SQL for the O3 seller sales dashboard lives here, PreparedStatement
- * only (Section 2, Rule 1). Revenue and unit counts are computed only from
- * DELIVERED orders - a shipped-but-not-yet-delivered order isn't a
- * completed sale yet.
- */
 public class JdbcAnalyticsDAO implements AnalyticsDAO {
 
     private final DataSource dataSource;

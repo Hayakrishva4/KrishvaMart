@@ -2,7 +2,6 @@ package com.krishva.krishvamart.dto;
 
 import java.math.BigDecimal;
 
-/** O3: per-product row in a seller's sales dashboard - units sold and revenue from DELIVERED orders. */
 public class ProductSalesDTO {
 
     private final Long productId;

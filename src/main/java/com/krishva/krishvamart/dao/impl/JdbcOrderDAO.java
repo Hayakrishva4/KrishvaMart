@@ -4,7 +4,6 @@ import com.krishva.krishvamart.dao.OrderDAO;
 import com.krishva.krishvamart.exception.DataAccessException;
 import com.krishva.krishvamart.model.Order;
 import com.krishva.krishvamart.model.OrderItem;
-
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,9 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.sql.DataSource;
 
-/** All SQL for orders/order_items lives here, PreparedStatement only (Section 2, Rule 1). */
 public class JdbcOrderDAO implements OrderDAO {
-
     private final DataSource dataSource;
 
     public JdbcOrderDAO(DataSource dataSource) {
@@ -28,8 +25,8 @@ public class JdbcOrderDAO implements OrderDAO {
 
     @Override
     public Order insert(Connection conn, Order order) throws DataAccessException {
-        String sql = "INSERT INTO orders (buyer_id, status, total_amount, shipping_address) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+     String sql = "INSERT INTO orders (buyer_id, status, total_amount, shipping_address) VALUES (?, ?, ?, ?)";
+     try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, order.getBuyerId());
             ps.setString(2, order.getStatus().name());
             ps.setBigDecimal(3, order.getTotalAmount());
@@ -90,8 +87,7 @@ public class JdbcOrderDAO implements OrderDAO {
     @Override
     public List<Order> findBySeller(long sellerId) throws DataAccessException {
         String sql = "SELECT DISTINCT o.id, o.buyer_id, o.status, o.total_amount, o.created_at "
-                + "FROM orders o "
-                + "JOIN order_items oi ON oi.order_id = o.id "
+            + "FROM orders o " + "JOIN order_items oi ON oi.order_id = o.id "
                 + "JOIN products p ON p.id = oi.product_id "
                 + "WHERE p.seller_id = ? ORDER BY o.created_at DESC";
         return queryList(sql, sellerId);
