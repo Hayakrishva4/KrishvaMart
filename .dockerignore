@@ -5,7 +5,6 @@ data/
 logs/
 *.log
 docs/
-deploy/
 .idea/
 *.iml
 src/main/resources/config.properties
