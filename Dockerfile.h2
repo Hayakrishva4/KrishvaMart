@@ -1,0 +1,15 @@
+# Runs H2 in TCP server mode as its own container, mirroring the systemd
+# reference setup in deploy/krishvamart-h2.service. Data persists in the
+# /data volume mounted by docker-compose.yml, so it survives container
+# restarts (a plain in-memory H2 would lose everything on redeploy).
+FROM eclipse-temurin:17-jre-alpine
+
+ARG H2_VERSION=2.2.224
+RUN apk add --no-cache curl && \
+    curl -fsSL -o /h2.jar "https://repo1.maven.org/maven2/com/h2database/h2/${H2_VERSION}/h2-${H2_VERSION}.jar" && \
+    apk del curl
+
+RUN mkdir -p /data
+EXPOSE 9092
+
+CMD ["java", "-cp", "/h2.jar", "org.h2.tools.Server", "-tcp", "-tcpAllowOthers", "-baseDir", "/data"]
