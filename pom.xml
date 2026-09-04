@@ -9,7 +9,6 @@
   <packaging>war</packaging>
   <name>KrishvaMart</name>
   <description>Multi-seller, E-commerce marketplace</description>
-
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
@@ -25,46 +24,38 @@
     <junit.version>5.10.2</junit.version>
     <mockito.version>5.11.0</mockito.version>
   </properties>
-
   <dependencies>
-    <!-- Servlet API (provided by Tomcat) -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <version>${servlet.version}</version>
       <scope>provided</scope>
     </dependency>
-    <!-- JSTL -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>jstl</artifactId>
       <version>${jstl.version}</version>
     </dependency>
-    <!-- H2 Database -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <version>${h2.version}</version>
     </dependency>
-    <!-- HikariCP connection pool -->
     <dependency>
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>
       <version>${hikaricp.version}</version>
     </dependency>
-    <!-- Gson -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>${gson.version}</version>
     </dependency>
-    <!-- jBCrypt -->
     <dependency>
       <groupId>org.mindrot</groupId>
       <artifactId>jbcrypt</artifactId>
       <version>${jbcrypt.version}</version>
     </dependency>
-    <!-- SLF4J + Logback -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -75,7 +66,6 @@
       <artifactId>logback-classic</artifactId>
       <version>${logback.version}</version>
     </dependency>
-    <!-- Testing -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -95,7 +85,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <build>
     <finalName>krishvamart</finalName>
     <resources>
@@ -121,17 +110,21 @@
           <failOnMissingWebXml>true</failOnMissingWebXml>
         </configuration>
       </plugin>
-
-      <!-- Configured with argLine to allow Mockito dynamic agent self-attachment on Java 17+ -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
-          <argLine>-XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
+          <useModulePath>false</useModulePath>
+          <forkCount>1</forkCount>
+          <reuseForks>false</reuseForks>
+          <argLine>-Xmx1024m -XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
+          <systemPropertyVariables>
+            <sun.stdout.encoding>UTF-8</sun.stdout.encoding>
+            <sun.stderr.encoding>UTF-8</sun.stderr.encoding>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
@@ -170,12 +163,10 @@
         </executions>
       </plugin>
       <plugin>
-        <!-- Lets `mvn exec:java` run DbSeeder / DbMigrator style utility classes -->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.2.0</version>
       </plugin>
-      <!-- Embedded Tomcat 9 Server for local execution -->
       <plugin>
         <groupId>org.codehaus.cargo</groupId>
         <artifactId>cargo-maven3-plugin</artifactId>

@@ -161,16 +161,13 @@ Beyond the Minimum features :
 - **Shipping address capture at checkout** 
 - **Self-initializing, cloud-ready deployment** 
 - **Transaction-tested checkout** 
+- **Order Cancellation & returns**
 ## Screenshots
-_Add screenshots here once the app is running against the deployed URL
+ ![KrishvaMart home page](docs/screenshots/home.png)
 ## Known limitations
 - `GeminiChatProvider` is wired but untested against a live API key in this
   environment; `mock` is the safe default until a key is configured.
-- Test coverage covers the highest-risk logic (checkout transaction incl.rollback, auth, cart limits, catalog-aware chat, product ownership, wishlist, criteria-based product search/pagination) but doesn't exhaustively cover every DAO/service
-  `docs/test-cases.md` for the manual E2E sheet and `docs/load-testing.md` / `docs/load-test-plan.jmx` for the load test - neither has been executed against a live deployment yet.
-- Docker/cloud config has been written and manually reviewed but not    actually deployed and smoke-tested against a real cloud platform in this environment.
-- Only a handful of commits exist so far . The commits/week,
-  `feature/<name>`-branch workflow is a process to follow going
-  forward.
-- A GitHub Projects Kanban board has to be created manually in
-  the GitHub UI - it isn't a repo file.
+- Test coverage covers the highest-risk logic but doesn't exhaustively cover every DAO/service `docs/test-cases.md` for the manual E2E sheet and `docs/load-testing.md` / `docs/load-test-plan.jmx` for the load test - neither has been executed against a live deployment yet.
+- Docker/cloud config has been written and manually reviewed but not actually deployed and smoke-tested against a real cloud platform in this environment.
+- Only a handful of commits exist so far . The commits/week,`feature/<name>`-branch workflow is a process to follow going forward.
+- A GitHub Projects Kanban board has to be created manually in the GitHub UI - it isn't a repo file.
