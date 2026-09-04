@@ -15,7 +15,7 @@
 - Change for next sprint: Implement a dedicated `AuthFilter` to intercept protected routes before servlet execution occurs.
 
 ## Sprint 3: Product Catalog & Search
-- What worked: Building a structured `ProductSearchCriteria` pattern made multi-parameter filtering (category, price range, keyword) clean and extensible.
+- What worked: Building a structured `ProductSearchCriteria` pattern made multi-parameter filtering clean and extensible.
 - What didn't: Manual SQL query string concatenation for dynamic filters was error-prone and hard to maintain.
 - Change for next sprint: Standardize parameterized SQL query builders across all DAO implementations to prevent SQL injection risks.
 

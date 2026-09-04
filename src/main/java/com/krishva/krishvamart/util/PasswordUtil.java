@@ -10,13 +10,19 @@ public final class PasswordUtil {
     }
 
     public static String hash(String plainPassword) {
-        return BCrypt.hashpw(plainPassword, BCrypt.gensalt(WORK_FACTOR));
+        return BCrypt.hashpw(
+                plainPassword,
+                BCrypt.gensalt(WORK_FACTOR));
     }
 
-    public static boolean matches(String plainPassword, String hashed) {
+    public static boolean matches(
+            String plainPassword,
+            String hashed) {
+
         if (plainPassword == null || hashed == null) {
             return false;
         }
+
         try {
             return BCrypt.checkpw(plainPassword, hashed);
         } catch (IllegalArgumentException ex) {

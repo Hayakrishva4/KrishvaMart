@@ -18,8 +18,11 @@ Multi-seller e-commerce marketplace web application built with Java Servlets, JD
 | O2 | Order status workflow (Pending->Confirmed->Shipped->Delivered) | Implemented |
 | O3 | Seller sales dashboard (counts/revenue) | Implemented |
 | O4 | AI chatbot | Implemented (mock provider by default; swap in Gemini via config flag) |
+<<<<<<< HEAD
 Also implemented beyond the base spec :
 Shipping address capture at checkout, price-range/sort/pagination on browse.
+=======
+>>>>>>> 7a3b31e (Adding Products and fixing Checkstyles)
 ## Architecture
 Layered MVC over Servlets (Front Controller pattern):
 ```
@@ -31,10 +34,6 @@ Browser (JSP shell + vanilla JS/fetch)
   -> HikariCP connection pool (listener/AppContextListener)
   -> H2 Database (server mode)
 ```
-See `docs/D1-er-diagram.svg`, `docs/D2-use-case-diagram.svg`, and
-`docs/D3-sequence-diagram.svg` for the three required design diagrams
-(rendered images, ready to drop into the final report). PlantUML source for each is also checked in at `docs/*.puml` if you want to regenerate/edit them.
-`docs/design-patterns.md` documents where each of the six required design patterns is used.
 ### Package structure
 ```
 com.krishva.krishvamart
@@ -100,13 +99,12 @@ deploys to any container-hosting platform without code changes. Full
 step-by-step instructions for Render, Railway, a plain VM, and Docker
 Compose: **`docs/cloud-deployment.md`**.
 ## Deployed link
-> https://krishvamart.onrender.com
-`docs/cloud-deployment.md`
+  > https://krishvamart.onrender.com
 ## AI chatbot configuration
 `ai.chatbot.provider` in `config.properties` selects the implementation
 - `mock` (default) - canned FAQ answers, no network call, no API key needed.
-- `gemini` - calls the Gemini API server-side using `ai.chatbot.apiKey`
-  (never exposed to the browser). See `com.krishva.krishvamart.chat.GeminiChatProvider`.
+- `gemini` - calls the Gemini API server-side using `ai.chatbot.apiKey`.
+ See `com.krishva.krishvamart.chat.GeminiChatProvider`.
 Guardrails : 10 messages/minute per session, 500-character input
 cap, 10s outbound timeout, fixed server-side prompt template restricting the bot to product/order/shipping/returns questions, and in-memory per-session
 caching of repeated questions.
