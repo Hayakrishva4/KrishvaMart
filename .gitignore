@@ -5,7 +5,6 @@ logs/
 data/
 *.mv.db
 *.trace.db
-src/main/resources/config.properties
 .env
 .idea/
 *.iml
