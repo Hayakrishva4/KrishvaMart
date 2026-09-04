@@ -2,7 +2,7 @@
 Multi-seller e-commerce marketplace web application built with Java Servlets, JDBC, and Apache Tomcat.
 > Duration: Jul 27 - Oct 10, 2026 ; Builder: solo
 ## Problem statement
-Sellers list products. Buyers browse, search, add to cart, and purchase. An admin manages users, orders, and listings. Checkout uses a payment confirmation step. An AI chatbot answers FAQ-style questions about products, orders, shipping, and returns.
+> Sellers list products. Buyers browse, search, add to cart, and purchase. An admin manages users, orders, and listings. Checkout uses a payment confirmation step. An AI chatbot answers FAQ-style questions about products, orders, shipping, and returns.
 ## Feature status
 | ID | Requirement | Status |
 |----|-------------|--------|
@@ -19,7 +19,7 @@ Sellers list products. Buyers browse, search, add to cart, and purchase. An admi
 | O3 | Seller sales dashboard (counts/revenue) | Implemented |
 | O4 | AI chatbot | Implemented (mock provider by default; swap in Gemini via config flag) |
 Also implemented beyond the base spec :
-shipping address capture at checkout, price-range/sort/pagination on browse.
+Shipping address capture at checkout, price-range/sort/pagination on browse.
 ## Architecture
 Layered MVC over Servlets (Front Controller pattern):
 ```
@@ -100,7 +100,7 @@ deploys to any container-hosting platform without code changes. Full
 step-by-step instructions for Render, Railway, a plain VM, and Docker
 Compose: **`docs/cloud-deployment.md`**.
 ## Deployed link
-_Not yet deployed - add the live URL here once you've followed
+> https://krishvamart.onrender.com
 `docs/cloud-deployment.md`
 ## AI chatbot configuration
 `ai.chatbot.provider` in `config.properties` selects the implementation
@@ -111,8 +111,7 @@ Guardrails : 10 messages/minute per session, 500-character input
 cap, 10s outbound timeout, fixed server-side prompt template restricting the bot to product/order/shipping/returns questions, and in-memory per-session
 caching of repeated questions.
 ## API contract
-All JSON endpoints are versioned under `/api/v1/...` and return the fixed
-envelope:
+All JSON endpoints are versioned under `/api/v1/...` and return the fixed envelope:
 ```json
 { "success": true, "data": { }, "error": null }
 { "success": false, "data": null, "error": { "code": "VALIDATION_ERROR", "message": "..." } }
@@ -162,11 +161,8 @@ Beyond the Minimum features :
 - **Self-initializing, cloud-ready deployment** 
 - **Transaction-tested checkout** 
 - **Order Cancellation & returns**
-## Screenshots
- ![KrishvaMart home page](docs/screenshots/home.png)
 ## Known limitations
-- `GeminiChatProvider` is wired but untested against a live API key in this
-  environment; `mock` is the safe default until a key is configured.
+- `GeminiChatProvider` is wired but untested against a live API key in this environment; `mock` is the safe default until a key is configured.
 - Test coverage covers the highest-risk logic but doesn't exhaustively cover every DAO/service `docs/test-cases.md` for the manual E2E sheet and `docs/load-testing.md` / `docs/load-test-plan.jmx` for the load test - neither has been executed against a live deployment yet.
 - Docker/cloud config has been written and manually reviewed but not actually deployed and smoke-tested against a real cloud platform in this environment.
 - Only a handful of commits exist so far . The commits/week,`feature/<name>`-branch workflow is a process to follow going forward.
