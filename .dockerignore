@@ -7,4 +7,3 @@ logs/
 docs/
 .idea/
 *.iml
-src/main/resources/config.properties
