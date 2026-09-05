@@ -3,71 +3,63 @@ package com.krishva.krishvamart.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class ConfigResolver {
 
-    private static final Logger LOG =
-            LoggerFactory.getLogger(ConfigResolver.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ConfigResolver.class);
 
-    private final Properties fileProps;
+  private final Properties fileProps;
 
-    private ConfigResolver(Properties fileProps) {
-        this.fileProps = fileProps;
+  private ConfigResolver(Properties fileProps) {
+    this.fileProps = fileProps;
+  }
+
+  public static ConfigResolver load() {
+    Properties props = new Properties();
+
+    try (InputStream in = ConfigResolver.class.getClassLoader()
+        .getResourceAsStream("config.properties")) {
+
+      if (in != null) {
+        props.load(in);
+      } else {
+        LOG.info("config.properties not found on classpath - "
+            + "relying on environment variables and defaults");
+      }
+    } catch (IOException e) {
+      LOG.warn("Failed to read config.properties, relying on "
+          + "environment variables and defaults", e);
     }
 
-    public static ConfigResolver load() {
-        Properties props = new Properties();
+    return new ConfigResolver(props);
+  }
 
-        try (InputStream in = ConfigResolver.class.getClassLoader()
-                .getResourceAsStream("config.properties")) {
+  public String get(String propertyKey, String defaultValue) {
+    String envKey = propertyKey.toUpperCase().replace('.', '_');
+    String envValue = System.getenv(envKey);
 
-            if (in != null) {
-                props.load(in);
-            } else {
-                LOG.info(
-                        "config.properties not found on classpath - "
-                                + "relying on environment variables and defaults");
-            }
-        } catch (IOException e) {
-            LOG.warn(
-                    "Failed to read config.properties, relying on "
-                            + "environment variables and defaults",
-                    e);
-        }
-
-        return new ConfigResolver(props);
+    if (envValue != null && !envValue.isBlank()) {
+      return envValue;
     }
 
-    public String get(String propertyKey, String defaultValue) {
-        String envKey = propertyKey.toUpperCase().replace('.', '_');
-        String envValue = System.getenv(envKey);
+    return fileProps.getProperty(propertyKey, defaultValue);
+  }
 
-        if (envValue != null && !envValue.isBlank()) {
-            return envValue;
-        }
+  public int getInt(String propertyKey, int defaultValue) {
+    String raw = get(propertyKey, null);
 
-        return fileProps.getProperty(propertyKey, defaultValue);
+    if (raw == null || raw.isBlank()) {
+      return defaultValue;
     }
 
-    public int getInt(String propertyKey, int defaultValue) {
-        String raw = get(propertyKey, null);
-
-        if (raw == null || raw.isBlank()) {
-            return defaultValue;
-        }
-
-        try {
-            return Integer.parseInt(raw.trim());
-        } catch (NumberFormatException e) {
-            LOG.warn(
-                    "Invalid integer for {}: '{}' - using default {}",
-                    propertyKey,
-                    raw,
-                    defaultValue);
-            return defaultValue;
-        }
+    try {
+      return Integer.parseInt(raw.trim());
+    } catch (NumberFormatException e) {
+      LOG.warn("Invalid integer for {}: '{}' - using default {}",
+          propertyKey, raw, defaultValue);
+      return defaultValue;
     }
+  }
 }
