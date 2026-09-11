@@ -3,15 +3,15 @@ async function loadCart() {
     try {
         const data = await api.get("/cart");
         document.getElementById("cartTotal").textContent = formatMoney(data.total);
-        if (data.items.length === 0) {
-            container.innerHTML = "<p>Your cart is empty.</p>";
+        if (!data.items || data.items.length === 0) {
+            container.innerHTML = "<p style='color: var(--muted);'>Your cart is empty.</p>";
             return;
         }
         container.innerHTML = data.items.map(item => `
             <div class="cart-item" data-product-id="${item.productId}">
                 <strong>${escapeHtml(item.productName)}</strong>
                 &mdash; ${formatMoney(item.unitPrice)} each
-                <div>
+                <div style="margin: 8px 0;">
                     <label>Qty
                         <input type="number" min="1" value="${item.quantity}" class="qtyInput" style="width:70px;">
                     </label>
@@ -23,7 +23,45 @@ async function loadCart() {
         `).join("");
         wireItemButtons();
     } catch (err) {
-        container.innerHTML = "<p>Could not load cart: " + escapeHtml(err.message) + "</p>";
+        container.innerHTML = "<p class='form-error'>Could not load cart: " + escapeHtml(err.message) + "</p>";
+    }
+}
+
+async function loadRecommendations() {
+    const recContainer = document.getElementById("recommendations");
+    if (!recContainer) return;
+
+    try {
+        const res = await api.get("/products?page=1&size=3");
+        const products = res.items || res.data || res;
+
+        if (!products || products.length === 0) {
+            recContainer.innerHTML = "<p style='color: var(--muted);'>No recommendations available.</p>";
+            return;
+        }
+
+        recContainer.innerHTML = products.map(prod => `
+            <div class="rec-card" style="border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; margin-bottom: 1rem; background: var(--card-bg); color: var(--text);">
+                <img src="${escapeHtml(prod.imageUrl)}" alt="${escapeHtml(prod.name)}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px; background: #eee; margin-bottom: 0.5rem;">
+                <h4 style="margin: 0.25rem 0; font-size: 0.95rem; color: var(--text);">${escapeHtml(prod.name)}</h4>
+                <div style="font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">${formatMoney(prod.price)}</div>
+                <button class="addRecBtn" data-id="${prod.id}" style="width: 100%; padding: 0.4rem; font-size: 0.85rem;">Add to Cart</button>
+            </div>
+        `).join("");
+
+        recContainer.querySelectorAll(".addRecBtn").forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+                const id = e.target.dataset.id;
+                try {
+                    await api.post("/cart", { productId: parseInt(id, 10), quantity: 1 });
+                    loadCart();
+                } catch (err) {
+                    alert("Could not add item: " + err.message);
+                }
+            });
+        });
+    } catch (err) {
+        recContainer.innerHTML = "<p style='color: var(--muted); font-size: 0.85rem;'>Recommendations unavailable</p>";
     }
 }
 
@@ -34,19 +72,20 @@ function wireItemButtons() {
             const productId = row.dataset.productId;
             const qty = parseInt(row.querySelector(".qtyInput").value, 10);
             try {
-                await api.put("/cart/items/" + productId, { quantity: qty });
+                await api.put("/cart/" + productId, { quantity: qty });
                 loadCart();
             } catch (err) {
                 document.getElementById("checkoutMessage").textContent = err.message;
             }
         });
     });
+
     document.querySelectorAll(".removeBtn").forEach(btn => {
         btn.addEventListener("click", async (e) => {
             const row = e.target.closest(".cart-item");
             const productId = row.dataset.productId;
             try {
-                await api.del("/cart/items/" + productId);
+                await api.del("/cart/" + productId);
                 loadCart();
             } catch (err) {
                 document.getElementById("checkoutMessage").textContent = err.message;
@@ -73,3 +112,4 @@ document.getElementById("checkoutBtn").addEventListener("click", async () => {
 });
 
 loadCart();
+loadRecommendations();
