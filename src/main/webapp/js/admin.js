@@ -31,4 +31,19 @@ document.getElementById("moderateForm").addEventListener("submit", async (e) => 
     }
 });
 
+const activateForm = document.getElementById("activateForm");
+if (activateForm) {
+    activateForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const msg = document.getElementById("activateMessage");
+        const productId = document.getElementById("activateProductId").value;
+        try {
+            await api.put("/admin/products/" + productId + "/activate");
+            msg.textContent = "Listing reactivated successfully.";
+        } catch (err) {
+            msg.textContent = err.message;
+        }
+    });
+}
+
 loadAdminData();

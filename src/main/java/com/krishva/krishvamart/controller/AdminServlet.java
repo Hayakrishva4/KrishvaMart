@@ -28,6 +28,36 @@ public class AdminServlet extends BaseApiServlet {
             handleError(resp, e);
         }
     }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            User admin = requireAdmin(req);
+            if (!req.getServletPath().equals("/api/v1/admin/products")) {
+                JsonUtil.writeError(resp, HttpServletResponse.SC_NOT_FOUND, "NOT_FOUND", "Unknown route");
+                return;
+            }
+            String pathInfo = req.getPathInfo(); // e.g. "/12/activate"
+            if (pathInfo == null || pathInfo.equals("/")) {
+                throw new NotFoundException("Product id required");
+            }
+            String cleanPath = pathInfo.startsWith("/") ? pathInfo.substring(1) : pathInfo;
+            String[] parts = cleanPath.split("/");
+            long productId = Long.parseLong(parts[0]);
+
+            if (parts.length > 1 && "activate".equalsIgnoreCase(parts[1])) {
+                services().productService().moderateRestore(productId, admin);
+                JsonUtil.writeSuccess(resp, HttpServletResponse.SC_OK, null);
+            } else {
+                JsonUtil.writeError(resp, HttpServletResponse.SC_NOT_FOUND, "NOT_FOUND", "Unknown route");
+            }
+        } catch (AppException e) {
+            handleError(resp, e);
+        } catch (NumberFormatException e) {
+            JsonUtil.writeError(resp, HttpServletResponse.SC_BAD_REQUEST, "VALIDATION_ERROR", "Invalid product id");
+        }
+    }
+
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
@@ -49,6 +79,7 @@ public class AdminServlet extends BaseApiServlet {
             JsonUtil.writeError(resp, HttpServletResponse.SC_BAD_REQUEST, "VALIDATION_ERROR", "Invalid product id");
         }
     }
+
     private User requireAdmin(HttpServletRequest req) throws AppException {
         User user = requireUser(req);
         if (user.getRole() != User.Role.ADMIN) {
