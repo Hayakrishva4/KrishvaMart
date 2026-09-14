@@ -13,7 +13,14 @@
         <button type="submit">Deactivate listing</button>
     </form>
     <p id="moderateMessage"></p>
-</section>
 
+    <h2>Restore a listing</h2>
+    <form id="activateForm">
+        <label for="activateProductId">Product ID</label>
+        <input type="number" id="activateProductId" required>
+        <button type="submit">Activate listing</button>
+    </form>
+    <p id="activateMessage"></p>
+</section>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
 <script src="${pageContext.request.contextPath}/js/admin.js"></script>

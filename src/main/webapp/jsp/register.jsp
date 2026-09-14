@@ -1,6 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
-
 <section class="auth-form">
     <h1>Register</h1>
     <form id="registerForm">
@@ -14,12 +13,12 @@
         <select id="role">
             <option value="BUYER">Buyer</option>
             <option value="SELLER">Seller</option>
+            <option value="ADMIN">Admin</option>
         </select>
         <button type="submit">Create account</button>
     </form>
     <p id="registerError" class="form-error"></p>
     <p>Already have an account? <a href="${pageContext.request.contextPath}/jsp/login.jsp">Log in</a></p>
 </section>
-
 <script src="${pageContext.request.contextPath}/js/register.js"></script>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
