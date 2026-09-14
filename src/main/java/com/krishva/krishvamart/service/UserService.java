@@ -1,5 +1,7 @@
 package com.krishva.krishvamart.service;
 
+import java.util.List;
+
 import com.krishva.krishvamart.dao.UserDAO;
 import com.krishva.krishvamart.exception.AppException;
 import com.krishva.krishvamart.exception.ConflictException;
@@ -8,7 +10,6 @@ import com.krishva.krishvamart.exception.ValidationException;
 import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.util.PasswordUtil;
 import com.krishva.krishvamart.util.ValidationUtil;
-import java.util.List;
 
 public class UserService {
 
@@ -21,20 +22,20 @@ public class UserService {
   public User register(String name, String email, String password,
                        String roleRaw) throws AppException {
     if (ValidationUtil.isBlank(name)) {
-      throw new ValidationException("name", "Name is required");
+      throw new ValidationException("name", "Name is Required");
     }
     if (!ValidationUtil.isValidEmail(email)) {
-      throw new ValidationException("email", "A valid email is required");
+      throw new ValidationException("email", "A valid Email is required");
     }
     if (!ValidationUtil.isValidPassword(password)) {
-      throw new ValidationException("password",
+      throw new ValidationException("Password",
           "Password must be at least 8 characters");
     }
     User.Role role = parseSignupRole(roleRaw);
 
     if (userDAO.findByEmail(email.trim().toLowerCase()).isPresent()) {
       throw new ConflictException(
-          "An account with this email already exists");
+          "An account with this Email already exists!");
     }
 
     User user = new User();
@@ -47,14 +48,14 @@ public class UserService {
 
   public User login(String email, String password) throws AppException {
     if (ValidationUtil.isBlank(email) || ValidationUtil.isBlank(password)) {
-      throw new ValidationException("email",
-          "Email and password are required");
+      throw new ValidationException("Email",
+          "Email and Password are required");
     }
     User user = userDAO.findByEmail(email.trim().toLowerCase())
         .orElseThrow(() -> new UnauthorizedException(
-            "Invalid email or password"));
+            "Invalid Email or Password!"));
     if (!PasswordUtil.matches(password, user.getPasswordHash())) {
-      throw new UnauthorizedException("Invalid email or password");
+      throw new UnauthorizedException("Invalid Email or Password!");
     }
     return user;
   }
@@ -66,17 +67,13 @@ public class UserService {
   private User.Role parseSignupRole(String roleRaw)
       throws ValidationException {
     if (ValidationUtil.isBlank(roleRaw)) {
-      throw new ValidationException("role", "Role is required");
+      throw new ValidationException("role", "Role is Required");
     }
     String normalized = roleRaw.trim().toUpperCase();
-    if (normalized.equals("ADMIN")) {
-      throw new ValidationException("role",
-          "Admin accounts cannot self-register");
-    }
     try {
       return User.Role.valueOf(normalized);
     } catch (IllegalArgumentException e) {
-      throw new ValidationException("role", "Role must be BUYER or SELLER");
+      throw new ValidationException("role", "Role must be BUYER, SELLER, or ADMIN");
     }
   }
 }

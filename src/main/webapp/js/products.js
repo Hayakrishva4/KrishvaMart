@@ -34,6 +34,7 @@ function renderCard(p) {
     return `
         <a class="product-card" href="product-detail.jsp?id=${p.id}" style="text-decoration:none;color:inherit;">
             ${img ? `<img src="${img}" alt="${escapeHtml(p.name)}">` : ""}
+            <span class="product-id" style="font-size:0.8rem; opacity:0.75;">ID: #${p.id}</span>
             <strong>${escapeHtml(p.name)}</strong>
             <span class="category">${escapeHtml(p.category)}</span>
             <span class="price">&#8377;${Number(p.price).toFixed(2)}</span>           
@@ -65,7 +66,6 @@ document.getElementById("searchInput").addEventListener("keydown", (e) => {
 window.addEventListener('load', () => {
     loadProducts(1);
 });
-// I HAVE COMMENTED THIS OUT SO IT STOPS CRASHING
 // renderRecentlyViewedStrip("recentlyViewed");
 function escapeHtml(text) {
     if (!text) return '';

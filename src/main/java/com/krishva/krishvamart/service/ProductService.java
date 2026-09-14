@@ -112,6 +112,14 @@ public class ProductService {
         productDAO.setActive(productId, false);
     }
 
+    public void moderateRestore(
+            long productId,
+            User admin) throws AppException {
+
+        requireAdmin(admin);
+        productDAO.setActive(productId, true);
+    }
+
     private Product getOwnedOrThrow(
             long productId,
             long sellerId) throws AppException {
