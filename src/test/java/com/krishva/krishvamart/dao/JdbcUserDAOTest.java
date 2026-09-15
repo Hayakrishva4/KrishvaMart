@@ -1,17 +1,17 @@
 package com.krishva.krishvamart.dao;
 
-import com.krishva.krishvamart.dao.impl.JdbcUserDAO;
-import com.krishva.krishvamart.model.User;
-import com.zaxxer.hikari.HikariDataSource;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import com.krishva.krishvamart.dao.impl.JdbcUserDAO;
+import com.krishva.krishvamart.model.User;
+import com.zaxxer.hikari.HikariDataSource;
 
 class JdbcUserDAOTest {
 
@@ -19,14 +19,16 @@ class JdbcUserDAOTest {
     private UserDAO userDAO;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         dataSource = TestDataSource.create();
         userDAO = new JdbcUserDAO(dataSource);
     }
 
     @AfterEach
-    void tearDown() {
-        dataSource.close();
+    public void tearDown() {
+        if (dataSource != null) {
+            dataSource.close();
+        }
     }
 
     @Test

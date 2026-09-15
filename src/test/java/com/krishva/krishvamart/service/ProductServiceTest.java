@@ -1,20 +1,21 @@
 package com.krishva.krishvamart.service;
 
-import com.krishva.krishvamart.dao.ProductDAO;
-import com.krishva.krishvamart.exception.ForbiddenException;
-import com.krishva.krishvamart.exception.ValidationException;
-import com.krishva.krishvamart.model.Product;
+import java.math.BigDecimal;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import com.krishva.krishvamart.dao.ProductDAO;
+import com.krishva.krishvamart.exception.ForbiddenException;
+import com.krishva.krishvamart.exception.ValidationException;
+import com.krishva.krishvamart.model.Product;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -25,32 +26,36 @@ class ProductServiceTest {
     private ProductService productService;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         productService = new ProductService(productDAO);
     }
 
     @Test
     void create_rejectsBlankName() {
-        assertThrows(ValidationException.class,
+        ValidationException ex = assertThrows(ValidationException.class,
                 () -> productService.create(1L, "", "desc", new BigDecimal("10.00"), 5, "Tools", null));
+        assertNotNull(ex);
     }
 
     @Test
     void create_rejectsNonPositivePrice() {
-        assertThrows(ValidationException.class,
+        ValidationException ex = assertThrows(ValidationException.class,
                 () -> productService.create(1L, "Widget", "desc", BigDecimal.ZERO, 5, "Tools", null));
+        assertNotNull(ex);
     }
 
     @Test
     void create_rejectsNegativeStock() {
-        assertThrows(ValidationException.class,
+        ValidationException ex = assertThrows(ValidationException.class,
                 () -> productService.create(1L, "Widget", "desc", new BigDecimal("10.00"), -1, "Tools", null));
+        assertNotNull(ex);
     }
 
     @Test
     void create_rejectsBlankCategory() {
-        assertThrows(ValidationException.class,
+        ValidationException ex = assertThrows(ValidationException.class,
                 () -> productService.create(1L, "Widget", "desc", new BigDecimal("10.00"), 5, "", null));
+        assertNotNull(ex);
     }
 
     @Test
@@ -60,8 +65,9 @@ class ProductServiceTest {
         existing.setSellerId(99L);
         when(productDAO.findById(1L)).thenReturn(Optional.of(existing));
 
-        assertThrows(ForbiddenException.class,
+        ForbiddenException ex = assertThrows(ForbiddenException.class,
                 () -> productService.update(1L, 1L, "New name", "desc", new BigDecimal("15.00"), 5, "Tools", null));
+        assertNotNull(ex);
     }
 
     @Test
@@ -71,6 +77,7 @@ class ProductServiceTest {
         existing.setSellerId(99L);
         when(productDAO.findById(1L)).thenReturn(Optional.of(existing));
 
-        assertThrows(ForbiddenException.class, () -> productService.delete(1L, 1L));
+        ForbiddenException ex = assertThrows(ForbiddenException.class, () -> productService.delete(1L, 1L));
+        assertNotNull(ex);
     }
 }

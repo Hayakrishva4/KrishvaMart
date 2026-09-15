@@ -1,5 +1,15 @@
 package com.krishva.krishvamart.service;
 
+import java.math.BigDecimal;
+
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.krishva.krishvamart.dao.CartDAO;
 import com.krishva.krishvamart.dao.OrderDAO;
 import com.krishva.krishvamart.dao.ProductDAO;
@@ -15,13 +25,6 @@ import com.krishva.krishvamart.model.Order;
 import com.krishva.krishvamart.model.Product;
 import com.krishva.krishvamart.model.User;
 import com.zaxxer.hikari.HikariDataSource;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import java.math.BigDecimal;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OrderServiceTest {
     private HikariDataSource dataSource;
@@ -32,7 +35,7 @@ class OrderServiceTest {
     private long productId;
 
     @BeforeEach
-    void setUp() throws Exception {
+    public void setUp() throws Exception {
         dataSource = TestDataSource.create();
         UserDAO userDAO = new JdbcUserDAO(dataSource);
         productDAO = new JdbcProductDAO(dataSource);
@@ -63,24 +66,29 @@ class OrderServiceTest {
     }
 
     @AfterEach
-    void tearDown() {
-        dataSource.close();
+    public void tearDown() {
+        if (dataSource != null) {
+            dataSource.close();
+        }
     }
 
     @Test
     void checkout_rejectsEmptyCart() {
-        assertThrows(ValidationException.class, () -> orderService.checkout(buyerId, true, "123 Main St, Chennai, TN 600001"));
+        ValidationException ex = assertThrows(ValidationException.class, () -> orderService.checkout(buyerId, true, "123 Main St, Chennai, TN 600001"));
+        assertNotNull(ex);
     }
 
     @Test
     void checkout_rejectsWithoutMockPaymentConfirmation() {
-        assertThrows(ValidationException.class, () -> orderService.checkout(buyerId, false, "123 Main St, Chennai, TN 600001"));
+        ValidationException ex = assertThrows(ValidationException.class, () -> orderService.checkout(buyerId, false, "123 Main St, Chennai, TN 600001"));
+        assertNotNull(ex);
     }
 
     @Test
     void checkout_rejectsBlankShippingAddress() throws Exception {
         cartService.addItem(buyerId, productId, 1);
-        assertThrows(ValidationException.class, () -> orderService.checkout(buyerId, true, "  "));
+        ValidationException ex = assertThrows(ValidationException.class, () -> orderService.checkout(buyerId, true, "  "));
+        assertNotNull(ex);
     }
 
     @Test
@@ -100,7 +108,8 @@ class OrderServiceTest {
         cartService.addItem(buyerId, productId, 3);
         productDAO.adjustStock(productId, -3);
         assertEquals(2, productDAO.findById(productId).orElseThrow().getStockQty());
-        assertThrows(ConflictException.class, () -> orderService.checkout(buyerId, true, "123 Main St, Chennai, TN 600001"));
+        ConflictException ex = assertThrows(ConflictException.class, () -> orderService.checkout(buyerId, true, "123 Main St, Chennai, TN 600001"));
+        assertNotNull(ex);
         assertEquals(2, productDAO.findById(productId).orElseThrow().getStockQty());
         assertEquals(1, cartService.view(buyerId).size(), "Cart should not be cleared when checkout rolls back");
     }
