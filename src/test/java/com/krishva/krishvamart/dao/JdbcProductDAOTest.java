@@ -1,20 +1,20 @@
 package com.krishva.krishvamart.dao;
 
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.krishva.krishvamart.dao.impl.JdbcProductDAO;
 import com.krishva.krishvamart.dao.impl.JdbcUserDAO;
 import com.krishva.krishvamart.model.Product;
 import com.krishva.krishvamart.model.User;
 import com.zaxxer.hikari.HikariDataSource;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JdbcProductDAOTest {
 
@@ -23,7 +23,7 @@ class JdbcProductDAOTest {
     private long sellerId;
 
     @BeforeEach
-    void setUp() throws Exception {
+    public void setUp() throws Exception {
         dataSource = TestDataSource.create();
         productDAO = new JdbcProductDAO(dataSource);
         UserDAO userDAO = new JdbcUserDAO(dataSource);
@@ -37,8 +37,10 @@ class JdbcProductDAOTest {
     }
 
     @AfterEach
-    void tearDown() {
-        dataSource.close();
+    public void tearDown() {
+        if (dataSource != null) {
+            dataSource.close();
+        }
     }
 
     private Product sampleProduct(String name, String category) {

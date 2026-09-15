@@ -1,5 +1,17 @@
 package com.krishva.krishvamart.service;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.krishva.krishvamart.dao.CartDAO;
 import com.krishva.krishvamart.dao.ProductDAO;
 import com.krishva.krishvamart.exception.ConflictException;
@@ -7,17 +19,6 @@ import com.krishva.krishvamart.exception.NotFoundException;
 import com.krishva.krishvamart.exception.ValidationException;
 import com.krishva.krishvamart.model.CartItem;
 import com.krishva.krishvamart.model.Product;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CartServiceTest {
@@ -30,7 +31,7 @@ class CartServiceTest {
     private CartService cartService;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         cartService = new CartService(cartDAO, productDAO);
     }
 
@@ -45,13 +46,15 @@ class CartServiceTest {
 
     @Test
     void addItem_rejectsNonPositiveQuantity() {
-        assertThrows(ValidationException.class, () -> cartService.addItem(1L, 1L, 0));
+        ValidationException ex = assertThrows(ValidationException.class, () -> cartService.addItem(1L, 1L, 0));
+        assertNotNull(ex);
     }
 
     @Test
     void addItem_rejectsUnknownProduct() throws Exception {
         when(productDAO.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> cartService.addItem(1L, 1L, 1));
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> cartService.addItem(1L, 1L, 1));
+        assertNotNull(ex);
     }
 
     @Test
@@ -59,14 +62,16 @@ class CartServiceTest {
         Product inactive = activeProduct(5);
         inactive.setActive(false);
         when(productDAO.findById(1L)).thenReturn(Optional.of(inactive));
-        assertThrows(ConflictException.class, () -> cartService.addItem(1L, 1L, 1));
+        ConflictException ex = assertThrows(ConflictException.class, () -> cartService.addItem(1L, 1L, 1));
+        assertNotNull(ex);
     }
 
     @Test
     void addItem_rejectsQuantityExceedingStock() throws Exception {
         when(productDAO.findById(1L)).thenReturn(Optional.of(activeProduct(3)));
         when(cartDAO.findByUserAndProduct(1L, 1L)).thenReturn(Optional.empty());
-        assertThrows(ConflictException.class, () -> cartService.addItem(1L, 1L, 5));
+        ConflictException ex = assertThrows(ConflictException.class, () -> cartService.addItem(1L, 1L, 5));
+        assertNotNull(ex);
     }
 
     @Test
@@ -76,6 +81,7 @@ class CartServiceTest {
         existing.setQuantity(4);
         when(cartDAO.findByUserAndProduct(1L, 1L)).thenReturn(Optional.of(existing));
 
-        assertThrows(ConflictException.class, () -> cartService.addItem(1L, 1L, 2));
+        ConflictException ex = assertThrows(ConflictException.class, () -> cartService.addItem(1L, 1L, 2));
+        assertNotNull(ex);
     }
 }
