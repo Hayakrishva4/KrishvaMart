@@ -32,8 +32,9 @@ async function loadRecommendations() {
     if (!recContainer) return;
 
     try {
-        const res = await api.get("/products?page=1&size=3");
-        const products = res.items || res.data || res;
+        const res = await api.get("/products?page=1&pageSize=3");
+        const rawProducts = res.items || res.data || (Array.isArray(res) ? res : []);
+        const products = rawProducts.slice(0, 3);
 
         if (!products || products.length === 0) {
             recContainer.innerHTML = "<p style='color: var(--muted);'>No recommendations available.</p>";
