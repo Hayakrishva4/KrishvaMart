@@ -1,22 +1,23 @@
 package com.krishva.krishvamart.service;
 
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.krishva.krishvamart.dao.ProductDAO;
 import com.krishva.krishvamart.dao.WishlistDAO;
 import com.krishva.krishvamart.exception.NotFoundException;
 import com.krishva.krishvamart.model.Product;
 import com.krishva.krishvamart.model.WishlistItem;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class WishlistServiceTest {
@@ -29,14 +30,15 @@ class WishlistServiceTest {
     private WishlistService wishlistService;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         wishlistService = new WishlistService(wishlistDAO, productDAO);
     }
 
     @Test
     void add_rejectsUnknownProduct() throws Exception {
         when(productDAO.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> wishlistService.add(10L, 1L));
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> wishlistService.add(10L, 1L));
+        assertNotNull(ex);
     }
 
     @Test
@@ -54,6 +56,7 @@ class WishlistServiceTest {
     @Test
     void remove_throwsWhenNotInWishlist() throws Exception {
         when(wishlistDAO.remove(10L, 1L)).thenReturn(false);
-        assertThrows(NotFoundException.class, () -> wishlistService.remove(10L, 1L));
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> wishlistService.remove(10L, 1L));
+        assertNotNull(ex);
     }
 }

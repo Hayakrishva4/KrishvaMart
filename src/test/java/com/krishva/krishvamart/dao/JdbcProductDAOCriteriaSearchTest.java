@@ -1,5 +1,14 @@
 package com.krishva.krishvamart.dao;
 
+import java.math.BigDecimal;
+import java.util.Objects;
+
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.krishva.krishvamart.dao.impl.JdbcProductDAO;
 import com.krishva.krishvamart.dao.impl.JdbcUserDAO;
 import com.krishva.krishvamart.dto.PagedResult;
@@ -7,14 +16,6 @@ import com.krishva.krishvamart.dto.ProductSearchCriteria;
 import com.krishva.krishvamart.model.Product;
 import com.krishva.krishvamart.model.User;
 import com.zaxxer.hikari.HikariDataSource;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JdbcProductDAOCriteriaSearchTest {
 
@@ -23,10 +24,11 @@ class JdbcProductDAOCriteriaSearchTest {
     private long sellerId;
 
     @BeforeEach
-    void setUp() throws Exception {
-        dataSource = TestDataSource.create();
-        productDAO = new JdbcProductDAO(dataSource);
-        UserDAO userDAO = new JdbcUserDAO(dataSource);
+    public void setUp() throws Exception {
+        HikariDataSource ds = TestDataSource.create();
+        this.dataSource = ds;
+        this.productDAO = new JdbcProductDAO(ds);
+        UserDAO userDAO = new JdbcUserDAO(ds);
 
         User seller = new User();
         seller.setName("Seller");
@@ -42,8 +44,10 @@ class JdbcProductDAOCriteriaSearchTest {
     }
 
     @AfterEach
-    void tearDown() {
-        dataSource.close();
+    public void tearDown() {
+        if (dataSource != null) {
+            dataSource.close();
+        }
     }
 
     private void insert(String name, String price, int stock, String category) throws Exception {
@@ -87,19 +91,19 @@ class JdbcProductDAOCriteriaSearchTest {
 
     @Test
     void search_paginatesResults() throws Exception {
-        ProductSearchCriteria page1 = ProductSearchCriteria.builder().page(1).pageSize(2).build();
-        ProductSearchCriteria page2 = ProductSearchCriteria.builder().page(2).pageSize(2).build();
+        ProductSearchCriteria firstPage = ProductSearchCriteria.builder().page(1).pageSize(2).build();
+        ProductSearchCriteria secondPage = ProductSearchCriteria.builder().page(2).pageSize(2).build();
 
-        PagedResult<Product> result1 = productDAO.search(page1);
-        PagedResult<Product> result2 = productDAO.search(page2);
+        PagedResult<Product> resultA = productDAO.search(firstPage);
+        PagedResult<Product> resultB = productDAO.search(secondPage);
 
-        assertEquals(2, result1.getItems().size());
-        assertEquals(2, result2.getItems().size());
-        assertEquals(4, result1.getTotalItems());
-        assertEquals(2, result1.getTotalPages());
-        assertTrue(result1.getItems().stream().noneMatch(a ->
-                        result2.getItems().stream().anyMatch(b -> b.getId().equals(a.getId()))),
-                "Page 1 and page 2 should not overlap");
+        assertEquals(2, resultA.getItems().size());
+        assertEquals(2, resultB.getItems().size());
+        assertEquals(4L, resultA.getTotalItems());
+        assertEquals(2, resultA.getTotalPages());
+        assertTrue(resultA.getItems().stream().noneMatch(a ->
+                        resultB.getItems().stream().anyMatch(b -> Objects.equals(b.getId(), a.getId()))),
+                "Page batches should not overlap");
     }
 
     @Test
