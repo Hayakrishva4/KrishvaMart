@@ -1,18 +1,42 @@
 # Changelog
 
+> All notable changes to this project will be documented in this file.
+
 ## [Unreleased]
-- O1 wishlist and O3 seller sales dashboard implemented (previously listed
-  as not started). Real-marketplace browse: price range, sort, pagination.
-  Shipping address captured at checkout.
-- Cloud deployment readiness: Dockerfile + docker-compose.yml, environment-
-  variable-driven config (ConfigResolver), self-initializing database on
-  first boot (SchemaInitializer), docs/cloud-deployment.md.
-- Week 9-11: catalog-aware chatbot decorator (live stock/price answers),
-  dark mode, recently-viewed products, checkout transaction integration
-  test, final report, demo script, regression checklist, Final Review
-  slide deck.
-- Initial project scaffold generated: layered MVC architecture, schema,
-  DAO/service/controller layers for F1-F8, mock-provider AI chatbot (O4),
-  JSP+JS frontend, DAO/service unit tests, CI workflow.
-## [0.1.0] - MVP Review (target: 2026-08-10)
-- F1 authentication, F2 seller listings, F3 browse/search, F4 cart scaffolded.
+
+### Planned - Weeks 9 to 11
+- **Catalog-Aware Chatbot Decorator**: Live stock, price querying, and recommendation integration.
+- **Recently Viewed & Personalization**: Session-backed tracking of viewed items with recommendations.
+- **Transaction Integration Testing**: Concurrency and race condition testing for high-volume checkout scenarios.
+- **Project Deliverables**: Final technical report, demonstration script, comprehensive regression checklist, and Final Review slide deck.
+
+## Polish, Test Harness & UX Enhancement (Current)
+
+### Added
+- **Dynamic Product Recommendations**: Integrated responsive product recommendation sidebars across Cart (`cart.jsp`, `cart.js`) and Wishlist (`wishlist.jsp`, `wishlist.js`) capped cleanly at 3 items.
+- **Persistent Wishlist Navigation**: Added sticky sidebar layout featuring a "Browse now!" quick-action banner linking directly to the main catalog.
+- **Visual Scaffolding**: Added cross-theme doodle canvas background styling and unified UI token definitions in `style.css`.
+- **Dormant Chat Widget Styling**: Base floating widget and message box stylesheets pre-configured for future AI chat integration without layout shifts.
+
+### Fixed
+- **IDE Diagnostic & Linter Cleanliness**: 
+  - Elevated JUnit 5 lifecycle methods (`setUp`, `tearDown`) to `public` visibility across DAO and Service unit tests, eliminating false-positive "method never used" compiler warnings.
+  - Asserted `assertThrows` outcomes across `CartServiceTest`, `OrderServiceTest`, `ProductServiceTest`, and `WishlistServiceTest` to eliminate "Throwable method result is ignored" static analysis diagnostics.
+  - Hardened resource lifecycle handling in `JdbcProductDAOCriteriaSearchTest`, `JdbcProductDAOTest`, and `JdbcUserDAOTest` with null-safe teardown routines.
+- **Pagination & Query Alignment**: Aligned client query parameters to `pageSize` and added JavaScript defensive slicing (`.slice(0, 3)`) to prevent recommendation overflows.
+
+## Marketplace Expansion & Deployment Readiness
+
+### Added
+- **Wishlist & Dashboard Modules**: Functional multi-item wishlist persistence and dedicated seller sales metrics dashboard.
+- **Advanced Catalog Search**: Criteria-based product search supporting price ranges (`minPrice`/`maxPrice`), dynamic sorting (`PRICE_ASC`, `PRICE_DESC`, `NEWEST`), and backend pagination via `ProductSearchCriteria` and `PagedResult`.
+- **Checkout Address Capture**: Required delivery address capture in checkout workflow passed through order confirmation.
+- **Cloud & Containerization Suite**: Production-ready `Dockerfile`, `docker-compose.yml`, centralized `ConfigResolver` for environment variables, and automated first-boot `SchemaInitializer`.
+- **Documentation**: Step-by-step deployment guide in `docs/cloud-deployment.md`.
+
+## MVP Review
+
+### Added
+- **Core Architecture Scaffold**: Layered MVC pattern utilizing JSP, Java Servlets, JDBC DAOs, and service layers.
+- **Foundational Feature Set**: User authentication, seller product management, catalog browsing, and basic shopping cart.
+- **Automated Verification**: Baseline JUnit test harness with H2/HikariCP test database provisioning and continuous integration workflow.
