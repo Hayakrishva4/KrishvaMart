@@ -1,9 +1,3 @@
-# Local integration testing, or a simple single-VM cloud deployment (any
-# host that runs Docker Compose: a DigitalOcean droplet, an AWS EC2 box, a
-# free-tier Oracle Cloud VM, etc.). For fully-managed container platforms
-# (Render, Railway, Fly.io, Cloud Run) deploy the `app` image alone and point
-# DB_URL at a managed database instead - see docs/cloud-deployment.md.
-
 version: "3.8"
 
 services:
