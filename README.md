@@ -18,11 +18,6 @@ Multi-seller e-commerce marketplace web application built with Java Servlets, JD
 | O2 | Order status workflow (Pending->Confirmed->Shipped->Delivered) | Implemented |
 | O3 | Seller sales dashboard (counts/revenue) | Implemented |
 | O4 | AI chatbot | Implemented (mock provider by default; swap in Gemini via config flag) |
-<<<<<<< HEAD
-Also implemented beyond the base spec :
-Shipping address capture at checkout, price-range/sort/pagination on browse.
-=======
->>>>>>> 7a3b31e (Adding Products and fixing Checkstyles)
 ## Architecture
 Layered MVC over Servlets (Front Controller pattern):
 ```
