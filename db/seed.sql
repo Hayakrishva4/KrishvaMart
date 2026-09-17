@@ -30,6 +30,7 @@ INSERT INTO products (seller_id, name, description, price, stock_qty, category, 
   (3, 'Leather Boots', 'Durable handcrafted ankle boots made with genuine full-grain leather.', 3999.00, 20, 'Apparel', 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=600&q=80', TRUE),
   (2, 'Baseball Cap', 'Adjustable cotton twill baseball cap with embroidered logo.', 399.00, 60, 'Apparel', 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=600&q=80', TRUE),
   (3, 'Chanel Perfume', 'Long-lasting signature fragrance with woody and floral essence (10ml).', 1199.00, 30, 'Apparel', 'https://images.unsplash.com/photo-1594035910387-fea47794261f?w=600&q=80', TRUE),
+ 
   -- === HOME ===
   (2, 'Vintage Wall Clock', 'Silent non-ticking quartz decorative wall clock for the living room.', 899.00, 50, 'Home', 'https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=600&q=80', TRUE),
   (2, 'Stainless Steel Bottle', '1L double-wall insulated stainless steel water bottle.', 499.00, 70, 'Home', 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80', TRUE),
@@ -45,4 +46,4 @@ INSERT INTO products (seller_id, name, description, price, stock_qty, category, 
   (3, 'Chair', 'Breathable mesh back chair with adjustable lumbar support.', 1499.00, 50, 'Home', 'https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?w=600&q=80', TRUE),
   (3, 'Premium Kitchen Knife Set', 'Professional 6-piece high-carbon stainless steel chef knife set.', 3499.00, 25, 'Home', 'https://images.unsplash.com/photo-1593618998160-e34014e67546?w=600&q=80', TRUE),
   (2, 'Modern Ceramic Vase', 'Nordic minimalist off-white ceramic flower vase for living room decor.', 799.00, 45, 'Home', 'https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?w=600&q=80', TRUE),
-  (2, 'Drinking Glass ', 'Set of 4 lead-free clear glass tumblers for everyday dining.', 499.00, 60, 'Home', 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=600&q=80', TRUE);
+  (3, 'Luxury Cotton Bath Towel', 'Large, ultra-absorbent premium bath towel made from 100% combed cotton. Quick-drying and exceptionally soft.', 599.00, 70, 'Home', 'https://images.unsplash.com/photo-1616641883015-8121f1d13db2?w=600&q=80', TRUE),
