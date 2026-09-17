@@ -13,8 +13,8 @@ public final class DbSeeder
     {}
     public static void main(String[] args) throws SQLException, IOException 
     {
-        String url = System.getProperty("jdbc.url", "jdbc:h2:tcp://localhost:9092/./data/krishvamart");
-        try (Connection conn = DriverManager.getConnection(url, "sa", "sa"))
+       String url = System.getProperty("jdbc.url", "jdbc:h2:./data/krishvamart;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE");
+        try (Connection conn = DriverManager.getConnection(url, "sa", ""))
          {
             runScript(conn, Path.of("db/schema.sql"));
             seedUsers(conn);
