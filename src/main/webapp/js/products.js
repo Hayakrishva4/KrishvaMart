@@ -1,4 +1,5 @@
 let currentPage = 1;
+
 async function loadProducts(page) {
     currentPage = page || 1;
     const grid = document.getElementById("productGrid");
@@ -7,6 +8,7 @@ async function loadProducts(page) {
     const minPrice = document.getElementById("minPriceInput").value;
     const maxPrice = document.getElementById("maxPriceInput").value;
     const sort = document.getElementById("sortSelect").value;
+
     const params = new URLSearchParams();
     if (keyword) params.set("q", keyword);
     if (category) params.set("category", category);
@@ -14,7 +16,8 @@ async function loadProducts(page) {
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (sort) params.set("sort", sort);
     params.set("page", currentPage);
-    params.set("pageSize", 50);
+    params.set("pageSize", 8);
+
     grid.innerHTML = "<p>Loading products...</p>";
     try {
         const result = await api.get("/products?" + params.toString());
@@ -29,6 +32,7 @@ async function loadProducts(page) {
         grid.innerHTML = "<p>Could not load products: " + escapeHtml(err.message) + "</p>";
     }
 }
+
 function renderCard(p) {
     const img = p.imageUrl ? escapeHtml(p.imageUrl) : "";
     return `
@@ -37,36 +41,54 @@ function renderCard(p) {
             <span class="product-id" style="font-size:0.8rem; opacity:0.75;">ID: #${p.id}</span>
             <strong>${escapeHtml(p.name)}</strong>
             <span class="category">${escapeHtml(p.category)}</span>
-            <span class="price">&#8377;${Number(p.price).toFixed(2)}</span>           
+            <span class="price">&#8377;${Number(p.price).toFixed(2)}</span>          
             <span>${p.stockQty > 0 ? p.stockQty + " in stock" : "Out of stock"}</span>
         </a>
     `;
 }
+
 function renderPagination(result) {
     const nav = document.getElementById("pagination");
     const totalPages = result.totalPages;
+    const page = result.page;
+
     if (totalPages <= 1) {
         nav.classList.add("hidden");
         return;
     }
     nav.classList.remove("hidden");
+
     let html = "";
+
+    html += `<button class="page-btn prev-btn" ${page <= 1 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""} data-page="${page - 1}">&lt;&lt; Prev</button>`;
+
     for (let p = 1; p <= totalPages; p++) {
-        html += `<button class="page-btn${p === result.page ? " active" : ""}" data-page="${p}">${p}</button>`;
+        html += `<button class="page-btn${p === page ? " active" : ""}" data-page="${p}">${p}</button>`;
     }
+
+    html += `<button class="page-btn next-btn" ${page >= totalPages ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""} data-page="${page + 1}">Next &gt;&gt;</button>`;
+
     nav.innerHTML = html;
+
     nav.querySelectorAll(".page-btn").forEach(btn => {
-        btn.addEventListener("click", () => loadProducts(parseInt(btn.dataset.page, 10)));
+        btn.addEventListener("click", () => {
+            if (!btn.disabled) {
+                loadProducts(parseInt(btn.dataset.page, 10));
+                document.getElementById("productGrid").scrollIntoView({ behavior: 'smooth' });
+            }
+        });
     });
 }
+
 document.getElementById("searchBtn").addEventListener("click", () => loadProducts(1));
 document.getElementById("searchInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter") loadProducts(1);
 });
+
 window.addEventListener('load', () => {
     loadProducts(1);
 });
-// renderRecentlyViewedStrip("recentlyViewed");
+
 function escapeHtml(text) {
     if (!text) return '';
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
