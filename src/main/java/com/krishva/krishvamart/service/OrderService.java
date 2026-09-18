@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
@@ -28,6 +31,7 @@ public class OrderService {
     private final OrderDAO orderDAO;
     private final ProductDAO productDAO;
     private final CartDAO cartDAO;
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
 
     public OrderService(
             DataSource dataSource,
@@ -104,6 +108,7 @@ public class OrderService {
                 cartDAO.clear(conn, buyerId);
                 conn.commit();
 
+                scheduleMockDelivery(saved.getId());
                 return orderDAO.findById(saved.getId()).orElse(saved);
 
             } catch (AppException e) {
@@ -120,6 +125,30 @@ public class OrderService {
                     "Failed to open checkout transaction",
                     e);
         }
+    }
+
+   private void scheduleMockDelivery(long orderId) {
+        // Step 1: Advance to SHIPPED after 10s
+        scheduler.schedule(() -> {
+            try {
+                var opt = orderDAO.findById(orderId);
+                if (opt.isPresent() && opt.get().getStatus() == Order.Status.CONFIRMED) {
+                    orderDAO.updateStatus(orderId, Order.Status.SHIPPED);
+                }
+            } catch (AppException | RuntimeException ignored) {}
+        }, 10, TimeUnit.SECONDS);
+
+        scheduler.schedule(() -> {
+            try {
+                var opt = orderDAO.findById(orderId);
+                if (opt.isPresent()) {
+                    Order.Status cur = opt.get().getStatus();
+                    if (cur == Order.Status.SHIPPED || cur == Order.Status.CONFIRMED) {
+                        orderDAO.updateStatus(orderId, Order.Status.DELIVERED);
+                    }
+                }
+            } catch (AppException | RuntimeException ignored) {}
+        }, 25, TimeUnit.SECONDS);
     }
 
     public void cancelOrder(
@@ -177,13 +206,11 @@ public class OrderService {
 
                 conn.commit();
 
-            } catch (Exception e) {
+            } catch (AppException e) {
                 conn.rollback();
-
-                if (e instanceof AppException) {
-                    throw (AppException) e;
-                }
-
+                throw e;
+            } catch (SQLException e) {
+                conn.rollback();
                 throw new DataAccessException(
                         "Transaction failed during order cancellation",
                         e);
