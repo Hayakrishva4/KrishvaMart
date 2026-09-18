@@ -9,7 +9,7 @@ if (typeof window.escapeHtml !== "function") {
 if (typeof window.formatMoney !== "function") {
     window.formatMoney = function(v) {
         const num = Number(v);
-        return "₹" + (isNaN(num) ? "0.00" : num.toFixed(2));
+        return "\u20B9" + (isNaN(num) ? "0.00" : num.toFixed(2));
     };
 }
 
@@ -17,19 +17,22 @@ async function loadWishlist() {
     const container = document.getElementById("wishlistContainer") || document.getElementById("wishlistItems");
     if (!container) return [];
     try {
-        const items = await window.api.get("/wishlist");
+        const res = await window.api.get("/wishlist");
+        const items = Array.isArray(res) ? res : (res && res.data ? res.data : []);
+
         if (!items || items.length === 0) {
             container.innerHTML = "<p>Your wishlist is empty. Save products you like from their product page.</p>";
             return [];
         }
+
         container.innerHTML = items.map(item => `
             <div class="cart-item" data-product-id="${item.productId}">
                 <a href="product-detail.jsp?id=${item.productId}"><strong>${window.escapeHtml(item.productName)}</strong></a>
                 &mdash; ${window.formatMoney(item.productPrice)}
                 &mdash; ${item.productStockQty > 0 ? item.productStockQty + " in stock" : "Out of stock"}
                 <div style="margin-top: 0.5rem;">
-                    <button class="moveToCartBtn" ${item.productStockQty > 0 ? "" : "disabled"}>Move to cart</button>
-                    <button class="removeWishlistBtn secondary">Remove</button>
+                    <button class="moveToCartBtn btn btn-primary" ${item.productStockQty > 0 ? "" : "disabled"}>Move to cart</button>
+                    <button class="removeWishlistBtn btn secondary">Remove</button>
                 </div>
             </div>
         `).join("");
@@ -76,7 +79,16 @@ async function loadSuggestedProducts(existingWishlist = []) {
 
     try {
         const result = await window.api.get("/products?pageSize=10");
-        const allProducts = Array.isArray(result) ? result : (result.items || []);
+        
+        let allProducts = [];
+        if (Array.isArray(result)) {
+            allProducts = result;
+        } else if (result && result.data) {
+            allProducts = Array.isArray(result.data) ? result.data : (result.data.items || []);
+        } else if (result && result.items) {
+            allProducts = result.items;
+        }
+
         const wishlistedIds = new Set(existingWishlist.map(w => Number(w.productId)));
 
         const suggestions = allProducts
@@ -88,17 +100,18 @@ async function loadSuggestedProducts(existingWishlist = []) {
             return;
         }
 
+        container.className = "product-grid";
         container.innerHTML = suggestions.map(p => `
-            <div class="product-card">
+            <div class="product-card in-view">
                 ${p.imageUrl ? `<img src="${window.escapeHtml(p.imageUrl)}" alt="${window.escapeHtml(p.name)}">` : ""}
                 <span class="product-id" style="font-size:0.8rem; opacity:0.75;">ID: #${p.id}</span>
                 <a href="product-detail.jsp?id=${p.id}" style="text-decoration:none; color:inherit;">
                     <strong>${window.escapeHtml(p.name)}</strong>
                 </a>
-                <span class="category">${window.escapeHtml(p.category)}</span>
+                <span class="category">${window.escapeHtml(p.category || 'General')}</span>
                 <span class="price">${window.formatMoney(p.price)}</span>
-                <span>${p.stockQty > 0 ? p.stockQty + " in stock" : "Out of stock"}</span>
-                <button class="addSuggestedBtn" data-product-id="${p.id}" style="margin-top: 0.75rem;">
+                <span style="font-size: 0.85rem; color: var(--muted);">${p.stockQty > 0 ? p.stockQty + " in stock" : "Out of stock"}</span>
+                <button class="addSuggestedBtn btn btn-primary" data-product-id="${p.id}" style="margin-top: 0.75rem;">
                     &#10084; Add to Wishlist
                 </button>
             </div>

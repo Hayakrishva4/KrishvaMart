@@ -1,7 +1,8 @@
 let currentPage = 1;
+const PAGE_SIZE = 8;
 
 async function loadProducts(page) {
-    currentPage = page || 1;
+    currentPage = Number(page) || 1;
     const grid = document.getElementById("productGrid");
     const keyword = document.getElementById("searchInput").value.trim();
     const category = document.getElementById("categorySelect").value;
@@ -16,18 +17,34 @@ async function loadProducts(page) {
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (sort) params.set("sort", sort);
     params.set("page", currentPage);
-    params.set("pageSize", 8);
+    params.set("pageSize", PAGE_SIZE);
 
     grid.innerHTML = "<p>Loading products...</p>";
     try {
         const result = await api.get("/products?" + params.toString());
-        if (result.items.length === 0) {
+        const items = result.items || [];
+        
+        let totalCount = Number(result.total);
+        let totalPages = Number(result.totalPages);
+        
+        if (isNaN(totalPages) || totalPages < 1) {
+            totalPages = !isNaN(totalCount) && totalCount > 0 ? Math.ceil(totalCount / PAGE_SIZE) : 1;
+        }
+
+        if (items.length === 0 && currentPage > 1) {
+            loadProducts(1);
+            return;
+        }
+
+        if (items.length === 0) {
             grid.innerHTML = "<p>No products found.</p>";
             document.getElementById("pagination").classList.add("hidden");
             return;
         }
-        grid.innerHTML = result.items.map(renderCard).join("");
-        renderPagination(result);
+
+        grid.innerHTML = items.map(renderCard).join("");
+        triggerScrollCascade();
+        renderPagination(currentPage, totalPages, items.length);
     } catch (err) {
         grid.innerHTML = "<p>Could not load products: " + escapeHtml(err.message) + "</p>";
     }
@@ -47,35 +64,65 @@ function renderCard(p) {
     `;
 }
 
-function renderPagination(result) {
-    const nav = document.getElementById("pagination");
-    const totalPages = result.totalPages;
-    const page = result.page;
+function triggerScrollCascade() {
+    const cards = document.querySelectorAll(".product-grid .product-card");
+    
+    if (!("IntersectionObserver" in window)) {
+        cards.forEach(card => card.classList.add("in-view"));
+        return;
+    }
 
-    if (totalPages <= 1) {
+    const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("in-view");
+                obs.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: "0px 0px -40px 0px"
+    });
+
+    cards.forEach((card, index) => {
+        card.style.transitionDelay = `${(index % PAGE_SIZE) * 45}ms`;
+        observer.observe(card);
+    });
+}
+
+function renderPagination(page, totalPages, currentItemCount) {
+    const nav = document.getElementById("pagination");
+
+    if (page === 1 && currentItemCount < PAGE_SIZE && totalPages <= 1) {
         nav.classList.add("hidden");
         return;
     }
     nav.classList.remove("hidden");
 
+    const isFirstPage = page <= 1;
+    const isLastPage = (totalPages > 1 && page >= totalPages) || currentItemCount < PAGE_SIZE;
     let html = "";
+    html += `<button class="page-btn prev-btn" ${isFirstPage ? "disabled style='opacity:0.35;cursor:not-allowed;'" : ""} data-page="${page - 1}">&lt;&lt; Prev</button>`;
 
-    html += `<button class="page-btn prev-btn" ${page <= 1 ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""} data-page="${page - 1}">&lt;&lt; Prev</button>`;
-
-    for (let p = 1; p <= totalPages; p++) {
-        html += `<button class="page-btn${p === page ? " active" : ""}" data-page="${p}">${p}</button>`;
+    if (totalPages > 1) {
+        for (let p = 1; p <= totalPages; p++) {
+            html += `<button class="page-btn${p === page ? " active" : ""}" data-page="${p}">${p}</button>`;
+        }
     }
 
-    html += `<button class="page-btn next-btn" ${page >= totalPages ? "disabled style='opacity:0.5;cursor:not-allowed;'" : ""} data-page="${page + 1}">Next &gt;&gt;</button>`;
+    html += `<button class="page-btn next-btn" ${isLastPage ? "disabled style='opacity:0.35;cursor:not-allowed;'" : ""} data-page="${page + 1}">Next &gt;&gt;</button>`;
 
     nav.innerHTML = html;
 
     nav.querySelectorAll(".page-btn").forEach(btn => {
         btn.addEventListener("click", () => {
-            if (!btn.disabled) {
-                loadProducts(parseInt(btn.dataset.page, 10));
-                document.getElementById("productGrid").scrollIntoView({ behavior: 'smooth' });
-            }
+            if (btn.disabled) return;
+            const targetPage = parseInt(btn.dataset.page, 10);
+            if (isNaN(targetPage) || targetPage < 1) return;
+            if (isLastPage && targetPage > page) return;
+
+            loadProducts(targetPage);
+            document.getElementById("productGrid").scrollIntoView({ behavior: 'smooth' });
         });
     });
 }
