@@ -52,7 +52,7 @@ public class OrderService {
         if (!mockPaymentConfirmed) {
             throw new ValidationException(
                     "payment",
-                    "Mock payment confirmation is required to place an order");
+                    "Payment confirmation is required to place an order");
         }
 
         if (ValidationUtil.isBlank(shippingAddress)) {
@@ -107,7 +107,6 @@ public class OrderService {
 
                 cartDAO.clear(conn, buyerId);
                 conn.commit();
-
                 scheduleMockDelivery(saved.getId());
                 return orderDAO.findById(saved.getId()).orElse(saved);
 
@@ -127,8 +126,7 @@ public class OrderService {
         }
     }
 
-   private void scheduleMockDelivery(long orderId) {
-        // Step 1: Advance to SHIPPED after 10s
+    private void scheduleMockDelivery(long orderId) {
         scheduler.schedule(() -> {
             try {
                 var opt = orderDAO.findById(orderId);
@@ -136,7 +134,7 @@ public class OrderService {
                     orderDAO.updateStatus(orderId, Order.Status.SHIPPED);
                 }
             } catch (AppException | RuntimeException ignored) {}
-        }, 10, TimeUnit.SECONDS);
+        }, 35, TimeUnit.SECONDS);
 
         scheduler.schedule(() -> {
             try {
@@ -148,15 +146,13 @@ public class OrderService {
                     }
                 }
             } catch (AppException | RuntimeException ignored) {}
-        }, 25, TimeUnit.SECONDS);
+        }, 90, TimeUnit.SECONDS);
     }
 
     public void cancelOrder(
             long orderId,
             User requester) throws AppException {
-
         Order order = get(orderId, requester);
-
         boolean isOwner = order.getBuyerId().equals(requester.getId());
         boolean isAdmin = requester.getRole() == User.Role.ADMIN;
 

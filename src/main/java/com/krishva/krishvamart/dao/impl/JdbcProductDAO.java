@@ -1,10 +1,5 @@
 package com.krishva.krishvamart.dao.impl;
 
-import com.krishva.krishvamart.dao.ProductDAO;
-import com.krishva.krishvamart.dto.PagedResult;
-import com.krishva.krishvamart.dto.ProductSearchCriteria;
-import com.krishva.krishvamart.exception.DataAccessException;
-import com.krishva.krishvamart.model.Product;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,7 +9,14 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import javax.sql.DataSource;
+
+import com.krishva.krishvamart.dao.ProductDAO;
+import com.krishva.krishvamart.dto.PagedResult;
+import com.krishva.krishvamart.dto.ProductSearchCriteria;
+import com.krishva.krishvamart.exception.DataAccessException;
+import com.krishva.krishvamart.model.Product;
 
 public class JdbcProductDAO implements ProductDAO {
 
@@ -73,13 +75,13 @@ public class JdbcProductDAO implements ProductDAO {
         }
         if (keyword != null && !keyword.isBlank()) {
             sql.append("AND (LOWER(name) LIKE ? OR LOWER(description) LIKE ?) ");
-            String pattern = "%" + keyword.toLowerCase() + "%";
+            String pattern = "%" + keyword.toLowerCase().trim() + "%";
             params.add(pattern);
             params.add(pattern);
         }
-        if (category != null && !category.isBlank()) {
-            sql.append("AND category = ? ");
-            params.add(category);
+        if (category != null && !category.isBlank() && !category.equalsIgnoreCase("all")) {
+            sql.append("AND LOWER(TRIM(category)) = ? ");
+            params.add(category.toLowerCase().trim());
         }
         sql.append("ORDER BY created_at DESC, id DESC");
 
@@ -104,18 +106,19 @@ public class JdbcProductDAO implements ProductDAO {
     public PagedResult<Product> search(ProductSearchCriteria criteria) throws DataAccessException {
         StringBuilder where = new StringBuilder("WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
+        
         if (criteria.isActiveOnly()) {
             where.append("AND active = TRUE ");
         }
         if (criteria.getKeyword() != null && !criteria.getKeyword().isBlank()) {
             where.append("AND (LOWER(name) LIKE ? OR LOWER(description) LIKE ?) ");
-            String pattern = "%" + criteria.getKeyword().toLowerCase() + "%";
+            String pattern = "%" + criteria.getKeyword().toLowerCase().trim() + "%";
             params.add(pattern);
             params.add(pattern);
         }
-        if (criteria.getCategory() != null && !criteria.getCategory().isBlank()) {
-            where.append("AND category = ? ");
-            params.add(criteria.getCategory());
+        if (criteria.getCategory() != null && !criteria.getCategory().isBlank() && !criteria.getCategory().equalsIgnoreCase("all")) {
+            where.append("AND LOWER(TRIM(category)) = ? ");
+            params.add(criteria.getCategory().toLowerCase().trim());
         }
         if (criteria.getMinPrice() != null) {
             where.append("AND price >= ? ");
@@ -139,16 +142,17 @@ public class JdbcProductDAO implements ProductDAO {
         }
 
         int page = criteria.getPage() <= 0 ? 1 : criteria.getPage();
-        int pageSize = criteria.getPageSize() <= 0 ? 12 : criteria.getPageSize();
+        int pageSize = criteria.getPageSize() <= 0 ? 8 : criteria.getPageSize();
         int offset = (page - 1) * pageSize;
 
         try (Connection conn = dataSource.getConnection()) {
-            long totalItems;
+            long totalItems = 0;
             try (PreparedStatement countPs = conn.prepareStatement("SELECT COUNT(*) FROM products " + where)) {
                 bindParams(countPs, params);
                 try (ResultSet rs = countPs.executeQuery()) {
-                    rs.next();
-                    totalItems = rs.getLong(1);
+                    if (rs.next()) {
+                        totalItems = rs.getLong(1);
+                    }
                 }
             }
 
