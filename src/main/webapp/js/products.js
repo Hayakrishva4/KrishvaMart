@@ -9,10 +9,11 @@ async function loadProducts(page) {
     const minPrice = document.getElementById("minPriceInput").value;
     const maxPrice = document.getElementById("maxPriceInput").value;
     const sort = document.getElementById("sortSelect").value;
-
     const params = new URLSearchParams();
     if (keyword) params.set("q", keyword);
-    if (category) params.set("category", category);
+    if (category && category !== "all" && category !== "All categories") {
+        params.set("category", category);
+    }
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (sort) params.set("sort", sort);
@@ -21,14 +22,21 @@ async function loadProducts(page) {
 
     grid.innerHTML = "<p>Loading products...</p>";
     try {
-        const result = await api.get("/products?" + params.toString());
-        const items = result.items || [];
+        const res = await api.get("/products?" + params.toString());
+        const payload = (res && res.data) ? res.data : res;
+        const items = Array.isArray(payload) ? payload : (payload.items || []);
         
-        let totalCount = Number(result.total);
-        let totalPages = Number(result.totalPages);
+        let rawTotal = payload.totalItems ?? payload.totalCount ?? payload.total ?? res.totalItems ?? res.totalCount ?? res.total;
+        let totalCount = (rawTotal !== undefined && rawTotal !== null) ? Number(rawTotal) : NaN;
+        let rawPages = payload.totalPages ?? res.totalPages;
+        let totalPages = (rawPages !== undefined && rawPages !== null) ? Number(rawPages) : NaN;
         
         if (isNaN(totalPages) || totalPages < 1) {
-            totalPages = !isNaN(totalCount) && totalCount > 0 ? Math.ceil(totalCount / PAGE_SIZE) : 1;
+            if (!isNaN(totalCount) && totalCount >= 0) {
+                totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+            } else {
+                totalPages = items.length < PAGE_SIZE ? currentPage : currentPage;
+            }
         }
 
         if (items.length === 0 && currentPage > 1) {
@@ -93,21 +101,20 @@ function triggerScrollCascade() {
 function renderPagination(page, totalPages, currentItemCount) {
     const nav = document.getElementById("pagination");
 
-    if (page === 1 && currentItemCount < PAGE_SIZE && totalPages <= 1) {
+    if (page === 1 && totalPages <= 1) {
         nav.classList.add("hidden");
         return;
     }
     nav.classList.remove("hidden");
 
     const isFirstPage = page <= 1;
-    const isLastPage = (totalPages > 1 && page >= totalPages) || currentItemCount < PAGE_SIZE;
+    const isLastPage = page >= totalPages;
+
     let html = "";
     html += `<button class="page-btn prev-btn" ${isFirstPage ? "disabled style='opacity:0.35;cursor:not-allowed;'" : ""} data-page="${page - 1}">&lt;&lt; Prev</button>`;
 
-    if (totalPages > 1) {
-        for (let p = 1; p <= totalPages; p++) {
-            html += `<button class="page-btn${p === page ? " active" : ""}" data-page="${p}">${p}</button>`;
-        }
+    for (let p = 1; p <= totalPages; p++) {
+        html += `<button class="page-btn${p === page ? " active" : ""}" data-page="${p}">${p}</button>`;
     }
 
     html += `<button class="page-btn next-btn" ${isLastPage ? "disabled style='opacity:0.35;cursor:not-allowed;'" : ""} data-page="${page + 1}">Next &gt;&gt;</button>`;
@@ -122,7 +129,10 @@ function renderPagination(page, totalPages, currentItemCount) {
             if (isLastPage && targetPage > page) return;
 
             loadProducts(targetPage);
-            document.getElementById("productGrid").scrollIntoView({ behavior: 'smooth' });
+            const gridEl = document.getElementById("productGrid");
+            if (gridEl) {
+                gridEl.scrollIntoView({ behavior: 'smooth' });
+            }
         });
     });
 }
@@ -131,6 +141,11 @@ document.getElementById("searchBtn").addEventListener("click", () => loadProduct
 document.getElementById("searchInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter") loadProducts(1);
 });
+
+const catSelect = document.getElementById("categorySelect");
+if (catSelect) {
+    catSelect.addEventListener("change", () => loadProducts(1));
+}
 
 window.addEventListener('load', () => {
     loadProducts(1);

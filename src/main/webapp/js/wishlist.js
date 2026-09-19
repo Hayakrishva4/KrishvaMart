@@ -18,28 +18,35 @@ async function loadWishlist() {
     if (!container) return [];
     try {
         const res = await window.api.get("/wishlist");
-        const items = Array.isArray(res) ? res : (res && res.data ? res.data : []);
+        const payload = (res && res.data) ? res.data : res;
+        const items = Array.isArray(payload) ? payload : (payload.items || []);
 
         if (!items || items.length === 0) {
-            container.innerHTML = "<p>Your wishlist is empty. Save products you like from their product page.</p>";
+            container.innerHTML = "<p style='color: var(--muted); padding: 1rem 0;'>Your wishlist is empty. Save products you like from their product page.</p>";
             return [];
         }
 
         container.innerHTML = items.map(item => `
-            <div class="cart-item" data-product-id="${item.productId}">
-                <a href="product-detail.jsp?id=${item.productId}"><strong>${window.escapeHtml(item.productName)}</strong></a>
-                &mdash; ${window.formatMoney(item.productPrice)}
-                &mdash; ${item.productStockQty > 0 ? item.productStockQty + " in stock" : "Out of stock"}
-                <div style="margin-top: 0.5rem;">
-                    <button class="moveToCartBtn btn btn-primary" ${item.productStockQty > 0 ? "" : "disabled"}>Move to cart</button>
-                    <button class="removeWishlistBtn btn secondary">Remove</button>
+            <div class="cart-item" data-product-id="${item.productId}" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.85rem; background: var(--card-bg);">
+                <div>
+                    <a href="product-detail.jsp?id=${item.productId}" style="font-weight: 600; font-size: 1rem; color: var(--text); text-decoration: none;">
+                        ${window.escapeHtml(item.productName)}
+                    </a>
+                    <div style="margin-top: 0.25rem; font-size: 0.9rem; color: var(--muted);">
+                        <strong style="color: var(--primary);">${window.formatMoney(item.productPrice)}</strong> &bull; 
+                        <span>${item.productStockQty > 0 ? item.productStockQty + " in stock" : "Out of stock"}</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="moveToCartBtn btn btn-primary" ${item.productStockQty > 0 ? "" : "disabled"} style="padding: 0.4rem 0.85rem; font-size: 0.85rem;">Move to Cart</button>
+                    <button class="removeWishlistBtn btn secondary" style="padding: 0.4rem 0.75rem; font-size: 0.85rem; color: var(--error); border-color: var(--border); background: transparent;">Remove</button>
                 </div>
             </div>
         `).join("");
         wireButtons();
         return items;
     } catch (err) {
-        container.innerHTML = "<p>Could not load wishlist: " + window.escapeHtml(err.message) + "</p>";
+        container.innerHTML = "<p class='form-error' style='color: var(--error);'>Could not load wishlist: " + window.escapeHtml(err.message) + "</p>";
         return [];
     }
 }
@@ -78,7 +85,7 @@ async function loadSuggestedProducts(existingWishlist = []) {
     if (!container) return;
 
     try {
-        const result = await window.api.get("/products?pageSize=10");
+        const result = await window.api.get("/products?pageSize=12");
         
         let allProducts = [];
         if (Array.isArray(result)) {
@@ -96,7 +103,7 @@ async function loadSuggestedProducts(existingWishlist = []) {
             .slice(0, 3);
 
         if (suggestions.length === 0) {
-            container.innerHTML = "<p>No suggestions available.</p>";
+            container.innerHTML = "<p style='color: var(--muted);'>No suggestions available.</p>";
             return;
         }
 
@@ -129,7 +136,7 @@ async function loadSuggestedProducts(existingWishlist = []) {
             });
         });
     } catch (err) {
-        container.innerHTML = "<p>Could not load suggestions: " + window.escapeHtml(err.message) + "</p>";
+        container.innerHTML = "<p style='color: var(--muted); font-size: 0.85rem;'>Could not load suggestions: " + window.escapeHtml(err.message) + "</p>";
     }
 }
 

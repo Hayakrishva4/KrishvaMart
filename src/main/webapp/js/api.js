@@ -62,5 +62,6 @@ function escapeHtml(str) {
 
 function formatMoney(value) {
     const num = Number(value);
-    return "$" + (isNaN(num) ? "0.00" : num.toFixed(2));
+    return "\u20B9" + (isNaN(num) ? "0.00" : num.toFixed(2));
 }
+window.formatMoney = formatMoney;
