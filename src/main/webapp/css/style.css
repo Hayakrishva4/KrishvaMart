@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
     --primary: #1a5d3a;
@@ -12,6 +12,7 @@
     --border: #e5e3df;
     
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
     --font-serif: "Charter", "Iowan Old Style", "Sitka Text", Cambria, Georgia, serif;
 }
 
@@ -50,10 +51,100 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, .brand {
-    font-family: var(--font-serif);
-    letter-spacing: -0.015em;
+/* Headings and brand with JetBrains Mono */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-mono);
+    letter-spacing: -0.03em;
     font-weight: 600;
+}
+
+/* Site Header */
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--primary-dark);
+    color: white;
+    padding: 0.85rem 1.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 10;
+}
+
+/* Animated Fiery Emerald Logo Sweep */
+.site-header .brand {
+    font-size: 1.45rem;
+    font-weight: 700;
+    text-decoration: none;
+    font-family: var(--font-mono);
+    letter-spacing: -0.02em;
+    background: linear-gradient(
+        115deg,
+        #ffffff 0%,
+        #ffffff 35%,
+        #fbbf24 45%,
+        #f97316 50%,
+        #4ade80 58%,
+        #ffffff 68%,
+        #ffffff 100%
+    );
+    background-size: 250% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: brandShine 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    display: inline-block;
+    transition: transform 0.25s ease, filter 0.25s ease;
+    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.28));
+}
+
+.site-header .brand:hover {
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.55));
+}
+
+@keyframes brandShine {
+    0% {
+        background-position: 180% center;
+    }
+    40%, 100% {
+        background-position: -80% center;
+    }
+}
+
+/* Navigation & Sliding Line Indicator */
+.site-header nav {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.site-header nav a {
+    position: relative;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.925rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.site-header nav a:hover,
+.site-header nav a.active { 
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.nav-indicator {
+    position: absolute;
+    bottom: -4px;
+    height: 2.5px;
+    background: #ffffff;
+    border-radius: 2px;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 .theme-toggle {
@@ -70,6 +161,43 @@ h1, h2, h3, .brand {
 
 .theme-toggle:hover {
     background: rgba(255, 255, 255, 0.1);
+}
+
+.session-box { 
+    font-size: 0.9rem; 
+}
+
+.session-box a, .session-box button {
+    color: white;
+    background: var(--primary);
+    border: none;
+    padding: 0.4rem 0.85rem;
+    border-radius: 6px;
+    margin-left: 0.5rem;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    transition: opacity 0.15s ease;
+}
+
+.session-box a:hover, .session-box button:hover {
+    opacity: 0.9;
+}
+
+.site-main {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 1.75rem 1.5rem;
+    min-height: 65vh;
+}
+
+.site-footer {
+    text-align: center;
+    color: var(--muted);
+    padding: 2.5rem 1.5rem;
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
 }
 
 .recently-viewed {
@@ -109,72 +237,9 @@ h1, h2, h3, .brand {
     background: #eee;
     margin-bottom: 0.35rem;
 }
-
-.site-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--primary-dark);
-    color: white;
-    padding: 0.85rem 1.75rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.site-header .brand {
-    font-size: 1.35rem;
-    color: white;
-    text-decoration: none;
-}
-
-.site-header nav a {
-    color: rgba(255, 255, 255, 0.9);
-    text-decoration: none;
-    margin-right: 1.25rem;
-    font-size: 0.925rem;
-    font-weight: 500;
-}
-
-.site-header nav a:hover { 
-    color: #ffffff;
-    text-decoration: underline; 
-}
-
-.session-box { 
-    font-size: 0.9rem; 
-}
-
-.session-box a, .session-box button {
-    color: white;
-    background: var(--primary);
-    border: none;
-    padding: 0.4rem 0.85rem;
-    border-radius: 6px;
-    margin-left: 0.5rem;
-    cursor: pointer;
-    text-decoration: none;
-    font-weight: 500;
-    font-family: var(--font-sans);
-    transition: opacity 0.15s ease;
-}
-
-.session-box a:hover, .session-box button:hover {
-    opacity: 0.9;
-}
-
-.site-main {
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 1.75rem 1.5rem;
-    min-height: 65vh;
-}
-
-.site-footer {
-    text-align: center;
-    color: var(--muted);
-    padding: 2.5rem 1.5rem;
-    font-size: 0.85rem;
-    border-top: 1px solid var(--border);
+.recently-viewed-strip .mini-card strong {
+    font-family: var(--font-mono);
+    font-weight: 600;
 }
 
 .search-bar {
@@ -255,10 +320,15 @@ button.secondary { background: var(--muted); }
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
 }
 
-.product-card strong {
-    font-family: var(--font-serif);
-    font-size: 1.05rem;
+/* Product Titles use JetBrains Mono */
+.product-card strong, 
+.product-card a,
+.cart-item a,
+.mini-rec-card a {
+    font-family: var(--font-mono);
+    font-size: 1.02rem;
     line-height: 1.35;
+    letter-spacing: -0.02em;
 }
 
 .product-card img {
@@ -278,6 +348,7 @@ button.secondary { background: var(--muted); }
     font-weight: 600; 
     color: var(--primary); 
     font-size: 1.05rem;
+    font-family: var(--font-mono);
 }
 
 .product-card .category { 
@@ -503,7 +574,7 @@ button.secondary { background: var(--muted); }
     min-width: 150px;
 }
 .stat-value {
-    font-family: var(--font-serif);
+    font-family: var(--font-mono);
     font-size: 1.8rem;
     font-weight: 700;
     color: var(--primary-dark);
@@ -525,7 +596,7 @@ button.secondary { background: var(--muted); }
 }
 
 .cart-total { 
-    font-family: var(--font-serif);
+    font-family: var(--font-mono);
     font-weight: 700; 
     margin: 1.25rem 0; 
     font-size: 1.25rem; 
