@@ -11,6 +11,7 @@
             document.documentElement.setAttribute("data-theme", "dark");
         }
     </script>
+    <script src="${pageContext.request.contextPath}/js/floating-dots.js" defer></script>
 </head>
 <body>
     <header class="site-header">

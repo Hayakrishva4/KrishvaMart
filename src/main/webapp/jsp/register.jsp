@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
-<section class="auth-form">
+
+<section class="auth-form" style="position: relative; z-index: 1; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: var(--card-bg); border: 1px solid var(--border); box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);">
     <h1>Register</h1>
     <form id="registerForm">
         <label for="name">Name</label>
@@ -20,5 +21,6 @@
     <p id="registerError" class="form-error"></p>
     <p>Already have an account? <a href="${pageContext.request.contextPath}/jsp/login.jsp">Log in</a></p>
 </section>
+
 <script src="${pageContext.request.contextPath}/js/register.js"></script>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
