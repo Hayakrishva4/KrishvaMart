@@ -29,15 +29,14 @@
         </div>
     </div>
 
+    <script>
+        if (sessionStorage.getItem("krishvamart_intro_viewed") === "true") {
+            document.getElementById("introOverlay").style.display = "none";
+        }
+    </script>
+
     <header class="site-header">
-        <a class="brand brand-k" href="${pageContext.request.contextPath}/jsp/index.jsp" title="KrishvaMart">
-            <svg viewBox="0 0 100 100" class="k-logo-svg" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 15 H32 V85 H20 Z" />
-                <path d="M36 15 H39 V85 H36 Z" />
-                <polygon points="39,52 68,15 86,15 48,58" />
-                <polygon points="42,50 86,85 68,85 39,55" />
-            </svg>
-        </a>
+        <a class="brand" href="${pageContext.request.contextPath}/jsp/index.jsp">KrishvaMart</a>
         
         <nav id="siteNav">
             <a href="${pageContext.request.contextPath}/jsp/index.jsp">Browse</a>
@@ -66,18 +65,12 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const overlay = document.getElementById("introOverlay");
-
-        function dismissIntro() {
-            if (!overlay) return;
-            overlay.style.display = "none";
-            sessionStorage.setItem("krishvamart_intro_viewed", "true");
-        }
-
-        if (sessionStorage.getItem("krishvamart_intro_viewed") === "true") {
-            if (overlay) overlay.style.display = "none";
-        } else {
-            setTimeout(dismissIntro, 4800);
+        if (sessionStorage.getItem("krishvamart_intro_viewed") !== "true") {
+            setTimeout(() => {
+                const overlay = document.getElementById("introOverlay");
+                if (overlay) overlay.style.display = "none";
+                sessionStorage.setItem("krishvamart_intro_viewed", "true");
+            }, 4800);
         }
 
         const nav = document.getElementById("siteNav");
