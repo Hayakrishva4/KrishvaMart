@@ -14,8 +14,30 @@
     <script src="${pageContext.request.contextPath}/js/floating-dots.js" defer></script>
 </head>
 <body>
+    <div id="introOverlay" class="intro-overlay">
+        <div class="intro-stage">
+            <div class="intro-logo-container">
+                <svg viewBox="0 0 100 100" class="intro-k-svg" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 15 H32 V85 H20 Z" />
+                    <path d="M36 15 H39 V85 H36 Z" />
+                    <polygon points="39,52 68,15 86,15 48,58" />
+                    <polygon points="42,50 86,85 68,85 39,55" />
+                </svg>
+                <div class="intro-brand-text">KRISHVAMART</div>
+            </div>
+            <div class="slogan-type">You're Quality is our First Priority</div>
+        </div>
+    </div>
+
     <header class="site-header">
-        <a class="brand" href="${pageContext.request.contextPath}/jsp/index.jsp">KrishvaMart</a>
+        <a class="brand brand-k" href="${pageContext.request.contextPath}/jsp/index.jsp" title="KrishvaMart">
+            <svg viewBox="0 0 100 100" class="k-logo-svg" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 15 H32 V85 H20 Z" />
+                <path d="M36 15 H39 V85 H36 Z" />
+                <polygon points="39,52 68,15 86,15 48,58" />
+                <polygon points="42,50 86,85 68,85 39,55" />
+            </svg>
+        </a>
         
         <nav id="siteNav">
             <a href="${pageContext.request.contextPath}/jsp/index.jsp">Browse</a>
@@ -44,15 +66,26 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", function () {
+        const overlay = document.getElementById("introOverlay");
+
+        function dismissIntro() {
+            if (!overlay) return;
+            overlay.style.display = "none";
+            sessionStorage.setItem("krishvamart_intro_viewed", "true");
+        }
+
+        if (sessionStorage.getItem("krishvamart_intro_viewed") === "true") {
+            if (overlay) overlay.style.display = "none";
+        } else {
+            setTimeout(dismissIntro, 4800);
+        }
+
         const nav = document.getElementById("siteNav");
         const indicator = document.getElementById("navIndicator");
         const navLinks = nav.querySelectorAll("a");
 
         function moveIndicatorTo(elem) {
-            if (!elem) {
-                indicator.style.width = "0px";
-                return;
-            }
+            if (!elem || !indicator) return;
             indicator.style.width = elem.offsetWidth + "px";
             indicator.style.left = elem.offsetLeft + "px";
         }
@@ -67,22 +100,15 @@
             }
         });
 
-        if (activeLink) {
-            moveIndicatorTo(activeLink);
-        }
+        if (activeLink) moveIndicatorTo(activeLink);
 
         navLinks.forEach(link => {
             link.addEventListener("mouseenter", () => moveIndicatorTo(link));
             link.addEventListener("touchstart", () => moveIndicatorTo(link), { passive: true });
         });
 
-        nav.addEventListener("mouseleave", () => {
-            moveIndicatorTo(activeLink);
-        });
-
-        window.addEventListener("resize", () => {
-            moveIndicatorTo(activeLink);
-        });
+        nav.addEventListener("mouseleave", () => moveIndicatorTo(activeLink));
+        window.addEventListener("resize", () => moveIndicatorTo(activeLink));
     });
     </script>
     <main class="site-main">
