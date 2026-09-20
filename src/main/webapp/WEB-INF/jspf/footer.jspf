@@ -1,6 +1,7 @@
 </main>
     <footer class="site-footer">
-        <p>&copy;KrishvaMart - All Rights Reserved.</p>
+        <p class="copyright-line">&copy;KrishvaMart - All Rights Reserved.</p>
+        <p class="brand-slogan">" You're Quality is our First Priority "</p>
     </footer>
     <!--
     <div id="chatWidget" class="chat-widget">

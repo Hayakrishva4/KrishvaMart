@@ -1,47 +1,37 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-    <%@ include file="/WEB-INF/jspf/header.jspf" %>
+<%@ include file="/WEB-INF/jspf/header.jspf" %>
 
-        <section class="auth-form">
+<div class="auth-container">
+    <section class="auth-form">
+        <div class="auth-header">
+            <!-- Exact Custom K Symbol -->
+            <svg viewBox="0 0 100 100" class="k-logo-svg" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 15 H32 V85 H20 Z" />
+                <path d="M36 15 H39 V85 H36 Z" />
+                <polygon points="39,52 68,15 86,15 48,58" />
+                <polygon points="42,50 86,85 68,85 39,55" />
+            </svg>
             <h1>Login to Your Account</h1>
-            <div class="auth-box">
-                <form id="loginForm" class="login-form">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" required>
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required>
-                    <button type="submit">Login</button>
-                </form>
-            </div>
-            <p id="loginError" class="form-error"></p>
-            <p>No account? <a href="${pageContext.request.contextPath}/jsp/register.jsp">Register</a></p>
-        </section>
-        <style>
-            .auth-box {
-                max-width: 420px;
-                margin: 20px auto 0;
-                padding: 20px;
-                background: #ffffff1a;
-                border: 1px solid #dddddd;
-                border-radius: 10px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            }
-            .login-form {
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-            }
-            .login-form label {
-                font-weight: 600;
-            }
-            .login-form input,
-            .login-form button {
-                width: 100%;
-                padding: 10px 12px;
-                box-sizing: border-box;
-            }
-            .login-form button {
-                margin-top: 10px;
-            }
-        </style>
-        <script src="${pageContext.request.contextPath}/js/login.js"></script>
-        <%@ include file="/WEB-INF/jspf/footer.jspf" %>
+            <p class="auth-slogan">" You're Quality is our First Priority "</p>
+        </div>
+        
+        <form id="loginForm">
+            <label for="email">Email</label>
+            <input type="email" id="email" required>
+            
+            <label for="password">Password</label>
+            <input type="password" id="password" required>
+            
+            <button type="submit">Login</button>
+        </form>
+        
+        <p id="loginError" class="form-error" style="text-align: center; margin-top: 10px;"></p>
+        
+        <div class="auth-footer">
+            No account? <a href="${pageContext.request.contextPath}/jsp/register.jsp">Register</a>
+        </div>
+    </section>
+</div>
+
+<script src="${pageContext.request.contextPath}/js/login.js"></script>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
