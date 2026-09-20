@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () =>
      }
       return;
     }
+    
     fetch('/api/v1/products/' + productId)
      .then(res => 
         {
@@ -44,7 +45,9 @@ document.addEventListener('DOMContentLoaded', () =>
           detailContainer.innerHTML = '<p class="error-text">' + (err.message || 'Failed to load product details.') + '</p>';
          }
         });
+        
     fetchReviews(productId);
+
     function renderProduct(p) {
         if (!detailContainer) return;
         const inStock = p.stockQty > 0;
@@ -88,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () =>
             });
         }
     }
+
     function addToCart(prodId, quantity) 
     {
         const feedback = document.getElementById('cartFeedback');
@@ -135,51 +139,58 @@ document.addEventListener('DOMContentLoaded', () =>
             {
                 if (res.success && res.data) 
                 {
-                    const { reviews, averageRating } = res.data;
-                    renderReviews(reviews || [], averageRating || 0, pId);
+                    const { reviews } = res.data;
+                    renderReviews(reviews || [], pId);
                 } else {
-                    renderReviews([], 0, pId);
+                    renderReviews([], pId);
                 }
             })
             .catch(() => {
-                renderReviews([], 0, pId);
+                renderReviews([], pId);
             });
     }
 
-    function renderReviews(reviews, avgRating, pId) 
+    function renderReviews(reviews, pId) 
     {
         if (!reviewList) return;
 
-        let displayRating = avgRating;
-        let reviewCount = reviews.length;
+        // Base fallback metrics based on product ID to simulate community activity
+        const numericId = parseInt(pId, 10) || 1;
+        const baseRating = 4.1 + (((numericId * 7) % 9) / 10);
+        const baseReviewCount = 12 + ((numericId * 13) % 37);
 
-        if (!displayRating || displayRating === 0 || reviews.length === 0) {
-            const numericId = parseInt(pId, 10) || 1;
-            displayRating = 4.1 + (((numericId * 7) % 9) / 10);
-            reviewCount = 12 + ((numericId * 13) % 37);
+        let finalRating = baseRating;
+        let finalReviewCount = baseReviewCount + reviews.length;
+
+        // Recalculate average incorporating real user reviews alongside the base fallback
+        if (reviews.length > 0) {
+            const sumRealRatings = reviews.reduce((sum, r) => sum + r.rating, 0);
+            const totalSum = (baseRating * baseReviewCount) + sumRealRatings;
+            finalRating = totalSum / finalReviewCount;
         }
 
-        const roundedRating = Math.round(displayRating);
+        const roundedRating = Math.round(finalRating);
         const stars = '\u2605'.repeat(roundedRating) + '\u2606'.repeat(5 - roundedRating);
 
         if (ratingSummary) 
         {
             ratingSummary.innerHTML = '<strong>Average Rating: <span class="stars" style="color:#f59e0b;">' + stars + '</span> (' 
-            + displayRating.toFixed(1) + ' / 5.0)</strong> \u2014 ' + reviewCount + ' review(s)';
+            + finalRating.toFixed(1) + ' / 5.0)</strong> \u2014 ' + finalReviewCount + ' review(s)';
         }
 
-        if (reviews.length === 0) 
+        let htmlOutput = '<p class="muted-text">Showing Verified Community Rating.</p>';
+        
+        if (reviews.length > 0) 
         {
-            reviewList.innerHTML = '<p class="muted-text">Showing Verified Community Rating.</p>';
-            return;
+            htmlOutput += reviews.map(r => 
+             '<div class="review-item" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem;">' +
+                '<div class="review-header" style="margin-bottom: 0.5rem;">' +
+                  '<span class="stars" style="color:#f59e0b;">' + '\u2605'.repeat(r.rating) + '\u2606'.repeat(5 - r.rating) + '</span>' +
+                    '<small class="muted-text" style="margin-left: 10px;">' + (r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '') + '</small>' +
+                '</div>' + '<p style="margin: 0; color: var(--text);">' + escapeHtml(r.comment || '') + '</p>' + '</div>').join('');
         }
 
-        reviewList.innerHTML = reviews.map(r => 
-         '<div class="review-item">' +
-            '<div class="review-header">' +
-              '<span class="stars" style="color:#f59e0b;">' + '\u2605'.repeat(r.rating) + '\u2606'.repeat(5 - r.rating) + '</span>' +
-                '<small class="muted-text">' + (r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '') + '</small>' +
-            '</div>' + '<p>' + escapeHtml(r.comment || '') + '</p>' + '</div>').join('');
+        reviewList.innerHTML = htmlOutput;
     }
 
     if (reviewForm) {
@@ -204,17 +215,27 @@ document.addEventListener('DOMContentLoaded', () =>
             .then(res => {
                 if (res.success) {
                     reviewForm.reset();
-                    if (reviewError) reviewError.textContent = 'Review submitted!';
+                    if (reviewError) {
+                        reviewError.style.color = "var(--primary)";
+                        reviewError.textContent = 'Review submitted!';
+                    }
                     fetchReviews(productId);
                 } else {
-                    if (reviewError) reviewError.textContent = res.error ? res.error.message : 'Failed to submit.';
+                    if (reviewError) {
+                        reviewError.style.color = "var(--error)";
+                        reviewError.textContent = res.error ? res.error.message : 'Failed to submit.';
+                    }
                 }
             })
             .catch(() => {
-                if (reviewError) reviewError.textContent = 'Login required or invalid order ID.';
+                if (reviewError) {
+                    reviewError.style.color = "var(--error)";
+                    reviewError.textContent = 'Login required or invalid order ID.';
+                }
             });
         });
     }
+
     function escapeHtml(text) 
     {
      if (!text) return '';

@@ -1,6 +1,6 @@
 </main>
     <footer class="site-footer">
-        <p class="copyright-line">&copy;KrishvaMart - All Rights Reserved.</p>
+        <p class="copyright-line">&copy; KrishvaMart - All Rights Reserved.</p>
         <p class="brand-slogan">" You're Quality is our First Priority "</p>
     </footer>
     <!--
@@ -22,7 +22,6 @@
     <script src="${pageContext.request.contextPath}/js/api.js"></script>
     <script src="${pageContext.request.contextPath}/js/theme.js"></script>
     <script src="${pageContext.request.contextPath}/js/auth.js"></script>
-    <!-- Deferred to Week 9/10: Chat Widget JS -->
     <!-- <script src="${pageContext.request.contextPath}/js/chat-widget.js"></script> -->
 </body>
 </html>

@@ -22,11 +22,29 @@ let pollTimer = null;
 let animationFrameId = null;
 let activeOrdersData = [];
 
-// Realistic timeline durations in seconds:
-// 0 to 35s: Confirmed -> Shipped (Fulfillment to local hub)
-// 35 to 90s: Shipped -> Delivered (Out for delivery to final doorstep)
 const TIME_TO_SHIPPED_SEC = 35;
 const TIME_TO_DELIVERED_SEC = 90;
+
+function calculateProgress(order) {
+    if (order.status === "DELIVERED") return 100;
+    if (order.status === "CANCELLED") return 0;
+
+    const now = Date.now();
+    const createdTime = order.createdAt ? new Date(order.createdAt).getTime() : now;
+    const elapsedSec = Math.max(0, (now - createdTime) / 1000);
+
+    let progressRatio = 0;
+    if (elapsedSec <= TIME_TO_SHIPPED_SEC) {
+        progressRatio = (elapsedSec / TIME_TO_SHIPPED_SEC) * 0.5;
+    } else if (elapsedSec < TIME_TO_DELIVERED_SEC) {
+        const remaining = elapsedSec - TIME_TO_SHIPPED_SEC;
+        const phase2Span = TIME_TO_DELIVERED_SEC - TIME_TO_SHIPPED_SEC;
+        progressRatio = 0.5 + (remaining / phase2Span) * 0.5;
+    } else {
+        progressRatio = 1.0;
+    }
+    return Math.min(100, Math.max(0, progressRatio * 100));
+}
 
 async function loadOrders() {
     const container = document.getElementById("ordersList");
@@ -70,7 +88,6 @@ function startSmoothPipelineLoop() {
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
     function tick() {
-        const now = Date.now();
         let needsNextFrame = false;
 
         activeOrdersData.forEach(order => {
@@ -97,21 +114,7 @@ function startSmoothPipelineLoop() {
                 return;
             }
 
-            const createdTime = order.createdAt ? new Date(order.createdAt).getTime() : now;
-            const elapsedSec = Math.max(0, (now - createdTime) / 1000);
-
-            let progressRatio = 0;
-            if (elapsedSec <= TIME_TO_SHIPPED_SEC) {
-                progressRatio = (elapsedSec / TIME_TO_SHIPPED_SEC) * 0.5;
-            } else if (elapsedSec < TIME_TO_DELIVERED_SEC) {
-                const remaining = elapsedSec - TIME_TO_SHIPPED_SEC;
-                const phase2Span = TIME_TO_DELIVERED_SEC - TIME_TO_SHIPPED_SEC;
-                progressRatio = 0.5 + (remaining / phase2Span) * 0.5;
-            } else {
-                progressRatio = 1.0;
-            }
-
-            const currentPercent = Math.min(100, Math.max(0, progressRatio * 100));
+            const currentPercent = calculateProgress(order);
             fillEl.style.width = currentPercent.toFixed(2) + "%";
 
             if (currentPercent >= 50) {
@@ -155,27 +158,28 @@ function renderPipeline(order) {
 
     const isDelivered = order.status === "DELIVERED";
     const isShipped = order.status === "SHIPPED" || isDelivered;
+    const currentPercent = calculateProgress(order);
 
     return `
         <div class="delivery-pipeline" style="margin: 1.25rem 0 1rem 0;">
             <div class="pipeline-track" style="position: relative; display: flex; justify-content: space-between; align-items: center;">
-                <div class="pipeline-track-fill" id="pipeline-fill-${order.id}" style="width: ${isDelivered ? '100%' : '0%'}; transition: width 0.3s linear;"></div>
+                <div class="pipeline-track-fill" id="pipeline-fill-${order.id}" style="width: ${currentPercent}%;"></div>
                 
                 <div class="pipeline-step active" id="step-1-${order.id}">
                     <div class="step-node" style="display: flex; align-items: center; justify-content: center; font-weight: bold;">&#10003;</div>
                     <span class="step-label">Confirmed</span>
                 </div>
                 
-                <div class="pipeline-step ${isShipped ? 'active' : ''}" id="step-2-${order.id}">
+                <div class="pipeline-step ${isShipped || currentPercent >= 50 ? 'active' : ''}" id="step-2-${order.id}">
                     <div class="step-node" id="node-2-${order.id}" style="display: flex; align-items: center; justify-content: center; font-weight: bold;">
-                        ${isShipped ? '&#10003;' : '2'}
+                        ${isShipped || currentPercent >= 50 ? '&#10003;' : '2'}
                     </div>
                     <span class="step-label">Shipped</span>
                 </div>
                 
-                <div class="pipeline-step ${isDelivered ? 'active' : ''}" id="step-3-${order.id}">
+                <div class="pipeline-step ${isDelivered || currentPercent >= 99 ? 'active' : ''}" id="step-3-${order.id}">
                     <div class="step-node" id="node-3-${order.id}" style="display: flex; align-items: center; justify-content: center; font-weight: bold;">
-                        ${isDelivered ? '&#10003;' : '3'}
+                        ${isDelivered || currentPercent >= 99 ? '&#10003;' : '3'}
                     </div>
                     <span class="step-label">Delivered</span>
                 </div>
