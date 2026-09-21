@@ -1,4 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<!-- SECURITY CHECK: Redirect unauthenticated users straight to Register -->
+<c:if test="${empty sessionScope.authUser}">
+    <c:redirect url="/jsp/register.jsp" />
+</c:if>
+
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
 
 <style>
@@ -214,7 +221,7 @@
                 <polygon points="39,52 68,15 86,15 48,58" />
                 <polygon points="42,50 86,85 68,85 39,55" />
             </svg>
-            <h4 class="slogan">" You're Quality is our First Priority "</h4>
+            <h4 class="slogan">"Your Quality is our First Priority"</h4>
         </div>
         <div class="about-text">
             <h3>About KrishvaMart</h3>
