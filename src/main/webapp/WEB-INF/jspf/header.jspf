@@ -25,7 +25,8 @@
                 </svg>
                 <div class="intro-brand-text">KRISHVAMART</div>
             </div>
-            <div class="slogan-type">You're Quality is our First Priority</div>
+            <!-- Fixed "You're" to "Your" for professional consistency -->
+            <div class="slogan-type">Your Quality is our First Priority</div>
         </div>
     </div>
 
@@ -38,15 +39,17 @@
     <header class="site-header">
         <a class="brand" href="${pageContext.request.contextPath}/jsp/index.jsp">KrishvaMart</a>
         
-        <nav id="siteNav">
-            <a href="${pageContext.request.contextPath}/jsp/index.jsp">Browse</a>
-            <a href="${pageContext.request.contextPath}/jsp/cart.jsp">Cart</a>
-            <a href="${pageContext.request.contextPath}/jsp/wishlist.jsp">Wishlist</a>
-            <a href="${pageContext.request.contextPath}/jsp/orders.jsp">Orders</a>
-            <a href="${pageContext.request.contextPath}/jsp/seller-dashboard.jsp">Sell</a>
-            <a href="${pageContext.request.contextPath}/jsp/admin.jsp">Admin</a>
-            <div class="nav-indicator" id="navIndicator"></div>
-        </nav>
+        <c:if test="${not empty sessionScope.authUser}">
+            <nav id="siteNav">
+                <a href="${pageContext.request.contextPath}/jsp/index.jsp">Browse</a>
+                <a href="${pageContext.request.contextPath}/jsp/cart.jsp">Cart</a>
+                <a href="${pageContext.request.contextPath}/jsp/wishlist.jsp">Wishlist</a>
+                <a href="${pageContext.request.contextPath}/jsp/orders.jsp">Orders</a>
+                <a href="${pageContext.request.contextPath}/jsp/seller-dashboard.jsp">Sell</a>
+                <a href="${pageContext.request.contextPath}/jsp/admin.jsp">Admin</a>
+                <div class="nav-indicator" id="navIndicator"></div>
+            </nav>
+        </c:if>
 
         <div class="session-box" id="sessionBox">
             <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">&#9788;</button>
@@ -56,7 +59,7 @@
                     <button id="logoutBtn">Log out</button>
                 </c:when>
                 <c:otherwise>
-                    <a href="${pageContext.request.contextPath}/jsp/login.jsp">Log in</a>
+                    <!-- Removed Login link so ONLY Register remains -->
                     <a href="${pageContext.request.contextPath}/jsp/register.jsp">Register</a>
                 </c:otherwise>
             </c:choose>
@@ -74,34 +77,37 @@
         }
 
         const nav = document.getElementById("siteNav");
-        const indicator = document.getElementById("navIndicator");
-        const navLinks = nav.querySelectorAll("a");
+        
+        if (nav) {
+            const indicator = document.getElementById("navIndicator");
+            const navLinks = nav.querySelectorAll("a");
 
-        function moveIndicatorTo(elem) {
-            if (!elem || !indicator) return;
-            indicator.style.width = elem.offsetWidth + "px";
-            indicator.style.left = elem.offsetLeft + "px";
-        }
-
-        let activeLink = null;
-        const currentPath = window.location.pathname;
-        navLinks.forEach(link => {
-            const href = link.getAttribute("href").split("/").pop();
-            if (href && currentPath.includes(href)) {
-                activeLink = link;
-                link.classList.add("active");
+            function moveIndicatorTo(elem) {
+                if (!elem || !indicator) return;
+                indicator.style.width = elem.offsetWidth + "px";
+                indicator.style.left = elem.offsetLeft + "px";
             }
-        });
 
-        if (activeLink) moveIndicatorTo(activeLink);
+            let activeLink = null;
+            const currentPath = window.location.pathname;
+            navLinks.forEach(link => {
+                const href = link.getAttribute("href").split("/").pop();
+                if (href && currentPath.includes(href)) {
+                    activeLink = link;
+                    link.classList.add("active");
+                }
+            });
 
-        navLinks.forEach(link => {
-            link.addEventListener("mouseenter", () => moveIndicatorTo(link));
-            link.addEventListener("touchstart", () => moveIndicatorTo(link), { passive: true });
-        });
+            if (activeLink) moveIndicatorTo(activeLink);
 
-        nav.addEventListener("mouseleave", () => moveIndicatorTo(activeLink));
-        window.addEventListener("resize", () => moveIndicatorTo(activeLink));
+            navLinks.forEach(link => {
+                link.addEventListener("mouseenter", () => moveIndicatorTo(link));
+                link.addEventListener("touchstart", () => moveIndicatorTo(link), { passive: true });
+            });
+
+            nav.addEventListener("mouseleave", () => moveIndicatorTo(activeLink));
+            window.addEventListener("resize", () => moveIndicatorTo(activeLink));
+        }
     });
     </script>
     <main class="site-main">

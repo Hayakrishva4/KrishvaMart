@@ -1,5 +1,11 @@
 package com.krishva.krishvamart.listener;
 
+import javax.sql.DataSource;
+
+import com.krishva.krishvamart.chat.ChatProvider;
+import com.krishva.krishvamart.chat.ChatService;
+import com.krishva.krishvamart.chat.GeminiChatProvider;
+import com.krishva.krishvamart.chat.MockChatProvider;
 import com.krishva.krishvamart.dao.AnalyticsDAO;
 import com.krishva.krishvamart.dao.CartDAO;
 import com.krishva.krishvamart.dao.OrderDAO;
@@ -22,7 +28,6 @@ import com.krishva.krishvamart.service.SellerAnalyticsService;
 import com.krishva.krishvamart.service.UserService;
 import com.krishva.krishvamart.service.WishlistService;
 import com.krishva.krishvamart.util.ConfigResolver;
-import javax.sql.DataSource;
 
 public final class ServiceRegistry {
 
@@ -35,6 +40,7 @@ public final class ServiceRegistry {
     private final ReviewService reviewService;
     private final WishlistService wishlistService;
     private final SellerAnalyticsService sellerAnalyticsService;
+    private final ChatService chatService; // Added ChatService field
 
     public ServiceRegistry(DataSource dataSource) {
         this(dataSource, ConfigResolver.load());
@@ -57,6 +63,18 @@ public final class ServiceRegistry {
         this.reviewService = new ReviewService(reviewDAO, orderDAO);
         this.wishlistService = new WishlistService(wishlistDAO, productDAO);
         this.sellerAnalyticsService = new SellerAnalyticsService(analyticsDAO);
+
+        String providerType = config.get("ai.chatbot.provider", "mock");
+        ChatProvider chatProvider;
+        
+        if ("gemini".equalsIgnoreCase(providerType)) {
+            String apiKey = config.get("ai.chatbot.api.key", "");
+            chatProvider = new GeminiChatProvider(apiKey);
+        } else {
+            chatProvider = new MockChatProvider();
+        }
+        
+        this.chatService = new ChatService(chatProvider);
     }
 
     public UserService userService() {
@@ -85,5 +103,9 @@ public final class ServiceRegistry {
 
     public SellerAnalyticsService sellerAnalyticsService() {
         return sellerAnalyticsService;
+    }
+
+    public ChatService chatService() {
+        return chatService;
     }
 }
