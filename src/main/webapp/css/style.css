@@ -265,7 +265,7 @@ button.secondary { background: var(--muted); }
 .product-card .price { font-weight: 600; color: var(--primary); font-size: 1.05rem; font-family: var(--font-mono); }
 .product-card .category { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
 
-.chat-widget { position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 1000; }
+.chat-widget { position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 9999; }
 .chat-toggle { width: 52px; height: 52px; border-radius: 50%; font-size: 1.4rem; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
 .chat-panel { position: absolute; bottom: 64px; right: 0; width: 300px; max-height: 420px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); display: flex; flex-direction: column; }
 .chat-panel-header { background: var(--primary-dark); color: white; padding: 0.65rem 0.85rem; display: flex; justify-content: space-between; align-items: center; border-radius: 10px 10px 0 0; }

@@ -4,9 +4,7 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
                              http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
-
     <display-name>KrishvaMart</display-name>
-
     <session-config>
         <session-timeout>30</session-timeout>
         <cookie-config>
@@ -15,9 +13,8 @@
     </session-config>
 
     <welcome-file-list>
-        <welcome-file>jsp/index.jsp</welcome-file>
+        <welcome-file>jsp/register.jsp</welcome-file>
     </welcome-file-list>
-
     <error-page>
         <error-code>404</error-code>
         <location>/jsp/error.jsp</location>
@@ -30,5 +27,4 @@
         <exception-type>java.lang.Throwable</exception-type>
         <location>/jsp/error.jsp</location>
     </error-page>
-
 </web-app>
