@@ -109,6 +109,14 @@ public class ProductService {
             User admin) throws AppException {
 
         requireAdmin(admin);
+        
+        Product product = productDAO.findById(productId)
+                .orElseThrow(() -> new NotFoundException("No such product"));
+                
+        if (!product.isActive()) {
+            throw new ValidationException("status", "Deactivated already");
+        }
+                
         productDAO.setActive(productId, false);
     }
 
@@ -117,6 +125,14 @@ public class ProductService {
             User admin) throws AppException {
 
         requireAdmin(admin);
+        
+        Product product = productDAO.findById(productId)
+                .orElseThrow(() -> new NotFoundException("No such product"));
+                
+        if (product.isActive()) {
+            throw new ValidationException("status", "Activated already");
+        }
+                
         productDAO.setActive(productId, true);
     }
 

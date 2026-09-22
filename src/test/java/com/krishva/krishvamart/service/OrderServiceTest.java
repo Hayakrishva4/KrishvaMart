@@ -74,27 +74,27 @@ class OrderServiceTest {
 
     @Test
     void checkout_rejectsEmptyCart() {
-        ValidationException ex = assertThrows(ValidationException.class, () -> orderService.checkout(buyerId, true, "123 Main St, Chennai, TN 600001"));
+        ValidationException ex = assertThrows(ValidationException.class, () -> orderService.checkout(buyerId, true, "123 Main St, Chennai", null, null));
         assertNotNull(ex);
     }
 
     @Test
     void checkout_rejectsWithoutMockPaymentConfirmation() {
-        ValidationException ex = assertThrows(ValidationException.class, () -> orderService.checkout(buyerId, false, "123 Main St, Chennai, TN 600001"));
+        ValidationException ex = assertThrows(ValidationException.class, () -> orderService.checkout(buyerId, false, "123 Main St, Chennai", null, null));
         assertNotNull(ex);
     }
 
     @Test
     void checkout_rejectsBlankShippingAddress() throws Exception {
         cartService.addItem(buyerId, productId, 1);
-        ValidationException ex = assertThrows(ValidationException.class, () -> orderService.checkout(buyerId, true, "  "));
+        ValidationException ex = assertThrows(ValidationException.class, () -> orderService.checkout(buyerId, true, "   ", null, null));
         assertNotNull(ex);
     }
 
     @Test
     void checkout_decrementsStockAndClearsCartOnSuccess() throws Exception {
         cartService.addItem(buyerId, productId, 3);
-        Order order = orderService.checkout(buyerId, true, "123 Main St, Chennai, TN 600001");
+        Order order = orderService.checkout(buyerId, true, "123 Main St, Chennai, TN 600001", null, null);
         assertEquals(Order.Status.CONFIRMED, order.getStatus());
         assertEquals(0, new BigDecimal("30.00").compareTo(order.getTotalAmount()));
         assertEquals(1, order.getItems().size());
@@ -108,9 +108,20 @@ class OrderServiceTest {
         cartService.addItem(buyerId, productId, 3);
         productDAO.adjustStock(productId, -3);
         assertEquals(2, productDAO.findById(productId).orElseThrow().getStockQty());
-        ConflictException ex = assertThrows(ConflictException.class, () -> orderService.checkout(buyerId, true, "123 Main St, Chennai, TN 600001"));
+        ConflictException ex = assertThrows(ConflictException.class, () -> orderService.checkout(buyerId, true, "123 Main St, Chennai, TN 600001", null, null));
         assertNotNull(ex);
         assertEquals(2, productDAO.findById(productId).orElseThrow().getStockQty());
         assertEquals(1, cartService.view(buyerId).size(), "Cart should not be cleared when checkout rolls back");
+    }
+    
+    @Test
+    void checkout_directBuyNowBypassesCartAndDoesNotClearIt() throws Exception {
+        cartService.addItem(buyerId, productId, 1);
+        Order order = orderService.checkout(buyerId, true, "123 Main St, Chennai", productId, 2);
+        assertEquals(Order.Status.CONFIRMED, order.getStatus());
+        assertEquals(0, new BigDecimal("20.00").compareTo(order.getTotalAmount()));
+        Product afterCheckout = productDAO.findById(productId).orElseThrow();
+        assertEquals(3, afterCheckout.getStockQty());
+        assertEquals(1, cartService.view(buyerId).size(), "Cart should NOT be cleared on direct checkout");
     }
 }
