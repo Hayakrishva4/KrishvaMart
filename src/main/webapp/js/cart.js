@@ -13,10 +13,75 @@ if (typeof window.formatMoney !== "function") {
     };
 }
 
+const urlParams = new URLSearchParams(window.location.search);
+const buyNowId = urlParams.get('buyNow');
+
 async function loadCart() {
     const container = document.getElementById("cartItems");
     const totalEl = document.getElementById("cartTotal");
     if (!container) return;
+
+    if (buyNowId) {
+        const header = document.querySelector(".cart-page h1");
+        if (header) header.textContent = "Direct Checkout";
+        
+        try {
+            const res = await api.get("/products/" + buyNowId);
+            const prod = (res && res.data) ? res.data : res;
+
+            if (totalEl) totalEl.textContent = formatMoney(prod.price);
+
+            window.directCheckoutItem = { id: prod.id, price: prod.price, quantity: 1 };
+
+            container.innerHTML = `
+                <div class="cart-item" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem; border: 2px solid var(--primary); border-radius: 8px; margin-bottom: 0.85rem; background: var(--card-bg);">
+                    <div style="flex: 1; min-width: 0;">
+                        <strong style="font-size: 1rem; color: var(--text); display: block; margin-bottom: 0.25rem;">
+                            ${escapeHtml(prod.name)}
+                        </strong>
+                        <span style="color: var(--primary); font-size: 0.85rem; font-weight: bold; background: rgba(32, 201, 151, 0.1); padding: 0.2rem 0.5rem; border-radius: 4px;">
+                            Fast Track Checkout
+                        </span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 0.9rem; font-weight: 600;">Qty:</span>
+                        <input type="number" id="directQtyInput" min="1" max="${prod.stockQty}" value="1" class="qtyInput" style="width: 55px; padding: 0.35rem 0.45rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; text-align: center; background: var(--card-bg); color: var(--text);">
+                    </div>
+                    <div id="directItemTotal" style="font-weight: 700; font-size: 1.05rem; color: var(--primary); text-align: right; min-width: 80px;">
+                        ${formatMoney(prod.price)}
+                    </div>
+                </div>
+            `;
+            
+            const directQtyInput = document.getElementById("directQtyInput");
+            if (directQtyInput) {
+                directQtyInput.addEventListener("change", (e) => {
+                    let newQty = parseInt(e.target.value, 10);
+                    
+                    if (isNaN(newQty) || newQty < 1) {
+                        newQty = 1;
+                        e.target.value = 1;
+                    }
+                    
+                    if (newQty > prod.stockQty) {
+                        alert("Only " + prod.stockQty + " items available in stock!");
+                        newQty = prod.stockQty;
+                        e.target.value = prod.stockQty;
+                    }
+                    
+                    window.directCheckoutItem.quantity = newQty;
+                    const newTotal = prod.price * newQty;
+                    
+                    document.getElementById("directItemTotal").textContent = formatMoney(newTotal);
+                    if (totalEl) totalEl.textContent = formatMoney(newTotal);
+                });
+            }
+            
+        } catch (err) {
+            container.innerHTML = "<p class='form-error' style='color: var(--error);'>Could not load product for checkout: " + escapeHtml(err.message) + "</p>";
+        }
+        return;
+    }
 
     try {
         const res = await api.get("/cart");
@@ -35,9 +100,7 @@ async function loadCart() {
                     <a href="index.jsp" class="btn btn-primary" style="text-decoration: none; display: inline-block;">Browse Products</a>
                 </div>
             `;
-            if (totalEl) {
-                totalEl.textContent = formatMoney(0);
-            }
+            if (totalEl) totalEl.textContent = formatMoney(0);
             return;
         }
 
@@ -78,7 +141,6 @@ async function loadRecommendations() {
         const res = await api.get("/products?page=1&pageSize=6");
         const payload = (res && res.data) ? res.data : res;
         const rawProducts = Array.isArray(payload) ? payload : (payload.items || []);
-        
         const products = rawProducts.slice(0, 3);
 
         if (!products || products.length === 0) {
@@ -123,7 +185,7 @@ async function loadRecommendations() {
 
                 try {
                     await api.post("/cart", { productId: parseInt(id, 10), quantity: 1 });
-                    await loadCart();
+                    if (!buyNowId) await loadCart();
                     targetBtn.textContent = "Added!";
                     setTimeout(() => {
                         targetBtn.textContent = originalText;
@@ -199,10 +261,18 @@ if (checkoutBtn) {
         try {
             checkoutBtn.disabled = true;
             checkoutBtn.textContent = "Processing...";
-            const order = await api.post("/orders/checkout", { 
+            
+            const payload = { 
                 mockPaymentConfirmed: true, 
                 shippingAddress: shippingAddress 
-            });
+            };
+            
+            if (window.directCheckoutItem) {
+                payload.directProductId = window.directCheckoutItem.id;
+                payload.directQuantity = window.directCheckoutItem.quantity;
+            }
+
+            const order = await api.post("/orders/checkout", payload);
             
             if (msg) {
                 msg.style.color = "var(--primary)";
@@ -210,7 +280,6 @@ if (checkoutBtn) {
             }
             
             if (addrInput) addrInput.value = "";
-            await loadCart();
             
             setTimeout(() => {
                 window.location.href = "orders.jsp";

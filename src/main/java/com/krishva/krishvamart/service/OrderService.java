@@ -47,7 +47,9 @@ public class OrderService {
     public Order checkout(
             long buyerId,
             boolean mockPaymentConfirmed,
-            String shippingAddress) throws AppException {
+            String shippingAddress,
+            Long directProductId,
+            Integer directQuantity) throws AppException {
 
         if (!mockPaymentConfirmed) {
             throw new ValidationException(
@@ -61,15 +63,37 @@ public class OrderService {
                     "A shipping address is required");
         }
 
-        List<CartItem> cartItems = cartDAO.findByUser(buyerId);
+        List<CartItem> itemsToBuy;
 
-        if (cartItems.isEmpty()) {
-            throw new ValidationException(
-                    "cart",
-                    "Your cart is empty");
+        if (directProductId != null && directQuantity != null) {
+            var productOpt = productDAO.findById(directProductId);
+            if (productOpt.isEmpty()) {
+                throw new NotFoundException("Product not found");
+            }
+            var product = productOpt.get();
+
+            if (product.getStockQty() < directQuantity) {
+                throw new ConflictException(
+                        "\"" + product.getName() + "\" does not have enough stock");
+            }
+
+            CartItem directItem = new CartItem();
+            directItem.setProductId(product.getId());
+            directItem.setProductName(product.getName());
+            directItem.setQuantity(directQuantity);
+            directItem.setUnitPrice(product.getPrice());
+
+            itemsToBuy = List.of(directItem);
+        } else {
+            itemsToBuy = cartDAO.findByUser(buyerId);
+            if (itemsToBuy.isEmpty()) {
+                throw new ValidationException(
+                        "cart",
+                        "Your cart is empty");
+            }
         }
 
-        BigDecimal total = cartItems.stream()
+        BigDecimal total = itemsToBuy.stream()
                 .map(CartItem::getLineTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -85,7 +109,7 @@ public class OrderService {
             try {
                 Order saved = orderDAO.insert(conn, order);
 
-                for (CartItem item : cartItems) {
+                for (CartItem item : itemsToBuy) {
                     boolean stockOk = productDAO.adjustStock(
                             conn,
                             item.getProductId(),
@@ -105,7 +129,10 @@ public class OrderService {
                             item.getUnitPrice());
                 }
 
-                cartDAO.clear(conn, buyerId);
+                if (directProductId == null) {
+                    cartDAO.clear(conn, buyerId);
+                }
+                
                 conn.commit();
                 scheduleMockDelivery(saved.getId());
                 return orderDAO.findById(saved.getId()).orElse(saved);
@@ -162,10 +189,11 @@ public class OrderService {
         }
 
         if (order.getStatus() != Order.Status.PENDING
-                && order.getStatus() != Order.Status.CONFIRMED) {
+                && order.getStatus() != Order.Status.CONFIRMED
+                && order.getStatus() != Order.Status.SHIPPED) {
             throw new ValidationException(
                     "status",
-                    "Only PENDING or CONFIRMED orders can be cancelled");
+                    "Orders can only be cancelled before they are delivered");
         }
 
         try (Connection conn = dataSource.getConnection()) {
@@ -303,7 +331,8 @@ public class OrderService {
 
         if (to == Order.Status.CANCELLED) {
             return from == Order.Status.PENDING
-                    || from == Order.Status.CONFIRMED;
+                    || from == Order.Status.CONFIRMED
+                    || from == Order.Status.SHIPPED;
         }
 
         return switch (from) {
