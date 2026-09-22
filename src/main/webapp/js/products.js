@@ -60,15 +60,28 @@ async function loadProducts(page) {
 
 function renderCard(p) {
     const img = p.imageUrl ? escapeHtml(p.imageUrl) : "";
+    const isOutOfStock = p.stockQty <= 0;
+    
     return `
-        <a class="product-card" href="product-detail.jsp?id=${p.id}" style="text-decoration:none;color:inherit;">
-            ${img ? `<img src="${img}" alt="${escapeHtml(p.name)}">` : ""}
-            <span class="product-id" style="font-size:0.8rem; opacity:0.75;">ID: #${p.id}</span>
-            <strong>${escapeHtml(p.name)}</strong>
-            <span class="category">${escapeHtml(p.category)}</span>
-            <span class="price">&#8377;${Number(p.price).toFixed(2)}</span>          
-            <span>${p.stockQty > 0 ? p.stockQty + " in stock" : "Out of stock"}</span>
-        </a>
+        <div class="product-card" style="display: flex; flex-direction: column; position: relative; height: 100%;">
+            <a href="product-detail.jsp?id=${p.id}" style="text-decoration:none; color:inherit; flex-grow: 1; display: flex; flex-direction: column;">
+                ${img ? `<img src="${img}" alt="${escapeHtml(p.name)}">` : ""}
+                <span class="product-id" style="font-size:0.8rem; opacity:0.75; margin-top: 0.5rem;">ID: #${p.id}</span>
+                <strong style="margin: 0.25rem 0;">${escapeHtml(p.name)}</strong>
+                <span class="category" style="margin-bottom: 0.5rem;">${escapeHtml(p.category)}</span>
+                <span class="price" style="font-size: 1.1rem; font-weight: bold; color: var(--primary);">&#8377;${Number(p.price).toFixed(2)}</span>          
+                <span style="font-size: 0.85rem; margin-top: 0.25rem;">${isOutOfStock ? "<span style='color: var(--error);'>Out of stock</span>" : p.stockQty + " in stock"}</span>
+            </a>
+            <div style="margin-top: 15px;">
+                <button onclick="window.location.href='cart.jsp?buyNow=${p.id}'" 
+                        style="width: 100%; padding: 0.65rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: ${isOutOfStock ? 'not-allowed' : 'pointer'}; opacity: ${isOutOfStock ? 0.5 : 1}; transition: filter 0.2s;"
+                        onmouseover="this.style.filter='brightness(1.1)'" 
+                        onmouseout="this.style.filter='brightness(1)'"
+                        ${isOutOfStock ? 'disabled' : ''}>
+                    Buy Now
+                </button>
+            </div>
+        </div>
     `;
 }
 

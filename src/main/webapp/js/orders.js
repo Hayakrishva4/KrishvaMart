@@ -26,8 +26,10 @@ const TIME_TO_SHIPPED_SEC = 35;
 const TIME_TO_DELIVERED_SEC = 90;
 
 function calculateProgress(order) {
-    if (order.status === "DELIVERED") return 100;
-    if (order.status === "CANCELLED") return 0;
+    if (!order.status) return 0;
+    const statusUpper = String(order.status).toUpperCase();
+    if (statusUpper === "DELIVERED") return 100;
+    if (statusUpper === "CANCELLED") return 0;
 
     const now = Date.now();
     const createdTime = order.createdAt ? new Date(order.createdAt).getTime() : now;
@@ -67,7 +69,10 @@ async function loadOrders() {
         wireButtons();
         startSmoothPipelineLoop();
 
-        const hasActiveDeliveries = orders.some(o => o.status === "PENDING" || o.status === "CONFIRMED" || o.status === "SHIPPED");
+        const hasActiveDeliveries = orders.some(o => {
+            const st = String(o.status || "").toUpperCase();
+            return st === "PENDING" || st === "CONFIRMED" || st === "SHIPPED";
+        });
         
         if (hasActiveDeliveries && !pollTimer) {
             pollTimer = setInterval(loadOrders, 4000);
@@ -91,7 +96,8 @@ function startSmoothPipelineLoop() {
         let needsNextFrame = false;
 
         activeOrdersData.forEach(order => {
-            if (order.status === "CANCELLED") return;
+            const statusUpper = String(order.status || "").toUpperCase();
+            if (statusUpper === "CANCELLED") return;
 
             const fillEl = document.getElementById(`pipeline-fill-${order.id}`);
             const node2 = document.getElementById(`node-2-${order.id}`);
@@ -99,10 +105,11 @@ function startSmoothPipelineLoop() {
             const step2 = document.getElementById(`step-2-${order.id}`);
             const step3 = document.getElementById(`step-3-${order.id}`);
             const statusNotice = document.getElementById(`delivery-notice-${order.id}`);
+            const cancelBtn = document.querySelector(`#order-${order.id} .cancelBtn`);
 
             if (!fillEl) return;
 
-            if (order.status === "DELIVERED") {
+            if (statusUpper === "DELIVERED") {
                 fillEl.style.width = "100%";
                 if (step2) step2.classList.add("active");
                 if (step3) step3.classList.add("active");
@@ -111,6 +118,8 @@ function startSmoothPipelineLoop() {
                 if (statusNotice) {
                     statusNotice.textContent = "Package safely delivered to your destination.";
                 }
+
+                if (cancelBtn) cancelBtn.style.display = "none";
                 return;
             }
 
@@ -129,12 +138,16 @@ function startSmoothPipelineLoop() {
                 }
             }
 
-            if (currentPercent >= 99) {
+            if (currentPercent >= 99.5) {
                 if (step3) step3.classList.add("active");
                 if (node3) node3.innerHTML = "&#10003;";
+                if (statusNotice) {
+                    statusNotice.textContent = "Package safely delivered to your destination.";
+                }
+                if (cancelBtn) cancelBtn.style.display = "none";
             }
 
-            if (currentPercent < 100 && order.status !== "DELIVERED") {
+            if (currentPercent < 100 && statusUpper !== "DELIVERED") {
                 needsNextFrame = true;
             }
         });
@@ -148,7 +161,8 @@ function startSmoothPipelineLoop() {
 }
 
 function renderPipeline(order) {
-    if (order.status === "CANCELLED") {
+    const statusUpper = String(order.status || "").toUpperCase();
+    if (statusUpper === "CANCELLED") {
         return `
             <div style="margin: 0.75rem 0;">
                 <span class="status-badge" style="background: var(--error); color: white; padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.8rem;">CANCELLED</span>
@@ -156,8 +170,8 @@ function renderPipeline(order) {
         `;
     }
 
-    const isDelivered = order.status === "DELIVERED";
-    const isShipped = order.status === "SHIPPED" || isDelivered;
+    const isDelivered = statusUpper === "DELIVERED";
+    const isShipped = statusUpper === "SHIPPED" || isDelivered;
     const currentPercent = calculateProgress(order);
 
     return `
@@ -189,13 +203,14 @@ function renderPipeline(order) {
 }
 
 function getTrackingStatusText(order) {
-    if (order.status === "CANCELLED") {
+    const statusUpper = String(order.status || "").toUpperCase();
+    if (statusUpper === "CANCELLED") {
         return "Order has been cancelled.";
     }
-    if (order.status === "DELIVERED") {
+    if (statusUpper === "DELIVERED") {
         return "Package delivered successfully.";
     }
-    if (order.status === "SHIPPED") {
+    if (statusUpper === "SHIPPED") {
         return "Reached nearby delivery center. Out for delivery.";
     }
     return "Order confirmed and being prepared at fulfillment center.";
@@ -206,11 +221,14 @@ function renderOrder(o, me) {
         `<li style="margin-bottom: 0.25rem;">${window.escapeHtml(i.productName)} &times; ${i.quantity} <span style="color: var(--muted);">(${window.formatMoney(i.unitPrice)} each)</span></li>`
     ).join("");
     
-    const nextStatus = STATUS_FLOW[o.status];
-    const canAdvance = (me && (me.role === "SELLER" || me.role === "ADMIN")) && nextStatus;
-    const isOwner = me && me.role === "BUYER" && o.buyerId === me.id;
-    const isAdmin = me && me.role === "ADMIN";
-    const canCancel = (isOwner || isAdmin) && (o.status === "PENDING" || o.status === "CONFIRMED");
+    const statusUpper = String(o.status || "").toUpperCase();
+    const nextStatus = STATUS_FLOW[statusUpper];
+    const canAdvance = (me && (String(me.role).toUpperCase() === "SELLER" || String(me.role).toUpperCase() === "ADMIN")) && nextStatus;
+    
+    const isOwner = me && String(o.buyerId) === String(me.id);
+    const isAdmin = me && String(me.role).toUpperCase() === "ADMIN";
+    
+    const canCancel = (isOwner || isAdmin) && (statusUpper === "PENDING" || statusUpper === "CONFIRMED" || statusUpper === "SHIPPED");
 
     return `
         <div class="order-card" id="order-${o.id}" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
@@ -223,7 +241,6 @@ function renderOrder(o, me) {
 
             ${renderPipeline(o)}
 
-            <!-- Professional Live Tracking Notice -->
             <div style="background: rgba(0, 0, 0, 0.03); border-left: 3px solid var(--primary); padding: 0.6rem 0.85rem; border-radius: 4px; margin: 0.75rem 0; font-size: 0.88rem; color: var(--text);">
                 <strong>Status Update: </strong>
                 <span id="delivery-notice-${o.id}">${getTrackingStatusText(o)}</span>
@@ -242,12 +259,12 @@ function renderOrder(o, me) {
             <div style="font-size: 0.9rem; font-weight: 600; margin-top: 0.75rem; color: var(--text);">Items:</div>
             <ul style="margin: 0.4rem 0 1rem 0; padding-left: 1.25rem; font-size: 0.9rem; color: var(--text);">${items}</ul>
             
-            <div class="order-actions" style="display: flex; gap: 10px; margin-top: 0.5rem;">
+            <div class="order-actions" style="display: flex; gap: 10px; margin-top: 1rem;">
                 ${canAdvance
                 ? `<button class="advanceBtn btn btn-primary" data-order-id="${o.id}" data-next="${nextStatus}" style="padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; border: none; background: var(--primary); color: #fff; font-weight: 500;">Mark as ${nextStatus}</button>`
                 : ""}
                 ${canCancel
-                ? `<button class="cancelBtn btn btn-secondary" data-order-id="${o.id}" style="padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--error); font-weight: 500;">Cancel Order</button>`
+                ? `<button class="cancelBtn btn btn-secondary" data-order-id="${o.id}" style="padding: 0.5rem 1.2rem; border-radius: 6px; cursor: pointer; border: 1px solid #dc3545; background: transparent; color: #dc3545; font-weight: 600; transition: all 0.2s;">Cancel Order</button>`
                 : ""}
             </div>
         </div>
@@ -269,6 +286,15 @@ function wireButtons() {
     });
 
     document.querySelectorAll(".cancelBtn").forEach(btn => {
+        btn.addEventListener("mouseenter", (e) => {
+            e.target.style.background = "#dc3545";
+            e.target.style.color = "#fff";
+        });
+        btn.addEventListener("mouseleave", (e) => {
+            e.target.style.background = "transparent";
+            e.target.style.color = "#dc3545";
+        });
+
         btn.addEventListener("click", async (e) => {
             const orderId = e.target.dataset.orderId;
             if (confirm("Are you sure you want to cancel this order? Stock will be restored automatically.")) {

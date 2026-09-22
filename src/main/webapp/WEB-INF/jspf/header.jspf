@@ -25,7 +25,6 @@
                 </svg>
                 <div class="intro-brand-text">KRISHVAMART</div>
             </div>
-            <!-- Fixed "You're" to "Your" for professional consistency -->
             <div class="slogan-type">Your Quality is our First Priority</div>
         </div>
     </div>
@@ -45,8 +44,17 @@
                 <a href="${pageContext.request.contextPath}/jsp/cart.jsp">Cart</a>
                 <a href="${pageContext.request.contextPath}/jsp/wishlist.jsp">Wishlist</a>
                 <a href="${pageContext.request.contextPath}/jsp/orders.jsp">Orders</a>
-                <a href="${pageContext.request.contextPath}/jsp/seller-dashboard.jsp">Sell</a>
-                <a href="${pageContext.request.contextPath}/jsp/admin.jsp">Admin</a>
+                
+                <!-- Server-side validation: Only SELLER and ADMIN can see the Sell tab -->
+                <c:if test="${sessionScope.authUser.role == 'SELLER' or sessionScope.authUser.role == 'ADMIN'}">
+                    <a href="${pageContext.request.contextPath}/jsp/seller-dashboard.jsp">Sell</a>
+                </c:if>
+                
+                <!-- Server-side validation: Only ADMIN can see the Admin tab -->
+                <c:if test="${sessionScope.authUser.role == 'ADMIN'}">
+                    <a href="${pageContext.request.contextPath}/jsp/admin.jsp">Admin</a>
+                </c:if>
+                
                 <div class="nav-indicator" id="navIndicator"></div>
             </nav>
         </c:if>
@@ -59,7 +67,6 @@
                     <button id="logoutBtn">Log out</button>
                 </c:when>
                 <c:otherwise>
-                    <!-- Removed Login link so ONLY Register remains -->
                     <a href="${pageContext.request.contextPath}/jsp/register.jsp">Register</a>
                 </c:otherwise>
             </c:choose>

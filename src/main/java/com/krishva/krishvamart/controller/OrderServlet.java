@@ -1,5 +1,13 @@
 package com.krishva.krishvamart.controller;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.krishva.krishvamart.dto.CheckoutRequestDTO;
 import com.krishva.krishvamart.dto.OrderConfirmationDTO;
 import com.krishva.krishvamart.dto.OrderStatusRequestDTO;
@@ -10,15 +18,10 @@ import com.krishva.krishvamart.exception.ValidationException;
 import com.krishva.krishvamart.model.Order;
 import com.krishva.krishvamart.model.User;
 import com.krishva.krishvamart.util.JsonUtil;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 @WebServlet(urlPatterns = {"/api/v1/orders", "/api/v1/orders/*"})
 public class OrderServlet extends BaseApiServlet {
+    
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
@@ -56,8 +59,19 @@ public class OrderServlet extends BaseApiServlet {
                 return;
             }
             CheckoutRequestDTO body = readBody(req, CheckoutRequestDTO.class);
+            
             String shippingAddress = body == null ? null : body.getShippingAddress();
-            Order order = services().orderService().checkout(user.getId(), true, shippingAddress);
+            Long directProductId = body == null ? null : body.getDirectProductId();
+            Integer directQuantity = body == null ? null : body.getDirectQuantity();
+            
+            Order order = services().orderService().checkout(
+                user.getId(), 
+                true, 
+                shippingAddress, 
+                directProductId, 
+                directQuantity
+            );
+            
             JsonUtil.writeSuccess(resp, HttpServletResponse.SC_CREATED,
                     OrderConfirmationDTO.fromOrder(order));
         } catch (AppException e) {
