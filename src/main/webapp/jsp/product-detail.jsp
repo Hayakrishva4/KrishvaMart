@@ -1,12 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
-
 <section id="productDetail" class="product-detail">
     <p>Loading...</p>
 </section>
-
 <section id="recentlyViewed" class="recently-viewed hidden"></section>
-
 <section id="reviewSection" class="review-section">
     <h2>Customer Reviews</h2>
     <div id="ratingSummary"></div>
@@ -15,7 +12,6 @@
         <h3>Leave a Review</h3>
         <label for="orderIdForReview">Order ID (Delivered orders only)</label>
         <input type="number" id="orderIdForReview" required>
-        
         <label for="rating">Rating</label>
         <select id="rating">
             <option value="5">5 - Excellent</option>
@@ -24,15 +20,12 @@
             <option value="2">2 - Poor</option>
             <option value="1">1 - Very Poor</option>
         </select>
-        
         <label for="comment">Comment</label>
         <textarea id="comment" maxlength="2000"></textarea>
-        
         <button type="submit" class="btn btn-primary">Submit Review</button>
     </form>
     <p id="reviewError" class="form-error"></p>
 </section>
-
 <script src="${pageContext.request.contextPath}/js/recently-viewed.js"></script>
 <script src="${pageContext.request.contextPath}/js/product-detail.js"></script>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>

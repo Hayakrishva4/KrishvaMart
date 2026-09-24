@@ -1,29 +1,16 @@
 package com.krishva.krishvamart.listener;
 
-import com.krishva.krishvamart.util.ConfigResolver;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Owns the single HikariCP {@link DataSource} for the application lifetime.
- * Section 2, Rule 5: no DriverManager.getConnection() calls anywhere outside
- * this listener. DAOs pull connections exclusively from the DataSource this
- * class stores in the ServletContext.
- *
- * Configuration resolves environment variables first (see
- * {@link ConfigResolver}), so the same WAR can be deployed unmodified to a
- * cloud platform (Render, Railway, Fly.io, AWS, etc.) by setting DB_URL /
- * DB_USER / DB_PASSWORD as environment variables there - no rebuild, no
- * secrets committed to config.properties.
- */
+import com.krishva.krishvamart.util.ConfigResolver;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 @WebListener
 public class AppContextListener implements ServletContextListener {
 
