@@ -16,23 +16,89 @@ if (typeof window.formatMoney !== "function") {
 const urlParams = new URLSearchParams(window.location.search);
 const buyNowId = urlParams.get('buyNow');
 
+let isOrderPlaced = false;
+function injectExitModal() {
+    if (document.getElementById("directCheckoutModal")) return;
+    const modalHtml = `
+        <div id="directCheckoutModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:9999; justify-content:center; align-items:center;">
+            <div style="background:var(--card-bg, #1e1e2f); border:1px solid var(--border, #333); padding:1.25rem; border-radius:8px; max-width:280px; width:90%; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+                <h3 style="margin:0 0 .5rem; color:var(--text, #fff); font-size:1.05rem;">Unsaved Item</h3>
+                <p style="color:var(--muted, #aaa); font-size:.85rem; margin:0 0 1rem;">Save this item to your cart?</p>
+                <div style="display:flex; justify-content:center; gap:.5rem;">
+                    <button id="modalBuyLaterBtn" style="padding:.4rem .8rem; background:var(--primary, #20c997); color:#fff; border:none; border-radius:4px; font-weight:600; cursor:pointer; font-size:.85rem;">Add to Cart</button>
+                    <button id="modalDiscardBtn" style="padding:.4rem .8rem; background:transparent; border:1px solid var(--error, #dc3545); color:var(--error, #dc3545); border-radius:4px; font-weight:600; cursor:pointer; font-size:.85rem;">Remove</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML("beforeend", modalHtml);
+}
+
+function setupNavigationInterceptor() {
+    injectExitModal();
+
+    document.addEventListener("click", (e) => {
+        if (!buyNowId || isOrderPlaced) return;
+        const anchor = e.target.closest("a");
+        if (!anchor) return;
+        const targetHref = anchor.getAttribute("href");
+        if (!targetHref || targetHref.startsWith("#") || targetHref.startsWith("javascript:")) return;
+        e.preventDefault();
+        showExitModal(targetHref);
+    });
+
+    window.addEventListener("beforeunload", (e) => {
+        if (buyNowId && !isOrderPlaced && window.directCheckoutItem) {
+            e.preventDefault();
+            e.returnValue = "";
+        }
+    });
+}
+
+function showExitModal(targetUrl) {
+    const modal = document.getElementById("directCheckoutModal");
+    const buyLaterBtn = document.getElementById("modalBuyLaterBtn");
+    const discardBtn = document.getElementById("modalDiscardBtn");
+
+    modal.style.display = "flex";
+    buyLaterBtn.onclick = async () => {
+        buyLaterBtn.disabled = true;
+        buyLaterBtn.textContent = "Saving...";
+        try {
+            if (window.directCheckoutItem) {
+                await api.post("/cart", {
+                    productId: window.directCheckoutItem.id,
+                    quantity: window.directCheckoutItem.quantity || 1
+                });
+            }
+        } catch (err) {
+            console.error("Could not save to cart:", err);
+        } finally {
+            isOrderPlaced = true;
+            window.location.href = targetUrl;
+        }
+    };
+
+    discardBtn.onclick = () => {
+        isOrderPlaced = true;
+        window.location.href = targetUrl;
+    };
+}
+
 async function loadCart() {
     const container = document.getElementById("cartItems");
     const totalEl = document.getElementById("cartTotal");
     if (!container) return;
-
     if (buyNowId) {
+        setupNavigationInterceptor();
         const header = document.querySelector(".cart-page h1");
         if (header) header.textContent = "Direct Checkout";
-        
         try {
             const res = await api.get("/products/" + buyNowId);
             const prod = (res && res.data) ? res.data : res;
 
             if (totalEl) totalEl.textContent = formatMoney(prod.price);
-
             window.directCheckoutItem = { id: prod.id, price: prod.price, quantity: 1 };
-
             container.innerHTML = `
                 <div class="cart-item" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem; border: 2px solid var(--primary); border-radius: 8px; margin-bottom: 0.85rem; background: var(--card-bg);">
                     <div style="flex: 1; min-width: 0;">
@@ -52,31 +118,23 @@ async function loadCart() {
                     </div>
                 </div>
             `;
-            
+
             const directQtyInput = document.getElementById("directQtyInput");
             if (directQtyInput) {
                 directQtyInput.addEventListener("change", (e) => {
                     let newQty = parseInt(e.target.value, 10);
-                    
-                    if (isNaN(newQty) || newQty < 1) {
-                        newQty = 1;
-                        e.target.value = 1;
-                    }
-                    
+                    if (isNaN(newQty) || newQty < 1) newQty = 1;
                     if (newQty > prod.stockQty) {
                         alert("Only " + prod.stockQty + " items available in stock!");
                         newQty = prod.stockQty;
-                        e.target.value = prod.stockQty;
                     }
-                    
+                    e.target.value = newQty;
                     window.directCheckoutItem.quantity = newQty;
                     const newTotal = prod.price * newQty;
-                    
                     document.getElementById("directItemTotal").textContent = formatMoney(newTotal);
                     if (totalEl) totalEl.textContent = formatMoney(newTotal);
                 });
             }
-            
         } catch (err) {
             container.innerHTML = "<p class='form-error' style='color: var(--error);'>Could not load product for checkout: " + escapeHtml(err.message) + "</p>";
         }
@@ -89,10 +147,7 @@ async function loadCart() {
         const items = data.items || [];
         const total = data.total !== undefined ? data.total : (data.totalAmount !== undefined ? data.totalAmount : 0);
 
-        if (totalEl) {
-            totalEl.textContent = formatMoney(total);
-        }
-
+        if (totalEl) totalEl.textContent = formatMoney(total);
         if (!items || items.length === 0) {
             container.innerHTML = `
                 <div style="text-align: center; padding: 2.5rem 1rem; color: var(--muted);">
@@ -114,13 +169,11 @@ async function loadCart() {
                         ${formatMoney(item.unitPrice)} each
                     </span>
                 </div>
-
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                     <input type="number" min="1" max="99" value="${item.quantity}" class="qtyInput" style="width: 55px; padding: 0.35rem 0.45rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; text-align: center; background: var(--card-bg); color: var(--text);">
                     <button class="updateQtyBtn" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--text); cursor: pointer;">Update</button>
                     <button class="removeBtn secondary" style="padding: 0.35rem 0.65rem; font-size: 0.8rem; background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--error); cursor: pointer;">&#10005;</button>
                 </div>
-
                 <div style="font-weight: 600; font-size: 0.95rem; color: var(--primary); min-width: 80px; text-align: right;">
                     ${formatMoney(item.unitPrice * item.quantity)}
                 </div>
@@ -136,7 +189,6 @@ async function loadCart() {
 async function loadRecommendations() {
     const recContainer = document.getElementById("recommendations");
     if (!recContainer) return;
-
     try {
         const res = await api.get("/products?page=1&pageSize=6");
         const payload = (res && res.data) ? res.data : res;
@@ -156,7 +208,6 @@ async function loadRecommendations() {
                     return `
                         <div class="mini-rec-card" style="display: flex; align-items: center; gap: 0.85rem; padding: 0.65rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg);">
                             <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(productName)}" style="width: 72px; height: 72px; object-fit: cover; border-radius: 6px; background: #eee; flex-shrink: 0;">
-                            
                             <div style="flex: 1; min-width: 0;">
                                 <a href="product-detail.jsp?id=${prod.id}" style="display: block; font-weight: 600; font-size: 0.875rem; color: var(--text); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.2rem;">
                                     ${escapeHtml(productName)}
@@ -179,10 +230,9 @@ async function loadRecommendations() {
                 const targetBtn = e.currentTarget;
                 const id = targetBtn.dataset.id;
                 const originalText = "+ Add to Cart";
-                
+
                 targetBtn.textContent = "Adding...";
                 targetBtn.disabled = true;
-
                 try {
                     await api.post("/cart", { productId: parseInt(id, 10), quantity: 1 });
                     if (!buyNowId) await loadCart();
@@ -214,7 +264,6 @@ function wireItemButtons() {
                 alert("Quantity must be at least 1");
                 return;
             }
-
             try {
                 await api.put("/cart/" + productId, { quantity: qty });
                 loadCart();
@@ -245,10 +294,9 @@ if (checkoutBtn) {
     checkoutBtn.addEventListener("click", async () => {
         const msg = document.getElementById("checkoutMessage");
         if (msg) msg.textContent = "";
-        
         const addrInput = document.getElementById("shippingAddress");
         const shippingAddress = addrInput ? addrInput.value.trim() : "";
-        
+
         if (!shippingAddress) {
             if (msg) {
                 msg.style.color = "var(--error)";
@@ -261,26 +309,26 @@ if (checkoutBtn) {
         try {
             checkoutBtn.disabled = true;
             checkoutBtn.textContent = "Processing...";
-            
-            const payload = { 
-                mockPaymentConfirmed: true, 
-                shippingAddress: shippingAddress 
+
+            const payload = {
+                mockPaymentConfirmed: true,
+                shippingAddress: shippingAddress
             };
-            
+
             if (window.directCheckoutItem) {
                 payload.directProductId = window.directCheckoutItem.id;
                 payload.directQuantity = window.directCheckoutItem.quantity;
             }
 
             const order = await api.post("/orders/checkout", payload);
-            
+            isOrderPlaced = true;
+
             if (msg) {
                 msg.style.color = "var(--primary)";
                 msg.textContent = order.message || "Order placed successfully!";
             }
-            
+
             if (addrInput) addrInput.value = "";
-            
             setTimeout(() => {
                 window.location.href = "orders.jsp";
             }, 1000);
@@ -294,6 +342,5 @@ if (checkoutBtn) {
         }
     });
 }
-
 loadCart();
 loadRecommendations();
