@@ -2,7 +2,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:if test="${empty sessionScope.authUser}"><c:redirect url="/jsp/register.jsp" /></c:if>
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
-
 <style>
     .promo-container{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0 30px}
     .promo-banner{position:relative;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;cursor:pointer;transition:transform .2s ease;text-decoration:none;box-shadow:0 4px 10px rgba(0,0,0,.2)}
@@ -25,7 +24,6 @@
     .about-text p{color:var(--muted);font-size:.95rem;line-height:1.6;margin:0}
     @media (max-width:768px){.promo-container{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr 1fr;gap:2rem}.about-section{grid-template-columns:1fr;text-align:center}.about-brand{align-items:center;border-right:none;padding-right:0;border-bottom:1px solid var(--border);padding-bottom:2rem}}
 </style>
-
 <section class="promo-container">
     <div class="promo-banner promo-discount" onclick="document.getElementById('productGrid').scrollIntoView({behavior:'smooth'})">
         <div><h1 style="margin:0 0 10px;font-size:2.5rem">🎉 Grand Opening!</h1><p style="margin:0;font-size:1.2rem">Get <strong>10% OFF</strong> your first week.</p></div>
@@ -37,7 +35,6 @@
         <div><h2 style="margin:0 0 5px;font-size:2rem">Home & Living</h2><p style="margin:0">Upgrade your space</p></div>
     </div>
 </section>
-
 <section class="search-bar">
     <input type="text" id="searchInput" placeholder="Search products...">
     <select id="categorySelect">
@@ -50,11 +47,9 @@
     </select>
     <button id="searchBtn">Search</button>
 </section>
-
 <section id="recentlyViewed" class="recently-viewed hidden"></section>
 <section id="productGrid" class="product-grid"><p>Loading products...</p></section>
 <nav id="pagination" class="pagination hidden"></nav>
-
 <section class="browse-credits">
     <div class="stats-grid">
         <div class="stat-item"><div class="stat-num" data-target="15000" data-suffix="+">0</div><div class="stat-label">Orders Delivered</div></div>
@@ -73,11 +68,9 @@
         </div>
     </div>
 </section>
-
 <script>
     function autoFilterCategory(cat){const s=document.getElementById('categorySelect'),b=document.getElementById('searchBtn');if(s&&b){s.value=cat;b.click();document.getElementById('productGrid').scrollIntoView({behavior:'smooth'})}}
     document.addEventListener("DOMContentLoaded",()=>{const obs=new IntersectionObserver((ents,ob)=>{ents.forEach(e=>{if(e.isIntersecting){const c=e.target,t=+c.dataset.target,s=c.dataset.suffix;const u=()=>{const v=+c.innerText.replace(/\D/g,''),i=t/40;if(v<t){c.innerText=Math.ceil(v+i);setTimeout(u,30)}else c.innerText=t+s};u();ob.unobserve(c)}})},{threshold:.5});document.querySelectorAll('.stat-num').forEach(c=>obs.observe(c))});
 </script>
-
 <script src="${pageContext.request.contextPath}/js/products.js"></script>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>

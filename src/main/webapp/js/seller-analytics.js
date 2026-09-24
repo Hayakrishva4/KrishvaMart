@@ -39,5 +39,4 @@ async function loadSalesSummary() {
         summaryEl.innerHTML = "<p>" + escapeHtml(err.message) + "</p>";
     }
 }
-
 loadSalesSummary();

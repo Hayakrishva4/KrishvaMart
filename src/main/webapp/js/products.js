@@ -1,6 +1,5 @@
 let currentPage = 1;
 const PAGE_SIZE = 8;
-
 async function loadProducts(page) {
     currentPage = Number(page) || 1;
     const grid = document.getElementById("productGrid");
@@ -19,18 +18,15 @@ async function loadProducts(page) {
     if (sort) params.set("sort", sort);
     params.set("page", currentPage);
     params.set("pageSize", PAGE_SIZE);
-
     grid.innerHTML = "<p>Loading products...</p>";
     try {
         const res = await api.get("/products?" + params.toString());
         const payload = (res && res.data) ? res.data : res;
         const items = Array.isArray(payload) ? payload : (payload.items || []);
-        
         let rawTotal = payload.totalItems ?? payload.totalCount ?? payload.total ?? res.totalItems ?? res.totalCount ?? res.total;
         let totalCount = (rawTotal !== undefined && rawTotal !== null) ? Number(rawTotal) : NaN;
         let rawPages = payload.totalPages ?? res.totalPages;
         let totalPages = (rawPages !== undefined && rawPages !== null) ? Number(rawPages) : NaN;
-        
         if (isNaN(totalPages) || totalPages < 1) {
             if (!isNaN(totalCount) && totalCount >= 0) {
                 totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -38,18 +34,15 @@ async function loadProducts(page) {
                 totalPages = items.length < PAGE_SIZE ? currentPage : currentPage;
             }
         }
-
         if (items.length === 0 && currentPage > 1) {
             loadProducts(1);
             return;
         }
-
         if (items.length === 0) {
             grid.innerHTML = "<p>No products found.</p>";
             document.getElementById("pagination").classList.add("hidden");
             return;
         }
-
         grid.innerHTML = items.map(renderCard).join("");
         triggerScrollCascade();
         renderPagination(currentPage, totalPages, items.length);
@@ -57,11 +50,9 @@ async function loadProducts(page) {
         grid.innerHTML = "<p>Could not load products: " + escapeHtml(err.message) + "</p>";
     }
 }
-
 function renderCard(p) {
     const img = p.imageUrl ? escapeHtml(p.imageUrl) : "";
-    const isOutOfStock = p.stockQty <= 0;
-    
+    const isOutOfStock = p.stockQty <= 0;   
     return `
         <div class="product-card" style="display: flex; flex-direction: column; position: relative; height: 100%;">
             <a href="product-detail.jsp?id=${p.id}" style="text-decoration:none; color:inherit; flex-grow: 1; display: flex; flex-direction: column;">
@@ -84,15 +75,12 @@ function renderCard(p) {
         </div>
     `;
 }
-
 function triggerScrollCascade() {
-    const cards = document.querySelectorAll(".product-grid .product-card");
-    
+    const cards = document.querySelectorAll(".product-grid .product-card");   
     if (!("IntersectionObserver" in window)) {
         cards.forEach(card => card.classList.add("in-view"));
         return;
     }
-
     const observer = new IntersectionObserver((entries, obs) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -104,43 +92,33 @@ function triggerScrollCascade() {
         threshold: 0.1,
         rootMargin: "0px 0px -40px 0px"
     });
-
     cards.forEach((card, index) => {
         card.style.transitionDelay = `${(index % PAGE_SIZE) * 45}ms`;
         observer.observe(card);
     });
 }
-
 function renderPagination(page, totalPages, currentItemCount) {
     const nav = document.getElementById("pagination");
-
     if (page === 1 && totalPages <= 1) {
         nav.classList.add("hidden");
         return;
     }
     nav.classList.remove("hidden");
-
     const isFirstPage = page <= 1;
     const isLastPage = page >= totalPages;
-
     let html = "";
     html += `<button class="page-btn prev-btn" ${isFirstPage ? "disabled style='opacity:0.35;cursor:not-allowed;'" : ""} data-page="${page - 1}">&lt;&lt; Prev</button>`;
-
     for (let p = 1; p <= totalPages; p++) {
         html += `<button class="page-btn${p === page ? " active" : ""}" data-page="${p}">${p}</button>`;
     }
-
     html += `<button class="page-btn next-btn" ${isLastPage ? "disabled style='opacity:0.35;cursor:not-allowed;'" : ""} data-page="${page + 1}">Next &gt;&gt;</button>`;
-
     nav.innerHTML = html;
-
     nav.querySelectorAll(".page-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             if (btn.disabled) return;
             const targetPage = parseInt(btn.dataset.page, 10);
             if (isNaN(targetPage) || targetPage < 1) return;
             if (isLastPage && targetPage > page) return;
-
             loadProducts(targetPage);
             const gridEl = document.getElementById("productGrid");
             if (gridEl) {
@@ -149,21 +127,17 @@ function renderPagination(page, totalPages, currentItemCount) {
         });
     });
 }
-
 document.getElementById("searchBtn").addEventListener("click", () => loadProducts(1));
 document.getElementById("searchInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter") loadProducts(1);
 });
-
 const catSelect = document.getElementById("categorySelect");
 if (catSelect) {
     catSelect.addEventListener("change", () => loadProducts(1));
 }
-
 window.addEventListener('load', () => {
     loadProducts(1);
 });
-
 function escapeHtml(text) {
     if (!text) return '';
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };

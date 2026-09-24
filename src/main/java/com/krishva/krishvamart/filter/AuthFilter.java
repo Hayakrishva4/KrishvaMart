@@ -1,9 +1,7 @@
 package com.krishva.krishvamart.filter;
 
-import com.krishva.krishvamart.model.User;
-import com.krishva.krishvamart.util.JsonUtil;
-
 import java.io.IOException;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -14,6 +12,9 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import com.krishva.krishvamart.model.User;
+import com.krishva.krishvamart.util.JsonUtil;
 
 @WebFilter(urlPatterns = "/api/v1/*")
 public class AuthFilter implements Filter {
@@ -61,10 +62,8 @@ public class AuthFilter implements Filter {
         if ("GET".equalsIgnoreCase(method) && path.startsWith("/api/v1/products")) {
             return true;
         }
-        if ("GET".equalsIgnoreCase(method) && path.startsWith("/api/v1/reviews")) {
-            return true;
-        }
-        return false;
+        
+        return "GET".equalsIgnoreCase(method) && path.startsWith("/api/v1/reviews");
     }
 
     @Override

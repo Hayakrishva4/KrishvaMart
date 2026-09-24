@@ -26,6 +26,7 @@ public class ChatService {
         if (userMessage == null || userMessage.isBlank()) {
             return "Please type a question about products, orders, or shipping.";
         }
+
         String trimmed = userMessage.length() > MAX_MESSAGE_LENGTH
                 ? userMessage.substring(0, MAX_MESSAGE_LENGTH)
                 : userMessage;
@@ -37,11 +38,12 @@ public class ChatService {
         Map<String, String> sessionCache = replyCache.computeIfAbsent(sessionId, k -> new ConcurrentHashMap<>());
         String cacheKey = trimmed.trim().toLowerCase();
         String cached = sessionCache.get(cacheKey);
+
         if (cached != null) {
             return cached;
         }
-
         String reply;
+
         try {
             reply = provider.getReply(trimmed, "KrishvaMart multi-seller marketplace");
         } catch (Exception e) {
