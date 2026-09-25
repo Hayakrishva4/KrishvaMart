@@ -252,82 +252,82 @@ async function loadRecommendations() {
 }
 function wireItemButtons() {
  document.querySelectorAll(".updateQtyBtn").forEach(btn => {
-    btn.addEventListener("click", async (e) => {
-        const row = e.target.closest(".cart-item");
-        const productId = row.dataset.productId;
-        const qty = parseInt(row.querySelector(".qtyInput").value, 10);
-            if (isNaN(qty) || qty < 1) {
-                alert("Quantity must be at least 1");
-                return;
-            }
-            try {
-                await api.put("/cart/" + productId, { quantity: qty });
-                loadCart();
-            } catch (err) {
-        const msg = document.getElementById("checkoutMessage");
-                if (msg) msg.textContent = err.message;
-            }
-        });
+ btn.addEventListener("click", async (e) => {
+  const row = e.target.closest(".cart-item");
+  const productId = row.dataset.productId;
+  const qty = parseInt(row.querySelector(".qtyInput").value, 10);
+    if (isNaN(qty) || qty < 1) {
+      alert("Quantity must be at least 1");
+        return;
+    }
+    try {
+        await api.put("/cart/" + productId, { quantity: qty });
+         loadCart();
+    } catch (err) {
+    const msg = document.getElementById("checkoutMessage");
+        if (msg) msg.textContent = err.message;
+        }
+      });
     });
-    document.querySelectorAll(".removeBtn").forEach(btn => {
-        btn.addEventListener("click", async (e) => {
-        const row = e.target.closest(".cart-item");
-        const productId = row.dataset.productId;
-            try {
-                await api.del("/cart/" + productId);
-                loadCart();
-            } catch (err) {
-        const msg = document.getElementById("checkoutMessage");
-                if (msg) msg.textContent = err.message;
-            }
-        });
+ document.querySelectorAll(".removeBtn").forEach(btn => {
+ btn.addEventListener("click", async (e) => {
+  const row = e.target.closest(".cart-item");
+  const productId = row.dataset.productId;
+    try {
+        await api.del("/cart/" + productId);
+        loadCart();
+    } catch (err) {
+  const msg = document.getElementById("checkoutMessage");
+        if (msg) msg.textContent = err.message;
+        }
     });
+ });
 }
 const checkoutBtn = document.getElementById("checkoutBtn");
 if (checkoutBtn) {
-    checkoutBtn.addEventListener("click", async () => {
-    const msg = document.getElementById("checkoutMessage");
-     if (msg) msg.textContent = "";
-    const addrInput = document.getElementById("shippingAddress");
-    const shippingAddress = addrInput ? addrInput.value.trim() : "";
-     if (!shippingAddress) {
-     if (msg) {
-        msg.style.color = "var(--error)";
-        msg.textContent = "Please enter a delivery address.";
+ checkoutBtn.addEventListener("click", async () => {
+ const msg = document.getElementById("checkoutMessage");
+  if (msg) msg.textContent = "";
+ const addrInput = document.getElementById("shippingAddress");
+ const shippingAddress = addrInput ? addrInput.value.trim() : "";
+  if (!shippingAddress) {
+  if (msg) {
+    msg.style.color = "var(--error)";
+    msg.textContent = "Please enter a delivery address.";
+ }
+  if (addrInput) addrInput.focus();
+    return;
     }
-    if (addrInput) addrInput.focus();
-        return;
+    try {
+        checkoutBtn.disabled = true;
+        checkoutBtn.textContent = "Processing...";
+    const payload = {
+        mockPaymentConfirmed: true,
+        shippingAddress: shippingAddress
+    };
+    if (window.directCheckoutItem) {
+        payload.directProductId = window.directCheckoutItem.id;
+        payload.directQuantity = window.directCheckoutItem.quantity;
         }
-        try {
-            checkoutBtn.disabled = true;
-            checkoutBtn.textContent = "Processing...";
-        const payload = {
-                mockPaymentConfirmed: true,
-                shippingAddress: shippingAddress
-            };
-            if (window.directCheckoutItem) {
-                payload.directProductId = window.directCheckoutItem.id;
-                payload.directQuantity = window.directCheckoutItem.quantity;
-            }
-        const order = await api.post("/orders/checkout", payload);
-            isOrderPlaced = true;
-            if (msg) {
-                msg.style.color = "var(--primary)";
-                msg.textContent = order.message || "Order placed successfully!";
-            }
-            if (addrInput) addrInput.value = "";
-            setTimeout(() => {
-                window.location.href = "orders.jsp";
-            }, 1000);
-        } catch (err) {
-            if (msg) {
-                msg.style.color = "var(--error)";
-                msg.textContent = err.message;
-            }
-            checkoutBtn.disabled = false;
-            checkoutBtn.textContent = "Place Order";
+    const order = await api.post("/orders/checkout", payload);
+     isOrderPlaced = true;
+        if (msg) {
+            msg.style.color = "var(--primary)";
+            msg.textContent = order.message || "Order placed successfully!";
         }
-    });
+        if (addrInput) addrInput.value = "";
+         setTimeout(() => {
+            window.location.href = "orders.jsp";
+        }, 1000);
+    } catch (err) {
+        if (msg) {
+            msg.style.color = "var(--error)";
+            msg.textContent = err.message;
+        }
+        checkoutBtn.disabled = false;
+        checkoutBtn.textContent = "Place Order";
+    }
+  });
 }
 loadCart();
 loadRecommendations();
