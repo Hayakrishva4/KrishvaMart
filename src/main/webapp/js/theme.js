@@ -1,9 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const toggle = document.getElementById("themeToggle");
     if (!toggle) return;
-
     updateToggleIcon();
-
     toggle.addEventListener("click", () => {
         const isDark = document.documentElement.getAttribute("data-theme") === "dark";
         if (isDark) {
@@ -15,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         updateToggleIcon();
     });
-
     function updateToggleIcon() {
         const isDark = document.documentElement.getAttribute("data-theme") === "dark";
         toggle.innerHTML = isDark ? "&#9789;" : "&#9788;";

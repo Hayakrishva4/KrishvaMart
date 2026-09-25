@@ -5,14 +5,12 @@ if (typeof window.escapeHtml !== "function") {
         return String(str).replace(/[&<>"']/g, m => map[m]);
     };
 }
-
 if (typeof window.formatMoney !== "function") {
     window.formatMoney = function(v) {
         const num = Number(v);
         return "\u20B9" + (isNaN(num) ? "0.00" : num.toFixed(2));
     };
 }
-
 async function loadWishlist() {
     const container = document.getElementById("wishlistContainer") || document.getElementById("wishlistItems");
     if (!container) return [];
@@ -20,12 +18,10 @@ async function loadWishlist() {
         const res = await window.api.get("/wishlist");
         const payload = (res && res.data) ? res.data : res;
         const items = Array.isArray(payload) ? payload : (payload.items || []);
-
         if (!items || items.length === 0) {
             container.innerHTML = "<p style='color: var(--muted); padding: 1rem 0;'>Your wishlist is empty. Save products you like from their product page.</p>";
             return [];
         }
-
         container.innerHTML = items.map(item => `
             <div class="cart-item" data-product-id="${item.productId}" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.85rem; background: var(--card-bg);">
                 <div>
@@ -50,7 +46,6 @@ async function loadWishlist() {
         return [];
     }
 }
-
 function wireButtons() {
     document.querySelectorAll(".moveToCartBtn").forEach(btn => {
         btn.addEventListener("click", async (e) => {
@@ -65,7 +60,6 @@ function wireButtons() {
             }
         });
     });
-
     document.querySelectorAll(".removeWishlistBtn").forEach(btn => {
         btn.addEventListener("click", async (e) => {
             const row = e.target.closest(".cart-item");
@@ -79,14 +73,11 @@ function wireButtons() {
         });
     });
 }
-
 async function loadSuggestedProducts(existingWishlist = []) {
     const container = document.getElementById("suggestedContainer");
     if (!container) return;
-
     try {
         const result = await window.api.get("/products?pageSize=12");
-        
         let allProducts = [];
         if (Array.isArray(result)) {
             allProducts = result;
@@ -95,18 +86,14 @@ async function loadSuggestedProducts(existingWishlist = []) {
         } else if (result && result.items) {
             allProducts = result.items;
         }
-
         const wishlistedIds = new Set(existingWishlist.map(w => Number(w.productId)));
-
         const suggestions = allProducts
             .filter(p => !wishlistedIds.has(Number(p.id)))
             .slice(0, 3);
-
         if (suggestions.length === 0) {
             container.innerHTML = "<p style='color: var(--muted);'>No suggestions available.</p>";
             return;
         }
-
         container.className = "product-grid";
         container.innerHTML = suggestions.map(p => `
             <div class="product-card in-view">
@@ -123,7 +110,6 @@ async function loadSuggestedProducts(existingWishlist = []) {
                 </button>
             </div>
         `).join("");
-
         container.querySelectorAll(".addSuggestedBtn").forEach(btn => {
             btn.addEventListener("click", async (e) => {
                 const productId = e.currentTarget.dataset.productId;
@@ -139,10 +125,8 @@ async function loadSuggestedProducts(existingWishlist = []) {
         container.innerHTML = "<p style='color: var(--muted); font-size: 0.85rem;'>Could not load suggestions: " + window.escapeHtml(err.message) + "</p>";
     }
 }
-
 async function refreshAll() {
     const wishlistItems = await loadWishlist();
     await loadSuggestedProducts(wishlistItems);
 }
-
 refreshAll();

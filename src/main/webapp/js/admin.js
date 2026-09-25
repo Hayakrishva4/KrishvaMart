@@ -18,15 +18,12 @@ async function loadAdminData() {
         document.getElementById("adminUsers").innerHTML = "<p style='color: var(--error);'>" + escapeHtml(err.message) + "</p>";
     }
 }
-
 document.getElementById("moderateForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const msg = document.getElementById("moderateMessage");
-    const productId = document.getElementById("moderateProductId").value;
-    
+    const productId = document.getElementById("moderateProductId").value;   
     msg.textContent = "Processing...";
     msg.style.color = "var(--text)";
-    
     try {
         await api.del("/admin/products/" + productId);
         msg.style.color = "var(--primary)"; 
@@ -37,17 +34,14 @@ document.getElementById("moderateForm").addEventListener("submit", async (e) => 
         msg.textContent = err.message;
     }
 });
-
 const activateForm = document.getElementById("activateForm");
 if (activateForm) {
     activateForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const msg = document.getElementById("activateMessage");
-        const productId = document.getElementById("activateProductId").value;
-        
+        const productId = document.getElementById("activateProductId").value;     
         msg.textContent = "Processing...";
         msg.style.color = "var(--text)";
-        
         try {
             await api.put("/admin/products/" + productId + "/activate");
             msg.style.color = "var(--primary)"; 
@@ -59,5 +53,4 @@ if (activateForm) {
         }
     });
 }
-
 loadAdminData();
