@@ -48,9 +48,4 @@
 ## Week 10: Security, Validation & SpotBugs Auditing
 - What worked: Automating SpotBugs and Checkstyle in the Maven verify phase caught unclosed `ResultSet` and resource leak scenarios.
 - What didn't: Overly strict Google Checkstyle rules flagged standard DTO boilerplate formatting.
-- Change for next week: Configure `failOnViolation=false` with warning thresholds for Checkstyle while keeping SpotBugs fatal.
-
-## Week 11: Static Analysis Clean-Up, UI Polish & AI Readiness
-- What worked: Resolved compiler and linter diagnostics across all test suites by standardizing lifecycle visibility to `public` and actively asserting `assertThrows` outcomes; integrated dynamic product recommendation sidebars across cart and wishlist views with strict slice limits.
-- What didn't: Floating chat widget markup remained dormant without backend conversational context, requiring stub styling adjustments to prevent layout shifts.
-- Retrospective Summary: Core architecture, unit test harness, deployment containers, and database seed assets are verified and stabilized at zero warnings, leaving the project production-ready for intelligent catalog chat integration.
+- Change for next week: Configure `failOnViolation=false` with warning thresholds for Check

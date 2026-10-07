@@ -10,8 +10,7 @@
   <name>KrishvaMart</name>
   <description>Multi-seller, E-commerce marketplace</description>
   <properties>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <servlet.version>4.0.1</servlet.version>
     <jstl.version>1.2</jstl.version>
@@ -21,6 +20,7 @@
     <jbcrypt.version>0.4</jbcrypt.version>
     <slf4j.version>2.0.13</slf4j.version>
     <logback.version>1.5.6</logback.version>
+    <spotbugs-annotations.version>4.8.3</spotbugs-annotations.version>
     <junit.version>5.10.2</junit.version>
     <mockito.version>5.11.0</mockito.version>
   </properties>
@@ -67,6 +67,12 @@
       <version>${logback.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <version>${spotbugs-annotations.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>${junit.version}</version>
@@ -75,7 +81,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>5.11.0</version>
+      <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

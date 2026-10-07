@@ -1,6 +1,7 @@
 package com.krishva.krishvamart.chat;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,14 +26,14 @@ public class CatalogAwareChatProvider implements ChatProvider {
     private final ChatProvider delegate;
 
     public CatalogAwareChatProvider(ProductDAO productDAO, ChatProvider delegate) {
-        this.productDAO = productDAO;
-        this.delegate = delegate;
+        this.productDAO = Objects.requireNonNull(productDAO, "productDAO must not be null");
+        this.delegate = Objects.requireNonNull(delegate, "delegate must not be null");
     }
 
     @Override
     public String getReply(String userMessage, String context) {
         if (userMessage == null) {
-            return delegate.getReply(userMessage, context);
+            return delegate.getReply("", context);
         }
         String trimmed = userMessage.trim();
 
@@ -52,7 +53,7 @@ public class CatalogAwareChatProvider implements ChatProvider {
             }
         }
 
-        return delegate.getReply(userMessage, context);
+        return delegate.getReply(trimmed, context);
     }
 
     private String tryAnswerStock(String rawProductName) {

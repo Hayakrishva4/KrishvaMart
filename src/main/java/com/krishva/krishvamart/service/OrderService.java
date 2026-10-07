@@ -93,10 +93,13 @@ public class OrderService {
             }
         }
 
-        BigDecimal total = itemsToBuy.stream()
-                .map(CartItem::getLineTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
+    BigDecimal total = BigDecimal.ZERO;
+        for (CartItem item : itemsToBuy) {
+            if (item != null && item.getLineTotal() != null) {
+                total = total.add(item.getLineTotal());
+            }
+        }
+        
         Order order = new Order();
         order.setBuyerId(buyerId);
         order.setStatus(Order.Status.CONFIRMED);

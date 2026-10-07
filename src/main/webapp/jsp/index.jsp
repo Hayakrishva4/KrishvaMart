@@ -72,5 +72,11 @@
     function autoFilterCategory(cat){const s=document.getElementById('categorySelect'),b=document.getElementById('searchBtn');if(s&&b){s.value=cat;b.click();document.getElementById('productGrid').scrollIntoView({behavior:'smooth'})}}
     document.addEventListener("DOMContentLoaded",()=>{const obs=new IntersectionObserver((ents,ob)=>{ents.forEach(e=>{if(e.isIntersecting){const c=e.target,t=+c.dataset.target,s=c.dataset.suffix;const u=()=>{const v=+c.innerText.replace(/\D/g,''),i=t/40;if(v<t){c.innerText=Math.ceil(v+i);setTimeout(u,30)}else c.innerText=t+s};u();ob.unobserve(c)}})},{threshold:.5});document.querySelectorAll('.stat-num').forEach(c=>obs.observe(c))});
 </script>
+<script src="${pageContext.request.contextPath}/js/recently-viewed.js"></script>
 <script src="${pageContext.request.contextPath}/js/products.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        window.RecentlyViewed?.render("recentlyViewed", null);
+    });
+</script>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
