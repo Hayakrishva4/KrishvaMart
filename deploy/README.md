@@ -1,14 +1,11 @@
-# Deployment reference files (Section 10)
+# Deployment reference files
 
-These mirror the reference setup in Section 10 of the spec, adjusted for
-the actual paths on whatever VM you provision:
-
-- `krishvamart-h2.service` - runs H2 in server mode as a systemd service
-  (step 5). Set `H2_JAR` to wherever the H2 jar actually lives on the box.
-- `tomcat.service` - runs Tomcat 9 as a systemd service (step 3), depends on
+- `krishvamart-h2.service` - runs H2 in server mode as a systemd service.
+  Set `H2_JAR` to wherever the H2 jar actually lives on the box.
+- `tomcat.service` - runs Tomcat 9 as a systemd service, depends on
   the H2 service above so it starts first.
 - `nginx-krishvamart.conf` - reverse proxy with TLS in front of Tomcat's
-  port 8080 (step 4).
+  port 8080.
 
 ## Install steps on a fresh Linux VM
 
@@ -32,7 +29,3 @@ Then build and deploy the WAR:
 mvn clean package
 cp target/krishvamart.war /opt/tomcat9/webapps/krishvamart.war
 ```
-
-Backup requirement (Section 10): after each review, copy the H2 data file
-(`*.mv.db` under the `baseDir` configured in `krishvamart-h2.service`)
-somewhere durable, and re-record a fresh 2-3 minute screen-capture demo.

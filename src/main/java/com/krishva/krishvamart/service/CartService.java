@@ -1,5 +1,8 @@
 package com.krishva.krishvamart.service;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import com.krishva.krishvamart.dao.CartDAO;
 import com.krishva.krishvamart.dao.ProductDAO;
 import com.krishva.krishvamart.exception.AppException;
@@ -9,16 +12,15 @@ import com.krishva.krishvamart.exception.ValidationException;
 import com.krishva.krishvamart.model.CartItem;
 import com.krishva.krishvamart.model.Product;
 
-import java.math.BigDecimal;
-import java.util.List;
-
 public class CartService {
     private final CartDAO cartDAO;
     private final ProductDAO productDAO;
+
     public CartService(CartDAO cartDAO, ProductDAO productDAO) {
         this.cartDAO = cartDAO;
         this.productDAO = productDAO;
     }
+
     public CartItem addItem(long userId, long productId, int quantity) throws AppException {
         if (quantity <= 0) {
             throw new ValidationException("quantity", "Quantity must be at least 1");
@@ -28,7 +30,14 @@ public class CartService {
         if (!product.isActive()) {
             throw new ConflictException("This product is no longer available");
         }
-        int existingQty = cartDAO.findByUserAndProduct(userId, productId).map(CartItem::getQuantity).orElse(0);
+       int existingQty = 0;
+    java.util.Optional<CartItem> existingItem = cartDAO.findByUserAndProduct(userId, productId);
+     if (existingItem != null && existingItem.isPresent()) {
+      CartItem item = existingItem.get();
+     if (item != null) {
+        existingQty = item.getQuantity();
+      }
+    }
         int newQty = existingQty + quantity;
         if (newQty > product.getStockQty()) {
             throw new ConflictException("Only " + product.getStockQty() + " units in stock");
@@ -61,8 +70,15 @@ public class CartService {
     }
 
     public BigDecimal runningTotal(long userId) throws AppException {
-        return view(userId).stream()
-                .map(CartItem::getLineTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        List<CartItem> items = view(userId);
+        BigDecimal total = BigDecimal.ZERO;
+        if (items != null) {
+            for (CartItem item : items) {
+                if (item != null && item.getLineTotal() != null) {
+                    total = total.add(item.getLineTotal());
+                }
+            }
+        }
+        return total;
     }
 }

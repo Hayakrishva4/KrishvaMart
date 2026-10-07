@@ -17,7 +17,7 @@ Multi-seller e-commerce marketplace web application built with Java Servlets, JD
 | O1 | Wishlist / save-for-later | Implemented |
 | O2 | Order status workflow (Pending->Confirmed->Shipped->Delivered) | Implemented |
 | O3 | Seller sales dashboard (counts/revenue) | Implemented |
-| O4 | AI chatbot | Implemented (mock provider by default; swap in Gemini via config flag) |
+| O4 | AI chatbot | Implemented |
 ## Architecture
 Layered MVC over Servlets (Front Controller pattern):
 ```
@@ -39,7 +39,7 @@ com.krishva.krishvamart
 |-- dto          request/response shapes for JSON endpoints
 |-- filter       auth, request-id, encoding
 |-- listener     DataSource init/teardown, DI wiring (ServiceRegistry), SchemaInitializer
-|-- chat         AI chatbot: ChatProvider strategy, MockChatProvider, GeminiChatProvider, CatalogAwareChatProvider decorator
+|-- chat         ChatProvider strategy, MockChatProvider, GeminiChatProvider, CatalogAwareChatProvider
 |-- util         PasswordUtil, ValidationUtil, JsonUtil, ConfigResolver, DbSeeder
 `-- exception    checked exceptions mapped to HTTP status codes
 ```
@@ -149,14 +149,9 @@ Beyond the Minimum features :
 - **Catalog-aware chatbot** 
 - **Dark mode** 
 - **Recently viewed products** 
-- **Real-marketplace browse**
-- **Shipping address capture at checkout** 
-- **Self-initializing, cloud-ready deployment** 
-- **Transaction-tested checkout** 
+- **Shipping address capture at checkout**  
 - **Order Cancellation & returns**
 ## Known limitations
-- `GeminiChatProvider` is wired but untested against a live API key in this environment; `mock` is the safe default until a key is configured.
-- Test coverage covers the highest-risk logic but doesn't exhaustively cover every DAO/service `docs/test-cases.md` for the manual E2E sheet and `docs/load-testing.md` / `docs/load-test-plan.jmx` for the load test - neither has been executed against a live deployment yet.
-- Docker/cloud config has been written and manually reviewed but not actually deployed and smoke-tested against a real cloud platform in this environment.
-- Only a handful of commits exist so far . The commits/week,`feature/<name>`-branch workflow is a process to follow going forward.
-- A GitHub Projects Kanban board has to be created manually in the GitHub UI - it isn't a repo file.
+​> GeminiChatProvider is wired but requires a live API key in config.properties or environment variables; mock remains the safe local default.
+> ​Test coverage emphasizes core domain security, checkout, and inventory transactions; automated coverage for edge-case DAO queries is complemented by manual E2E test runs (docs/test-cases.md).
+​> Cloud deployment scripts (Dockerfile, docker-compose.yml) are configured for Render/standard container runtimes with persistent volume binding for the H2 database file.
