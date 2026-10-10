@@ -95,6 +95,7 @@ step-by-step instructions for Render, Railway, a plain VM, and Docker
 Compose: **`docs/cloud-deployment.md`**.
 ## Deployed link
   > https://krishvamart.onrender.com
+  >  https://krishvamart.up.railway.app
 ## AI chatbot configuration
 `ai.chatbot.provider` in `config.properties` selects the implementation
 - `mock` (default) - canned FAQ answers, no network call, no API key needed.
@@ -153,5 +154,5 @@ Beyond the Minimum features :
 - **Order Cancellation & returns**
 ## Known limitations
 ​> GeminiChatProvider is wired but requires a live API key in config.properties or environment variables; mock remains the safe local default.
-> ​Test coverage emphasizes core domain security, checkout, and inventory transactions; automated coverage for edge-case DAO queries is complemented by manual E2E test runs (docs/test-cases.md).
-​> Cloud deployment scripts (Dockerfile, docker-compose.yml) are configured for Render/standard container runtimes with persistent volume binding for the H2 database file.
+> ​Test coverage emphasizes core domain security, checkout, and inventory transactions; automated coverage for edge-case DAO queries is complemented by manual E2E test runs.
+​> Cloud deployment scripts are configured for Render/standard container runtimes with persistent volume binding for the H2 database file.
