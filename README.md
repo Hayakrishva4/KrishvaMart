@@ -95,7 +95,6 @@ step-by-step instructions for Render, Railway, a plain VM, and Docker
 Compose: **`docs/cloud-deployment.md`**.
 ## Deployed link
   > https://krishvamart.onrender.com
-  >  https://krishvamart.up.railway.app
 ## AI chatbot configuration
 `ai.chatbot.provider` in `config.properties` selects the implementation
 - `mock` (default) - canned FAQ answers, no network call, no API key needed.
