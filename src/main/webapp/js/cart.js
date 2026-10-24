@@ -37,7 +37,8 @@ function setupNavigationInterceptor() {
         const anchor = e.target.closest("a");
      if (!anchor) return;
         const targetHref = anchor.getAttribute("href");
-     if (!targetHref || targetHref.startsWith("#") || targetHref.startsWith("javascript:")) return;
+        const normalizedHref = targetHref ? targetHref.trim().toLowerCase() : "";
+     if (!targetHref || normalizedHref.startsWith("#") || normalizedHref.startsWith("javascript:") || normalizedHref.startsWith("data:") || normalizedHref.startsWith("vbscript:")) return;
         e.preventDefault();
       showExitModal(targetHref);
     });
